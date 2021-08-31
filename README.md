@@ -480,9 +480,9 @@ CREATE TABLE sys_projects  (
 
 ```
 #### 测试服务
-接口地址 /omnis 是我的项目设置的一级路由，根据实际情况替换，template_data 是文档“集成”步骤的路由
+template_data 是文档“集成”步骤的路由
 
-```/omnis/template_data/data```
+```/template_data/data```
 post body 发送
 
 ```
@@ -493,7 +493,7 @@ post body 发送
 
 返回结果
 
-```dart
+```json
 {
   "msg": "成功",
   "code": "0",
