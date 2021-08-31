@@ -2,7 +2,7 @@
 omnis-collect 是基于django框架，开发的一款web接口配置工具。目的是将系统的所有的接口都统一，简单点说，将所有的增删改查接口统一、让系统只有一个http接口，业务接口都是配置出来。
 实现通过一些简单配置，可以提供http接口服务。
 
-    目前已经实现
+目前已经实现
 1. 路由配置。将接口分目录管理，可以相似业务模块的功能放在一个大目录，同一页面的接口功能放在一个文件
 1. 模板查询。利用jinja2模板渲染+yml的语法。通过配置sql文件，实现根据配置sql 转http接口
 1. 模型数据新增、修改、删除。利用django model的orm,实现对模型数据的新增、修改、删除
@@ -20,13 +20,18 @@ omnis-collect 是基于django框架，开发的一款web接口配置工具。目
 
 ***
 ## 目录结构
-+ conf
-  + application.properties
-+ sample
-  + app 目录结构...
-  + settings.py
-+ omnis_data_service
-  + service_router.yml
+```
+────────────────────────────────
+├── conf
+│   └── application.properties
+├── sample
+│   ├── app
+│   └── settings.py
+├── omnis_data_service
+│   └── service_router.yml
+────────────────────────────────
+```
+
   
 ## 集成
 ### 安装依赖
@@ -46,7 +51,6 @@ INSTALLED_APPS = [
 from django.conf.urls import include
 urlpatterns = [
     ... 其他模块
-    url(r'^excel_manage/', include("collect.urls")),
     url(r'^template_data/', include("collect.template_urls")),
 ]
 
@@ -55,7 +59,7 @@ urlpatterns = [
 ### 添加项目查询
 #### 添加总路由
 首先在service_router.yml 写下如下配置。这个文件是总路由文件。如果已经存在内容就只要更内容
-```dart
+```yaml
 # 系统总路由
 services:
   - key: 'hrm'
@@ -73,6 +77,15 @@ services:
   - key: 'common'
     name: '权限'
     path: 'common/service.yml'
+  - key: 'server'
+    name: '权限'
+    path: 'server/service.yml'
+  - key: 'monitor'
+    name: '监控'
+    path: 'monitor/service.yml'
+  - key: 'grafana'
+    name: '监控'
+    path: 'grafana/service.yml'
 
 # 返回结果转换规则
 rules:
@@ -119,6 +132,33 @@ cache:
   path: django.core.cache
   obj: cache
 
+before_plugin:
+  # 继承参数
+  - name: extend_param
+    path: collect.service_imp.before_plugin.plugin.extend_param
+    class_name: ExtendParam
+    method: handler
+    template: "{% if extend_param %}True{% endif %}"
+  # 处理请求参数
+  - name: handler_req_param
+    path: collect.service_imp.before_plugin.plugin.handler_req_param
+    class_name: HandlerReqParam
+    method: handler
+    template: "True"
+  # 处理count 参数
+  - name: handler_req_count_param
+    path: collect.service_imp.before_plugin.plugin.handler_req_count_param
+    class_name: HandlerReqCountParam
+    method: handler
+    template: "{% if count_params or count_sql %}True{% endif %}"
+  # 处理参数过程
+  - name: handler_params
+    path: collect.service_imp.before_plugin.plugin.handler_params
+    class_name: HandlerParams
+    method: handler
+    template: "{% if handler_params %}True{% endif %}"
+
+
 # 请求处理器
 request_handler:
   # 字段转数组
@@ -140,6 +180,28 @@ request_handler:
   - key: ignore_data
     path: collect.service_imp.request_handlers.handlers.ignore_data
     class_name: IgnoreData
+    method: handler
+  # 数组转数组对象
+  - key: arr2arrObj
+    path: collect.service_imp.request_handlers.handlers.arr2arrobj
+    class_name: Arr2ArrObj
+    method: handler
+
+  # 提取数组对象里面的属性，作为数组
+  - key: prop_arr
+    path: collect.service_imp.request_handlers.handlers.prop_arr
+    class_name: PropArr
+    method: handler
+  # 数组乘以数组
+  - key: mul_arr
+    path: collect.service_imp.request_handlers.handlers.mul_arr
+    class_name: MulArr
+    method: handler
+
+  # 提取数组对象里面的属性，作为数组
+  - key: get_array_obj
+    path: collect.service_imp.request_handlers.handlers.get_array_obj
+    class_name: GetArrayObj
     method: handler
 
 # 结果处理器
@@ -165,6 +227,72 @@ result_handler:
     path: collect.service_imp.result_handlers.handlers.tree_node_name
     class_name: TreeNodeName
     method: handler
+
+ # 添加请求参数
+  - key: add_param
+    path: collect.service_imp.result_handlers.handlers.add_param
+    class_name: AddParam
+    method: handler
+  # 结果转对象
+  - key: arr2obj
+    path: collect.service_imp.result_handlers.handlers.array_2_obj
+    class_name: Array2Obj
+    method: handler
+  # 添加新列参数
+  - key: new_col
+    path: collect.service_imp.result_handlers.handlers.new_col
+    class_name: NewCol
+    method: handler
+  # 对象列表转数组
+  - key: value_arr
+    path: collect.service_imp.result_handlers.handlers.value_arr
+    class_name: ValueArr
+    method: handler
+  # 值转参数
+  - key: val2param
+    path: collect.service_imp.result_handlers.handlers.val_2_param
+    class_name: Val2Param
+    method: handler
+  # 结合其他服务
+  - key: combine_service
+    path: collect.service_imp.result_handlers.handlers.combine_service
+    class_name: CombineService
+    method: handler
+  # 列表转树
+  - key: to_tree
+    path: collect.service_imp.result_handlers.handlers.to_tree
+    class_name: ToTree
+    method: handler
+  # 转二级结构
+  - key: level_2
+    path: collect.service_imp.result_handlers.handlers.level_2
+    class_name: Level2
+    method: handler
+  # 参数转结果
+  - key: param2result
+    path: collect.service_imp.result_handlers.handlers.param2result
+    class_name: Param2Result
+    method: handler
+  # 过滤数组
+  - key: filter_arr
+    path: collect.service_imp.result_handlers.handlers.filter_arr
+    class_name: FilterArr
+    method: handler
+  # 字段转json
+  - key: field2json
+    path: collect.service_imp.result_handlers.handlers.field2json
+    class_name: Field2JSONService
+    method: handler
+  # 返回response 对象
+  - key: file_response
+    path: collect.service_imp.result_handlers.handlers.file_response
+    class_name: FileResponse
+    method: handler
+  # 结果转excel
+  - key: result2excel
+    path: collect.service_imp.result_handlers.handlers.result2excel
+    class_name: Result2Excel
+    method: handler
 # 模块处理器
 module_handler:
   # mysql 查询
@@ -187,6 +315,33 @@ module_handler:
   - key: bulk_create
     path: collect.service_imp.model.bulk_create
     class_name: BulkCreateService
+
+  # 服务流程化
+  - key: service_flow
+    path:  collect.service_imp.flow.service_flow
+    class_name: ServiceFlowService
+  # ssh
+  - key: ssh
+    path: collect.service_imp.flow.omnis_ssh
+    class_name: OmnisSSHService
+    method: handler
+  # bulk create
+  - key: bulk_service
+    path: collect.service_imp.bulk.bulk_service
+    class_name: ServiceBulkService
+    method: handler
+  # http
+  - key: http
+    path: collect.service_imp.http.http_service
+    class_name: HttpService
+    method: handler
+
+  # empty
+  - key: empty
+    path: collect.service_imp.empty.empty_service
+    class_name: EmptyService
+    method: handler
+
 
 filter_handler:
   # uuid
@@ -225,6 +380,51 @@ filter_handler:
     class_name: InArrayFilter
     method: filter
 
+  # 当天
+  - key: current_day
+    path: collect.service_imp.common.filters.template_filters.current_day
+    class_name: CurrentDay
+    method: filter
+
+  # 获取配置文件get_key
+  - key: get_key
+    path: collect.service_imp.common.filters.template_filters.get_key
+    class_name: GetKey
+    method: filter
+  # 截取字符串
+  - key: substr
+    path: collect.service_imp.common.filters.template_filters.sub_str
+    class_name: SubStr
+    method: filter
+
+  # 对象转json 字符串
+  - key: json_str
+    path: collect.service_imp.common.filters.template_filters.json_str
+    class_name: JsonStr
+    method: filter
+
+# 第三方方法
+third_application:
+  ssh:
+    - key: copy
+      path: "collect.service_imp.flow.common.scp_copy"
+      class_name: "SCPCopy"
+      method: "handler"
+    - key: gen_template
+      path: "collect.service_imp.flow.common.gen_template"
+      class_name: "GenTemplate"
+      method: "handler"
+
+    - key: server_copy
+      path: "collect.service_imp.flow.common.server_copy"
+      class_name: "ServerCopy"
+      method: "handler"
+
+    - key: server_archive
+      path: "collect.service_imp.flow.common.server_archive"
+      class_name: "ServerArchive"
+      method: "handler"
+
 
 ```
 要改的地方
@@ -237,7 +437,7 @@ filter_handler:
 #### 关联子模块。
 修改project_manage/servcie.yml。这个文件主要做管理各个目录来用。
 
-  ```dart
+  ```yaml
     #项目点路由
     service:
       - name: "项目模块"
@@ -249,31 +449,19 @@ path 指向具体服务路径
 1.创建project,以及新建index.yml
 2.在index.yml配置
 
-```python
+```yaml
 
 service:
   # 项目
   - key: "project"
     module: 'mysql'# 执行mysql 查询
     sql_file: 'project.sql'
-    result_parse: "excel"
-    data_type: 'file'
-    excel_out_path: './attendance_out/project.xls'
-    file_name: '项目模板.xls'
-    excel:
-      0:
-        start_row: 2
-        data: result
-        fields:
-          - name: 项目名称
-            value: project_name
-          - name: 编码
-            value: project_code
+
 ```
 注意 excel_out_path配置的 attendance_out目录必须存在，文件会自动创建
 3.创建project.sql 文件，编写sql 
 
-```
+```sql
    select * 
    from sys_projects
    limit 10
@@ -336,7 +524,5 @@ post body 发送
 }
 ```
 
-下载excel
-/omnis/excel_manage/download?service=project_manage.project
 
 [接口文档地址](http://wiki.cenboomh.com:88/pages/viewpage.action?pageId=59092313)
