@@ -1,0 +1,20 @@
+service:
+
+  # 项目
+  - key: "key2item_ids"
+    module: 'mysql'# 执行监控 查询
+    data_source: 'zabbix'
+    must_login: false
+    params:
+      hostid:
+        check:
+          template: "{{hostid|must}}"
+          err_msg: "监控主机不能为空"
+          name: 监控主机
+      host:
+        check:
+          template: "host|must_list"
+          err_msg: "目标主机IP不能为空"
+          name: 目标主机
+    sql_file: key2item_ids.sql
+    log: true

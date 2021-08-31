@@ -1,0 +1,79 @@
+service:
+  # 查询流水
+  - key: "cc_attendance"
+    module: 'mysql'# 执行mysql 查询
+    params:
+      ym: # 年月
+        default: ''
+    log: true
+    sql_file: 'attendance.sql'
+
+
+  - key: "attendance_white_list"
+    module: 'mysql'# 执行mysql 查询
+    name: 查询考勤白名单
+    params:
+      pagination:
+        default: false
+    log: true
+    sql_file: 'attendance_white_list.sql'
+  - key: "attendance_white_user"
+    module: 'mysql'
+    params:
+      pagination:
+        defaut: false
+    sql_file: white_user.sql
+  - key: "white_list_save"
+    module: 'bulk_create'
+    must_login: false
+    model: AttendanceWhiteList
+    log: true
+    params:
+      users:
+        check:
+          template: "{{ users |must_list }}"
+          err_msg: "用户列表不能为空！"
+        default: []
+      start_ym:
+        check:
+          template: "{{start_ym|must}}"
+          err_msg: "开始年月不能为空"
+        default: ''
+      end_ym:
+        check:
+          template: "{{end_ym|must}}"
+          err_msg: '结束年月不能为空'
+        default: ''
+      commnet:
+        default: ''
+      op_user:
+        template: '{{session_user_id}}'
+      create_time:
+        template: "{{'' |current_date_time}}"
+    model_field: 'models' # 模型字段保存位置
+    handler_params:
+      - key: field2array # 将数组字段，转成多个对象
+        from_field: users
+        to_field: user_id
+        save_field: 'models'
+      - key: update_data # 修改数据
+        foreach: models
+        field: 'white_id'
+        template: "{{''|uuid}}"
+
+
+  - key: "white_list_delete"
+    module: 'model_delete' # 执行模型删除
+    model: AttendanceWhiteList
+    name: 删除白名单
+    params:
+      white_list_id_list:
+        check:
+          template: "{{ white_list_id_list |must_list }}"
+          err_msg: "白名单列表不能为空！"
+        name: 白名单列表
+    filter:
+      white_id__in: white_list_id_list
+    operation: # 预留口子，做假删除
+      method: 'delete'
+

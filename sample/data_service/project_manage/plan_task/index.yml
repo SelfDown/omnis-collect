@@ -1,0 +1,272 @@
+service:
+  # 查询任务
+  - key: "plan_task_query"
+    module: 'mysql' # 执行mysql 查询
+    log: true
+    must_login: false
+    params:
+      pagination: # 查询分页
+        default: true
+        type: bool
+      page:
+        default: 1
+        type: int
+      size:
+        default: 20
+        type: int
+      start_row:
+        exp: '({page}-1)*{size}'
+        default: 0
+      start_date: #开始日期
+        check:
+          template: "{{start_date |must}}"
+          err_msg: "开始日期不能为空！"
+        default: ''
+      end_date: # 结束日期
+        check:
+          template: "{{end_date |must}}"
+          err_msg: "结束日期不能为空！"
+        default: ''
+    handler_params:
+      - key: service2field # 服务转字段
+        service:
+          service: 'common.department'
+        save_field: 'department_list'
+    sql_file: 'plan_task.sql'
+    count_params:
+      pagination: # 总数不分页
+        default: false
+        type: bool
+    count_sql: 'plan_count.sql'
+    result_handler:
+      - key: tree_node_name
+        params:
+          tree: 'department_list'
+          tree_id: 'hrm_department_id'
+          tree_parent: 'hrm_department_pid'
+          field: 'user_department_id'
+          # 取顶级节点
+          template: "{{ current_node.hrm_department_pid =='0'}}"
+          # 可以设置多个字段
+          to_field:
+            - field: 'user_first_department_name'
+              value: '{{current_node.hrm_department_name}}'
+            - field: 'user_first_department_id'
+              value: '{{current_node.hrm_department_id}}'
+
+      - key: tree_node_name
+        params:
+          tree: 'department_list'
+          tree_id: 'hrm_department_id'
+          tree_parent: 'hrm_department_pid'
+          field: 'user_department_id'
+          # 取第二级节点
+          template: "{{ parent_node.hrm_department_pid =='0'}}"
+          to_field:
+            - field: 'user_second_department_name'
+              value: '{{current_node.hrm_department_name}}'
+            - field: 'user_second_department_id'
+              value: '{{current_node.hrm_department_id}}'
+      - key: tree_node_name
+        params:
+          tree: 'department_list'
+          tree_id: 'hrm_department_id'
+          tree_parent: 'hrm_department_pid'
+          field: 'project_department_id'
+          # 取顶级节点
+          template: "{{ current_node.hrm_department_pid =='0'}}"
+          # 可以设置多个字段
+          to_field:
+            - field: 'project_first_department_name'
+              value: '{{current_node.hrm_department_name}}'
+            - field: 'project_first_department_id'
+              value: '{{current_node.hrm_department_id}}'
+
+      - key: tree_node_name
+        params:
+          tree: 'department_list'
+          tree_id: 'hrm_department_id'
+          tree_parent: 'hrm_department_pid'
+          field: 'project_department_id'
+          # 取第二级节点
+          template: "{{ parent_node.hrm_department_pid =='0'}}"
+          to_field:
+            - field: 'project_second_department_name'
+              value: '{{current_node.hrm_department_name}}'
+            - field: 'project_second_department_id'
+              value: '{{current_node.hrm_department_id}}'
+
+
+
+
+
+
+  # 项目
+  - key: "plan_task_save"
+    module: 'model_save'# 执行mysql 查询
+    model: PlanTask
+    must_login: false
+    params:
+      plan_task_id:
+        template: "{{ '' |uuid}}"
+        default: ''
+        name: ID
+      create_time:
+        template: "{{'' |current_date_time}}"
+        default: ''
+        name: 创建时间
+      modify_time:
+        template: "{{'' |current_date_time}}"
+        default: ''
+        name: 更新时间
+      op_user:
+        template: "{{session_user_id}}"
+        name: 操作人
+      start_date:
+        check:
+          path: business_check.project.plan_task_work_date_check
+          class_name: WorkDateCheck
+        name: 开始日期
+
+  - key: "plan_task_update"
+    module: 'model_save' # 执行mysql 查询
+    model: PlanTask
+    log: true
+    params:
+      plan_task_id:
+        check:
+          template: "{{ plan_task_id |exist(field_key='plan_task_id') }}"
+          err_msg: "任务已经不存在！"
+        name: 计划任务
+      modify_time:
+        template: "{{'' |current_date_time}}"
+        default: ''
+        name: 更新时间
+      op_user:
+        template: "{{session_user_id}}"
+        name: 操作人
+
+      start_date:
+        check:
+          service:
+            service: 'project_manage.plan_task_project_per_query'
+            start_date: '{{start_date}}'
+            end_date: '{{end_date}}'
+            per: '{{per}}'
+            user_id: '{{user_id}}'
+            plan_task_id: '{{plan_task_id}}'
+          template: "{{service_result|length <= 0}}"
+          err_msg: "{{service_result|foreach(template='{{project_ids}} {{date}}已经达到 {{current_sum}} % 了 ',join='\n')}}"
+
+        name: 开始日期
+
+    exclude_save_field: # 排除保存： exclude_save_field。仅保存：include_save_field
+      - plan_task_id
+      - create_time
+
+
+  - key: "plan_task_delete"
+    module: 'model_delete' # 执行模型删除
+    model: PlanTask
+    params:
+      plan_task_id_list:
+        check:
+          template: "{{ plan_task_id_list |must_list }}"
+          err_msg: "任务列表不能为空！"
+        name: 计划任务
+    filter:
+      plan_task_id__in: plan_task_id_list
+    operation: # 预留口子，做假删除
+      method: 'delete'
+
+
+  - key: "plan_task_project_per_query"
+    module: 'mysql'# 执行mysql 查询
+    log: true
+    must_login: false
+    params:
+      start_date: #开始日期
+        check:
+          template: "{{start_date |must}}"
+          err_msg: "开始日期不能为空！"
+        default: ''
+      end_date: #结束日期
+        check:
+          template: "{{end_date |must}}"
+          err_msg: "结束日期不能为空！"
+        default: ''
+      user_id:
+        default: ''
+    sql_file: 'plan_project_per.sql'
+  # 项目维度统计
+  - key: project_month_total
+    module: 'mysql'# 执行mysql 查询
+    log: true
+    must_login: false
+    params:
+      start_date: #开始日期
+        check:
+          template: "{{start_date |must}}"
+          err_msg: "开始日期不能为空！"
+          default: ''
+        default: ''
+      end_date: # 结束日期
+        check:
+          template: "{{end_date |must}}"
+          err_msg: "开始日期不能为空！"
+          default: ''
+        default: ''
+    sql_file: 'project_month_total.sql'
+    result_handler:
+      - key: row2col
+        params:
+          field: ym
+          template: '{{total_day}}'
+          remove:
+            - ym
+            - total_day
+      - key: combine
+        params:
+          template: '{{project_id}}'
+      - key: arrsort
+        params:
+          key: "project_id"
+          reverse: false
+
+  # 人员维度统计
+  - key: man_month_total
+    module: 'mysql'# 执行mysql 查询
+    log: true
+    must_login: false
+    params:
+      start_date: #开始日期
+        check:
+          template: "{{start_date |must}}"
+          err_msg: "开始日期不能为空！"
+          default: ''
+        default: ''
+      end_date: # 结束日期
+        check:
+          template: "{{end_date |must}}"
+          err_msg: "开始日期不能为空！"
+          default: ''
+        default: ''
+    sql_file: 'man_month_total.sql'
+    result_handler:
+      - key: row2col
+        params:
+          field: ym
+          template: '{{total_day}}({{per}}%)'
+          remove:
+            - ym
+            - total_day
+            - per
+      - key: combine
+        params:
+          template: '{{user_id}}'
+      - key: arrsort
+        params:
+          key: "work_code"
+          reverse: false
+
+

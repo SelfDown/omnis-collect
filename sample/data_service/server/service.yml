@@ -1,0 +1,7 @@
+# 项目点路由
+service:
+  - name: "项目模块"
+    path: "zabbix_item/index.yml"
+
+  - name: "关联模板"
+    path: "link_template/index.yml"

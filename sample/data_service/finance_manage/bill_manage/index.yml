@@ -1,0 +1,67 @@
+service:
+  # 查询任务
+  - key: "bill_query"
+    module: 'mysql'# 执行mysql 查询
+    params:
+      pagination: # 查询分页
+        default: true
+        type: bool
+      page:
+        default: 1
+        type: int
+      size:
+        default: 20
+        type: int
+      start_row:
+        exp: '({page}-1)*{size}'
+        default: 0
+    log_sql: true
+    sql_file: 'bill_query.sql'
+    count_params:
+      pagination: # 总数不分页
+        default: false
+        type: bool
+    count_sql: 'bill_count.sql'
+
+  # 项目
+  - key: "bill_save"
+    module: 'model_save'# 执行mysql 查询
+    model: BillManage
+    params:
+      bill_id:
+        template: "{{ '' |uuid}}"
+        default: ''
+        name: ID
+      create_time:
+        template: "{{'' |current_date_time}}"
+        default: ''
+        name: 创建时间
+      bill_code:
+        name: 发票编码
+        check:
+          service:
+            service: 'finance.bill_query'
+            bill_code: '{{bill_code}}'
+          template: "{{service_result|length <= 0}}"
+          err_msg: "发票已存在"
+      user_id:
+        template: "{{session_user_id}}"
+        name: 操作人
+
+
+  - key: "bill_delete"
+    module: 'model_delete' # 执行模型删除
+    model: BillManage
+    params:
+      bill_id_list:
+        check:
+          template: "{{ bill_id_list |must_list }}"
+          err_msg: "记录id不能为空！"
+        name: id
+    filter:
+      bill_id__in: bill_id_list
+    operation: # 预留口子，做假删除
+      method: 'delete'
+
+
+

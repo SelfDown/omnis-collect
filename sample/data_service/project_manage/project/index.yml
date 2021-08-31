@@ -1,0 +1,29 @@
+service:
+  # 项目
+  - key: "project"
+    module: 'mysql'# 执行mysql 查询
+    extend_param: project_manage.plan_task_query
+#    extend_param_fields:
+#      exclude:
+#        - start_date
+#        - end_date
+    sql_file: 'project.sql'
+    result_parse: "excel"
+    data_type: 'file'
+    must_login: false
+    excel_template_path: './template/project.xls'
+    excel_out_path: './attendance_out/project.xls'
+    file_name: '项目模板.xls'
+    cache:
+      template: ''
+      max: 10
+    excel:
+      0:
+        start_row: 2
+        data: result
+        fields:
+          - name: 项目名称
+            value: project_name
+          - name: 编码
+            value: project_id
+

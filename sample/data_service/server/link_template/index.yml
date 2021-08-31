@@ -1,0 +1,45 @@
+service:
+  - key: link_template
+    module: 'service_flow'
+    must_login: false
+    log: true
+    params:
+      hostid_list:
+        check:
+          template: "{{hostid_list|must_list}}"
+          err_msg: "请选择主机列表"
+      templateid_list:
+        check:
+          template: "{{templateid_list|must_list}}"
+          err_msg: "请选择模板列表"
+    handler_params:
+      - key: arr2arrObj
+        foreach: hostid_list
+        obj:
+          hostid: "{{item}}"
+        save_field: host_list
+      - key: arr2arrObj
+        foreach: templateid_list
+        obj:
+          templateid: "{{item}}"
+        save_field: template_list
+
+    flow:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: end
+        - key: end
+          type: end
+          name: 结束
+    result_handler:
+      - key: add_param
+        params:
+          from_field: host_list
+          to_field: host_list
+
+      - key: add_param
+        params:
+          from_field: template_list
+          to_field: template_list

@@ -1,0 +1,12 @@
+
+service:
+  # 查询流水
+  - key: "super_power"
+    module: 'mysql'# 执行mysql 查询
+    params:
+      user_id: # 用户ID
+        default: ''
+      super_user_code:
+        default: 'super_power_manage'
+    log: true
+    sql_file: 'base.sql'

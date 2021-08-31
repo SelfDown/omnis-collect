@@ -1,0 +1,101 @@
+service:
+  # 用户导出
+  - key: "user"
+    module: 'mysql'# 执行mysql 查询
+    must_login: false
+    params:
+      pagination: # 查询分页
+        type: bool
+        default: false
+      page:
+        default: 1
+      size:
+        default: 20
+      start:
+        exp: '({page}-1)*{size}'
+        default: 0
+      download:
+        default: true
+      download_file_name:
+        default: "用户列表.xls"
+      excel_path:
+        default: "./attendance_out/user.xls"
+      show_work_code:
+        default: false
+    log: true
+    sql_file: 'user.sql'
+    count_params:
+      pagination: # 总数不分页
+        default: false
+    count_sql: 'user_count.sql'
+    excel:
+      0:
+        title_row: 0
+        title_style: 'alignment:vert center;font:color white ,height 240;pattern: pattern solid, fore_colour light_blue;'
+        name_row: 1
+        name_style: 'font:color white ;pattern: pattern solid, fore_colour ocean_blue'
+        start_row: 2
+        frozen_col: 1
+        title: 盛博汇用户批量更新(请确保工号填写正确，只能修改银行卡、报销款、邮箱、生日。日期必须是"2021-01-01" 这样的格式 )
+        data: result
+        fields:
+          - name: 工号
+            enable: "{{show_work_code}}"
+            value: work_code
+          - name: 姓名
+            value: nick
+            width: 80
+          - name: 部门
+            value: hrm_department_name
+            width: 180
+          - name: 银行卡
+            value: bank_card_numbers
+            width: 200
+          - name: 报销卡
+            value: apply_card_no
+            width: 200
+          - name: 邮箱
+            value: email
+            width: 200
+          - name: 生日
+            value: birthday
+            width: 160
+          - name: 状态
+            value: status_name
+    result_handler:
+      - key: result2excel
+        enable: "{{download}}"
+        params:
+          excel_path: excel_path
+
+      - key: file_response
+        enable: "{{download}}"
+        params:
+          path: excel_path
+          filename: download_file_name
+  # 用户导入
+  - key: 'user_import'
+
+    module: 'mysql_update'
+    sql_file: 'user_update.xml'
+    data_type: 'data'
+    log: true
+    async: true
+    excel:
+      0:
+        start_row: 2
+        from: 'hrm.user.0'
+        fields:
+          - name: 工号
+
+            value: work_code
+          - name: 银行卡
+            value: bank_card_numbers
+          - name: 报销卡
+            value: apply_card_no
+          - name: 邮箱
+            value: email
+          - name: 生日
+            value: birthday
+
+
