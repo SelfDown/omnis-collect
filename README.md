@@ -1,5 +1,5 @@
 # omnis-collect
-omnis-collect 是基于django框架，开发的一款web接口配置工具。目的是将系统的所有的接口都统一，简单点说，将所有的增删改查接口统一、让系统只有一个http接口，业务接口都是配置出来。
+omnis-collect是web接口配置工具。目的是将系统接口都统一，简单点说，将所有的增删改查接口统一、让系统只有一个http接口，业务接口都是配置出来。
 实现通过一些简单配置，可以提供http接口服务。
 
 目前已经实现
@@ -11,12 +11,11 @@ omnis-collect 是基于django框架，开发的一款web接口配置工具。目
 ***
 
 ## 环境要求
-+ 依赖要求 django 1.11.23,熟悉django 目录结构，django model 的使用
-+ 系统中已经有sys_projects 项目表，并且有project_name 字段。其他业务表也行，这里是拿项目表举例
++ 依赖要求 django 1.11.23
 + 根目录下必须有conf/application.properties.
   - application.propertes 配置 写下一下配置
-  + collect_file_path=./omnis_data_service/service_router.yml   这个是路由入库文件，根据实际情况替换
-+ 根据上一步的配置，必须在根目录下创建omnis_data_servcie目录并且新建service_router.yml
+  + collect_file_path=./omnis_data_service/service_router.yml   这个是路由文件，根据实际情况替换
++ 项目根目录下创建omnis_data_servcie目录并且新建service_router.yml
 
 ***
 ## 目录结构
@@ -38,19 +37,19 @@ omnis-collect 是基于django框架，开发的一款web接口配置工具。目
     pip install omnis-collect --index-url https://pypi.org/simple
 ### 安装模块
 settings.py 中安装模块
-```
+```python
 INSTALLED_APPS = [
-     ... 其他模块
+     ... #其他模块
     'collect'
 
 ]
 ```
 ### 添加系统路由
-找到urls.py 文件，可以根据自己需要调整路由，主要避免冲突
-```
+找到系统urls.py 文件，可以根据自己需要调整路由，主要避免冲突
+```python
 from django.conf.urls import include
 urlpatterns = [
-    ... 其他模块
+    ... #其他模块
     url(r'^template_data/', include("collect.template_urls")),
 ]
 
@@ -458,7 +457,6 @@ service:
     sql_file: 'project.sql'
 
 ```
-注意 excel_out_path配置的 attendance_out目录必须存在，文件会自动创建
 3.创建project.sql 文件，编写sql 
 
 ```sql
@@ -468,7 +466,7 @@ service:
 ```
 前提数据库必须有sys_projects 表，如果没有，请在数据库中手动执行
 
-```
+```sql
 
 CREATE TABLE sys_projects  (
   sys_project_id varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
@@ -485,7 +483,7 @@ template_data 是文档“集成”步骤的路由
 ```/template_data/data```
 post body 发送
 
-```
+```json
 { 
    "service":"project_manage.project"
  }
