@@ -1,32 +1,14 @@
 # 系统总路由
 services:
-  - key: 'hrm'
-    name: '人资模块'
-    path: 'hrm/service.yml'
+
   - key: 'project_manage'
     name: '项目管理'
     path: 'project_manage/service.yml'
-  - key: 'man_hour_manage'
-    name: '工时管理'
-    path: 'man_hour/service.yml'
-  - key: 'finance'
-    name: '财务管理'
-    path: 'finance_manage/service.yml'
-  - key: 'common'
-    name: '权限'
-    path: 'common/service.yml'
-  - key: 'server'
-    name: '权限'
-    path: 'server/service.yml'
-  - key: 'monitor'
-    name: '监控'
-    path: 'monitor/service.yml'
-  - key: 'grafana'
-    name: '监控'
-    path: 'grafana/service.yml'
+
   - key: 'config'
     name: '配置'
     path: 'config/service.yml'
+
 
 # 返回结果转换规则
 rules:
@@ -230,14 +212,14 @@ result_handler:
     method: handler
 # 模块处理器
 module_handler:
-  # mysql 查询
-  - key: mysql
-    path: collect.service_imp.mysql.mysql_service
-    class_name: MysqlService
+  # sql 查询
+  - key: sql
+    path: collect.service_imp.sql.sql_service
+    class_name: SqlService
   # mysql 更新
-  - key: mysql_update
-    path: collect.service_imp.mysql.mysql_update
-    class_name: MysqlUpdateService
+  - key: sql_update
+    path: collect.service_imp.sql.sql_update
+    class_name: SqlUpdateService
   # 模型保存
   - key: model_save
     path: collect.service_imp.model.model_save

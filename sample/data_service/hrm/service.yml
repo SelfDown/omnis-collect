@@ -1,8 +1,0 @@
-# 项目点路由
-service:
-  - name: "用户模块"
-    path: "user/index.yml"
-  - name: "考勤模块"
-    path: 'attendance/index.yml'
-  - name: "项目假模块"
-    path: 'user_vacation/index.yml'

@@ -1,2 +1,0 @@
-select user_id
-from attendance_white_list

@@ -1,7 +1,0 @@
-service:
-  # 项目
-  - key: "login"
-    module: 'monitor'# 执行监控 查询
-    must_login: false
-    data_json: login.json
-

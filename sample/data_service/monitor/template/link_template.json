@@ -1,8 +1,0 @@
-{
-    "method": "template.massadd",
-    "params": {
-        "templates": {{template_list|json_str}},
-        "hosts": {{host_list|json_str}}
-    },
-  require('../common/session.common')
-}

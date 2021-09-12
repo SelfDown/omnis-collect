@@ -1,6 +1,0 @@
-# 项目点路由
-service:
-  - name: "超级权限"
-    path: "super_power/index.yml"
-  - name: "部门名称"
-    path: "department/index.yml"

@@ -96,13 +96,18 @@ if get_key("memcache")=='true':
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': get_key("database.name"),
-        'USER': get_key("database.user"),
-        'PASSWORD': get_key("database.password"),
-        'HOST': get_key("database.host"),
-        'PORT': get_key("database.port", data_type="int"),
+    # 'default': {
+    #     'ENGINE': get_key("database.engine"),
+    #     'NAME': get_key("database.name"),
+    #     'USER': get_key("database.user"),
+    #     'PASSWORD': get_key("database.password"),
+    #     'HOST': get_key("database.host"),
+    #     'PORT': get_key("database.port", data_type="int"),
+    # }
+    'default':{
+   	 	'ENGINE':  get_key("database.engine"),
+   		'NAME': get_key("database.name"),
+
     }
 }
 DATABASE_APPS_MAPPING = {

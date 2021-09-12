@@ -1,5 +1,0 @@
-{
-    "method": "item.delete",
-    "params": {{itemid_list|json_str}},
-    require('../common/session.common')
-}

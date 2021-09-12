@@ -1,8 +1,0 @@
-<xml>
-    update user_account
-    set apply_card_no = {{apply_card_no}} ,
-        bank_card_numbers={{bank_card_numbers}},
-        email={{ email }},
-        birthday={{ birthday }}
-    where work_code = {{work_code}}
-</xml>

@@ -1,7 +1,0 @@
-{
-    "method": "hostgroup.create",
-    "params": {
-        "name": "{{name}}"
-    },
-    require('../common/session.common')
-}

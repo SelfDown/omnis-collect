@@ -1,9 +1,0 @@
-{
-
-  "method": "trigger.get",
-  "params": {
-    "hostids": {{hostids}},
-    "output": "extend"
-  },
-   require('../common/session.common')
-}
