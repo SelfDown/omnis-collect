@@ -79,19 +79,20 @@ class ServiceOmnisFlowService(CollectService):
         d = {}
         for index, item in enumerate(services):
             key = get_safe_data(self.get_key_name(), item)
+
+            def err_info(name):
+                return "第【{index}】服务节点,【{key}】没有【{name}】 属性".format(index=str(index + 1), key=str(key), name=str(name))
+
             if not key:
-                return self.fail(self.get_template_service_name() + "第【" + str(
-                    index + 1) + "】服务节点,没有【" + self.get_key_name() + "】 属性")
+                return self.fail(err_info(self.get_key_name()))
             t = get_safe_data(self.get_type_name(), item)
             if not t:
-                return self.fail(self.get_template_service_name() + "第【" + str(
-                    index + 1) + "】服务节点,没有【" + self.get_type_name() + "】 属性")
+                return self.fail(err_info(self.get_type_name()))
             # 除结尾节点，都要配置next 标签
             if t not in (self.get_end_name()):
                 next = get_safe_data(self.get_next_name(), item)
                 if not next:
-                    return self.fail(self.get_template_service_name() + "第【" + str(
-                        index + 1) + "】服务节点,没有【" + self.get_next_name() + "】 属性")
+                    return self.fail(err_info(self.get_next_name()))
             if t not in (self.get_start_name(), self.get_end_name()):
                 has = False
                 names = self.get_must_node_names()
@@ -100,13 +101,11 @@ class ServiceOmnisFlowService(CollectService):
                         has = True
                 if not has and len(names) > 0:
                     err_node_names = ",".join(names)
-                    return self.fail(self.get_template_service_name() + "第【" + str(
-                        index + 1) + "】服务节点,没有【" + err_node_names + "】 属性")
+                    return self.fail(err_info(err_node_names))
 
             name = get_safe_data(self.get_name_name(), item)
             if not name:
-                return self.fail(self.get_template_service_name() + "第【" + str(
-                    index + 1) + "】服务节点,没有【" + self.get_name_name() + "】 属性")
+                return self.fail(err_info(self.get_name_name()))
             if key in d:
                 return self.fail(
                     self.get_template_service_name() + "第【" + str(index + 1) + "】服务节点,流程已经存在【" + key + "】节点")
@@ -213,4 +212,22 @@ class ServiceOmnisFlowService(CollectService):
         if first_err:
             return self.fail(first_err_msg)
         result = {}
+        return self.success(result)
+
+    def handler_app(self, node, config, result=None):
+        for key in config:
+            if key in node:
+                rule = config[key]
+                config_params = node[key]
+                params = self.get_params_result()
+                import importlib
+                path = rule[self.get_path_name()]
+                class_name = rule[self.get_class_name()]
+                collect_factory = importlib.import_module(path)
+                rule_obj = getattr(collect_factory, class_name)(op_user=self.op_user)
+                result = rule_obj.handler(params, config_params, template=self.template)
+                if not self.is_success(result):
+                    return result
+                result = self.get_data(result)
+                break
         return self.success(result)

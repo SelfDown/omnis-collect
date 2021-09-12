@@ -1,0 +1,208 @@
+service:
+  # 项目
+  - key: "item_query"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    params:
+      item_id_list:
+        check:
+          template: "{{item_id_list|must_list}}"
+          err_msg: "监控列表不能为空"
+        name: 监控列表
+    data_json: item_query_by_item_id_list.json
+    log: true
+  # 项目
+  - key: "key2item_ids"
+    module: 'mysql'# 执行监控 查询
+    data_source: 'zabbix'
+    must_login: false
+    params:
+      hostid:
+        check:
+          template: "{{hostid|must}}"
+          err_msg: "监控主机不能为空"
+          name: 监控主机
+      keys:
+        check:
+          template: "{{keys|must_list}}"
+          err_msg: "目标主机IP不能为空"
+          name: 目标主机
+    sql_file: key2item_ids.sql
+    log: true
+    result_handler:
+      - key: value_arr
+        params:
+          template: "{{itemid}}"
+
+
+  - key: "oracle_item_delay_create"
+    module: 'monitor'# 执行监控 查询
+    params:
+      install_soft_id:
+        check:
+          template: "{{install_soft_id|must}}"
+          err_msg: "数据库软件不能为空！"
+          name: 数据库软件
+      soft_server:
+        check:
+          template: "{{soft_server|must}}"
+          err_msg: "软件对应服务器不能为空"
+          name: 软件对应服务器
+      monitor_server:
+        check:
+          template: "{{monitor_server|must}}"
+          err_msg: "拨测主机不能为空"
+          name: 拨测主机
+    must_login: false
+    data_json: oracle_delay_create.json
+    log: true
+    result_handler:
+      - key: arr2obj
+        params:
+          field: itemids
+      - key: new_col
+        params:
+          to_field:
+            - field: 'item_id'
+              template: "{{itemids}}"
+          remove:
+            - itemids
+  - key: "oracle_item_delay_update"
+    module: 'monitor'# 执行监控 查询
+    params:
+      item_id:
+        check:
+          template: "{{item_id|must}}"
+          err_msg: "监控不能为空！"
+          name: 监控
+      soft_server:
+        check:
+          template: "{{soft_server|must}}"
+          err_msg: "软件对应服务器不能为空"
+          name: 软件对应服务器
+      monitor_server:
+        check:
+          template: "{{monitor_server|must}}"
+          err_msg: "拨测主机不能为空"
+          name: 拨测主机
+    must_login: false
+    data_json: oracle_delay_update.json
+    log: true
+
+
+
+  - key: "oracle_item_delay_delete"
+    module: 'monitor'# 执行监控 查询
+    params:
+      install_soft_id_list:
+        check:
+          template: "{{ install_soft_id_list |must_list }}"
+          err_msg: "软件列表不能为空！"
+          name: 软件列表
+    handler_params:
+      - key: service2field # 获取天览拨测主机
+        service:
+          service: 'monitor.monitor_server_get'
+        save_field: 'monitor_server'
+      - key: service2field # 根据软件ID 转成主机的keys
+        service:
+          service: 'server.soft_list'
+          install_soft_id_list: "install_soft_id_list"
+        save_field: 'server_keys'
+      - key: service2field # 根据keys 转items
+        service:
+          service: 'monitor.key2item_ids'
+          hostid: "{{monitor_server.hostid}}"
+          keys: "server_keys"
+        save_field: 'itemid_list'
+        template: "{{itemid_list|length >0}}"
+        err_msg: "软件监控项不存在"
+
+    must_login: false
+    data_json: oracle_delay_delete.json
+    log: true
+
+
+  - key: "monitor_item_delete"
+    module: 'monitor'# 执行监控 查询
+    name: "根据监控ID 列表删除"
+    params:
+      itemid_list:
+        check:
+          template: "{{ itemid_list |must_list }}"
+          err_msg: "监控列表不能为空！"
+          name: 监控列表
+    must_login: false
+    data_json: oracle_delay_delete.json
+    log: true
+  - key: "monitor_item_delete_by_item_id"
+    module: 'monitor'# 执行监控 查询
+    name: "根据监控ID 删除"
+    params:
+      item_id:
+        check:
+          template: "{{ item_id |must }}"
+          err_msg: "监控ID不能为空！"
+          name: 监控列表
+    must_login: false
+    data_json: delay_delete_by_item_id.json
+    log: true
+
+  - key: monitor_item_history
+    module: 'monitor'# 执行监控 查询
+    name: "根据监控ID 查询历史"
+    params:
+      item_id:
+        check:
+          template: "{{ item_id |must }}"
+          err_msg: "监控不能为空！"
+        name: 监控
+      value_type:
+        check:
+          template: "{{value_type|must}}"
+          err_msg: "数据类型不能为空"
+        name: 数据类型
+    must_login: false
+    data_json: monitor_item_history.json
+    result_handler:
+      - key: new_col
+        params:
+          to_field:
+            - field: 'time'
+              template: "{{clock|clock_time}}"
+    log: true
+
+
+  - key: "host_info_query"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    params:
+      host_id_list:
+        check:
+          template: "{{host_id_list|must_list}}"
+          err_msg: "监控列表不能为空"
+        name: 监控列表
+    data_json: host_info_query.json
+    result_handler:
+      - key: filter_arr
+        params:
+          field: items
+          template: "{{key_=='agent.ping'}}"
+      - key: arr2obj
+        params:
+          field: items
+      - key: new_col
+        params:
+          to_field:
+            - field: 'last_time'
+              template: "{{items.lastclock|clock_time}}"
+            - field: 'lastvalue'
+              template: "{{items.lastvalue}}"
+            - field: 'key_'
+              template: "{{items.key_}}"
+          remove:
+            - items
+    log: true
+
+
+

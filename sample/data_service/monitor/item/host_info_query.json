@@ -1,0 +1,20 @@
+{
+
+  "method": "host.get",
+      "params": {
+        "filter": {
+            "hostid": {{host_id_list|json_str}}
+                  },
+  "selectParentTemplates": [
+            "templateid",
+            "name"
+        ],
+        "selectItems": [
+                "lastvalue",
+                "lastclock",
+                "key_"
+                       ]
+
+},
+   require('../common/session.common')
+}

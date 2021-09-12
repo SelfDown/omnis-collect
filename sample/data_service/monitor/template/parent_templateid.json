@@ -1,0 +1,10 @@
+{
+
+  "method": "template.get",
+    "params": {
+        "output": "extend",
+        "selectParentTemplates": ["templateid","name"],
+        "hostids": {{hostid_list|json_str}}
+    },
+  require('../common/session.common')
+}

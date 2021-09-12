@@ -9,8 +9,6 @@ from collect.service_imp.flow.omnis_flow import ServiceOmnisFlowService
 from collect.utils.collect_utils import get_safe_data, get_key
 
 
-
-
 class ServiceFlowService(ServiceOmnisFlowService):
     sf_const = {
         "flow_name": "flow",
@@ -22,35 +20,20 @@ class ServiceFlowService(ServiceOmnisFlowService):
     def get_flow(self):
         return get_safe_data(self.get_flow_name(), self.template)
 
-
     def handler_current_node(self, current):
         params_result = self.get_params_result()
 
-        service = get_safe_data(self.get_service_name(), current)
+        # service = get_safe_data(self.get_service_name(), current)
         from collect.service_imp.common.filters.template_tool import TemplateTool
         template_tool = TemplateTool(op_user=self.op_user)
-
-        for key in service:
-            value_template = service[key]
-            # 如果配置的值存在，参数中，就取参数
-            if value_template in params_result:
-                value = params_result[value_template]
-            else:
-                value = template_tool.render(value_template, params_result)
-            service[key] = value
-
-        for key in params_result:
-            if key not in service:
-                service[key] = params_result[key]
-
+        service = self.get_node_service(current, params_result, template_tool)
+        if not self.is_success(service):
+            return service
+        service = self.get_data(service)
         service_result = self.get_service_result(service, self.template)
         if not self.is_success(service_result):
             return service_result
         data = self.get_data(service_result)
-
-        # save_field = get_safe_data(self.get_save_field_name(), current)
-        # if save_field:
-        #     params_result[save_field] = data
         return self.success(data)
 
     def execute(self, handler_node):
@@ -69,4 +52,3 @@ class ServiceFlowService(ServiceOmnisFlowService):
         if not self.is_success(flow_result):
             return flow_result
         return self.success({})
-

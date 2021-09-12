@@ -1,0 +1,6 @@
+{
+
+  "method": "trigger.delete",
+  "params":  {{trigger_id_list|json_str}},
+   require('../common/session.common')
+}

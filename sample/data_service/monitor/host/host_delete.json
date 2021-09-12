@@ -1,0 +1,6 @@
+{
+
+  "method": "host.delete",
+  "params": ["{{hostid}}"],
+  require('../common/session.common')
+}

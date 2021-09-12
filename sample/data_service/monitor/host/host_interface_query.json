@@ -1,0 +1,24 @@
+{
+
+  "method": "host.get",
+  "params": {
+    "hostids": {{hostid_list|json_str}},
+
+    "output": [
+      "hostid",
+      "host"
+    ],
+
+    "selectInterfaces": [
+      "interfaceid",
+      "dns",
+      "ip",
+      "hostid",
+      "port",
+      "main",
+      "useip",
+      "type"
+    ]
+  },
+  require('../common/session.common')
+}

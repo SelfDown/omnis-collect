@@ -3,29 +3,92 @@ service:
   - key: "oracle_delay_record_save"
     module: 'model_save'# 执行监控 查询
     must_login: false
+    params:
+      test_proxy_param:
+        template: "{{test_proxy_param|json_str}}"
+    log: true
+    model: MonitorActiveTest
+  # 项目
+  - key: "oracle_delay_record_update"
+    module: 'model_save'# 执行监控 查询
+    params:
+      active_test_id:
+        check:
+          template: "{{active_test_id|must}}"
+          err_msg: "拨测不能为空"
+        name: 拨测
+      test_proxy_param:
+        template: "{{test_proxy_param|json_str}}"
+
+    must_login: false
+    log: true
+    model: MonitorActiveTest
+  - key: test_code_check
+    module: "mysql"
+    must_login: false
     log: true
     params:
-      test_install_soft_id:
+      test_sql_code:
         check:
-          enable: "True"
-          switch:
-            - case: "{{test_type == '6'}}"
-              name: "SQL SERVER 监控判断"
-              template: "{{test_proxy_param.install_soft_id|must}}"
-            - case: "{{test_type=='3'}}"
-              name: "oracle 监控判断"
-              template: "{{test_install_soft_id|must}}"
-          err_msg: "软件不能为空"
-        switch:
-          - case: "{{test_type=='3'}}"
-            name: "oracle 监控判断"
-            template: "{{test_install_soft_id}}"
-          - case: "{{test_type == '6'}}"
-            name: "SQL SERVER 监控判断"
-            template: "{{test_proxy_param.install_soft_id}}"
-        name: "软件"
+          template: "{{test_sql_code|must}}"
+          err_msg: "SQL编码不能为空"
+        name: 编码
+    sql_file: test_code_check.sql
+  - key: get_active_test_by_id_list
+    module: "mysql"
+    must_login: false
+    log: true
+    params:
+      active_test_id_list:
+        check:
+          template: "{{active_test_id_list|must_list}}"
+          err_msg: "拨测不能为空"
+        name: 拨测
+    sql_file: test_active_test_id_list_check.sql
+  - key: get_active_test_by_id
+    module: "mysql"
+    must_login: false
+    log: true
+    params:
       active_test_id:
-        template: "{{ '' |uuid}}"
-        default: ''
-        name: ID
+        check:
+          template: "{{active_test_id|must}}"
+          err_msg: "拨测不能为空"
+        name: 拨测
+    sql_file: test_active_test_id_check.sql
+    result_handler:
+      - key: arr2obj
+
+  - key: oracle_delay_record_delete
+    module: 'model_delete' # 执行模型删除
     model: MonitorActiveTest
+    must_login: false
+    params:
+      test_sql_code_list:
+        check:
+          template: "{{ test_sql_code_list |must_list }}"
+          err_msg: "SQL编码列表不能为空！"
+        name: SQL编码列表
+    filter:
+      test_sql_code__in: test_sql_code_list
+    operation: # 预留口子，做假删除
+      method: 'delete'
+
+
+  - key: oracle_delay_record_delete_by_id_list
+    module: 'model_delete' # 执行模型删除
+    model: MonitorActiveTest
+    must_login: false
+    params:
+      active_test_id_list:
+        check:
+          template: "{{ active_test_id_list |must_list }}"
+          err_msg: "拨测列表不能为空！"
+        name: S拨测列表
+    filter:
+      active_test_id__in: active_test_id_list
+    operation: # 预留口子，做假删除
+      method: 'delete'
+
+
+

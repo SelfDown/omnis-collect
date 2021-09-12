@@ -10,7 +10,6 @@
 from collect.service_imp.flow.omnis_flow import ServiceOmnisFlowService
 from collect.utils.collect_utils import get_safe_data
 
-
 ssh_error_info_path = './conf/ssh_error_info.yml'
 #  这里判断文件是否存在
 import os
@@ -182,6 +181,9 @@ class OmnisSSHService(ServiceOmnisFlowService):
             ssh_connect = get_safe_data(self.get_ssh_client_name(), self.template)
         else:
             ssh_connect = True
+
+        if not self.get_server_ip():
+            ssh_connect = False
         if ssh_connect:
             ssh_client = self.get_ssh_client()
             if not self.is_success(ssh_client):
@@ -254,21 +256,25 @@ class OmnisSSHService(ServiceOmnisFlowService):
             if self.has_error(shell):
                 return self.fail(self.get_error_msg(shell_result))
         config = self.get_app_config()
-        for key in self.get_app_config():
-            if key in current:
-                rule = config[key]
-                config_params = current[key]
-                params = self.get_params_result()
-                import importlib
-                path = rule[self.get_path_name()]
-                class_name = rule[self.get_class_name()]
-                collect_factory = importlib.import_module(path)
-                rule_obj = getattr(collect_factory, class_name)(op_user=self.op_user)
-                result = rule_obj.handler(params, config_params, template=self.template)
-                if not self.is_success(result):
-                    return result
-                result = self.get_data(result)
-                break
+        result = self.handler_app(current, config, result)
+        if not self.is_success(result):
+            return result
+        result = self.get_data(result)
+        # for key in config:
+        #     if key in current:
+        #         rule = config[key]
+        #         config_params = current[key]
+        #         params = self.get_params_result()
+        #         import importlib
+        #         path = rule[self.get_path_name()]
+        #         class_name = rule[self.get_class_name()]
+        #         collect_factory = importlib.import_module(path)
+        #         rule_obj = getattr(collect_factory, class_name)(op_user=self.op_user)
+        #         result = rule_obj.handler(params, config_params, template=self.template)
+        #         if not self.is_success(result):
+        #             return result
+        #         result = self.get_data(result)
+        #         break
         if self.has_error(result):
             return self.fail(self.get_error_msg(result))
         return self.success(result)

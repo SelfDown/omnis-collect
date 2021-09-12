@@ -1,0 +1,29 @@
+{
+
+  "method": "host.get",
+  "params": {
+    "output": [
+      "hostid",
+      "host"
+    ],
+    "filter": {
+      {% if soft_server and  soft_server.server_ip %}
+        "host": "{{soft_server.server_ip}}.{{'monitor_project_code'|get_key}}"
+      {% else %}
+        "host": "{{'monitor_server'|get_key}}"
+      {% endif %}
+    },
+    "with_items": "1",
+    "selectInterfaces": [
+      "interfaceid",
+      "dns",
+      "ip",
+      "hostid",
+      "port",
+      "main",
+      "useip",
+      "type"
+    ]
+  },
+  require('../common/session.common')
+}

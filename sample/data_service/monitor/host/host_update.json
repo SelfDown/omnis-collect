@@ -1,0 +1,27 @@
+{
+
+  "method": "host.update",
+    "params": {
+      "hostid": "{{hostid}}",
+      "name": "{{monitor_agent_id}}",
+        "host": "{{host}}",
+        "groups":[
+          {
+                "groupid": "{{groupid}}"
+          }
+        ],
+
+
+         "templates": [
+            {
+                "templateid": "{{templateid}}"
+            }
+        ],
+
+        {% if 'true' == 'monitor_proxy'|get_key %}
+          "proxy_hostid":"{{proxyid}}"
+        {% endif %}
+
+    },
+  require('../common/session.common')
+}

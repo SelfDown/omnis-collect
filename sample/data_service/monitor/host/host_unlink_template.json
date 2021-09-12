@@ -1,0 +1,10 @@
+{
+
+
+  "method": "host.massremove",
+  "params": {
+      "hostids": {{hostid_list|json_str}},
+      "templateids_clear": {{templateid_list|json_str}}
+  },
+  require('../common/session.common')
+}

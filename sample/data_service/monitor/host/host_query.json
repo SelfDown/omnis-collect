@@ -1,0 +1,41 @@
+{
+
+  "method": "host.get",
+  "params": {
+    "filter": {
+            "host": "{{host}}"
+        },
+
+    "output": [
+      "hostid",
+      "host"
+    ],
+
+    "selectItems": [
+      "itemid",
+      "key_",
+      "name",
+      "lastclock",
+      "lastvalue",
+      "lastns"
+    ],
+    "selectParentTemplates": [
+      "name",
+      "templateid"
+    ],
+    "selectHostDiscovery": [
+      "lastcheck"
+    ],
+    "selectInterfaces": [
+      "interfaceid",
+      "dns",
+      "ip",
+      "hostid",
+      "port",
+      "main",
+      "useip",
+      "type"
+    ]
+  },
+  require('../common/session.common')
+}

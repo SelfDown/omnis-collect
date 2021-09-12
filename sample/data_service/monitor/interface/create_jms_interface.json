@@ -1,0 +1,5 @@
+{
+    "method": "hostinterface.create",
+    "params": {{new_jms_interface_list|json_str}},
+  require('../common/session.common')
+}

@@ -1,0 +1,5 @@
+{
+    "method": "item.delete",
+    "params": ["{{item_id}}"],
+    require('../common/session.common')
+}

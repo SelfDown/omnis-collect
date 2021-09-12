@@ -1,0 +1,12 @@
+service:
+  - key: "project_proxy"
+    module: 'monitor'
+    must_login: false
+    log: true
+    params:
+      monitor_proxy_name:
+        template: "{{ 'monitor_proxy_name' |get_key}}"
+        name: ID
+    data_json: proxy.json
+    result_handler:
+      - key: arr2obj

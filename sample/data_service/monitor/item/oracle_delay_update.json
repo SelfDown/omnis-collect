@@ -1,0 +1,33 @@
+{
+    "method": "item.update",
+    "params": {
+        "itemid": "{{item_id}}",
+        "name": "{{active_test_name|safe}}",
+        "key_": "{{soft_server.key|safe}}",
+        "hostid": "{{monitor_server.hostid|safe}}",
+        "interfaceid": "{{monitor_server.interfaceid|safe}}",
+        "type": 19,
+        "value_type": 1,
+        {% if test_type=='3' %}
+            "url": "http://{{'omnis_partner_url'|get_key}}{{'partner_sql_url'|get_key}}",
+        {% elif test_type == '6' %}
+            "url": "http://{{'omnis_partner_url'|get_key}}{{'partner_proxy_enhance_url'|get_key}}",
+        {% endif %}
+        "request_method": 1,
+        "query_fields": [
+        {% if test_type=='3' %}
+            {"sql":"{{test_sql_code}}"}
+        {% elif test_type == '6' %}
+
+            {"install_soft_id":"{{install_soft_id}}"},
+            {"limit":"{{test_proxy_param.limit}}"},
+            {"publication":"{{test_proxy_param.publication}}"},
+            {"type":"mssqllatencycheck"}
+
+        {% endif %}
+        ],
+        "delay": "{{delay}}",
+        "timeout": "60s"
+    },
+   require('../common/session.common')
+}

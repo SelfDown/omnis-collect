@@ -1,0 +1,3 @@
+"auth": "{{''|monitor_session_id}}",
+"id": "{{''|uuid}}",
+"jsonrpc": "2.0"

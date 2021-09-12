@@ -1,0 +1,442 @@
+service:
+  - key: "oracle_delay_monitor_create"
+    module: 'service_flow'
+    must_login: false
+    log: true
+    params:
+      active_test_id:
+        template: "{{ '' |uuid}}"
+        default: ''
+        name: ID
+      active_test_name:
+        default: 'oracle延时监控'
+        name: "监控名称"
+      add_time:
+        template: "{{'' |current_date_time}}"
+        default: ''
+        name: 创建时间
+      test_install_soft_id:
+        check:
+          # 如果是3, oracle 监控，test_install_soft_id不能为空。
+          #如果是6，sql server 监控，test_proxy_param.install_soft_id 不能为空
+          switch:
+            - case: "{{test_type == '6'}}"
+              name: "SQL SERVER 监控判断"
+              template: "{{test_proxy_param.install_soft_id|must}}"
+            - case: "{{test_type=='3'}}"
+              name: "oracle 监控判断"
+              template: "{{test_install_soft_id|must}}"
+          err_msg: "监控数据库软件不能为空{{test_proxy_param|json_str}}"
+        switch:
+          - case: "{{test_type=='3'}}"
+            name: "oracle 监控判断"
+            template: "{{test_install_soft_id}}"
+          - case: "{{test_type == '6'}}"
+            name: "SQL SERVER 监控判断"
+            template: "{{test_proxy_param.install_soft_id}}"
+        name: 容灾端soft_id
+      soft_user_type:
+        check:
+          switch:
+            - case: "{{test_type == '3'}}"
+              name: "软件用户判断 监控判断"
+              template: "{{soft_user_type|must}}"
+          err_msg: "用户类型不能为空"
+        name: 用户类型
+      soft_user_id:
+        check:
+          switch:
+            - case: "{{test_type == '3' and soft_user_type=='1' }}"
+              name: "oracle数据库 并且用户模式"
+              # 如果没有用户ID,就报错
+              template: "{% if not soft_user_id %}False{% endif %}"
+          err_msg: "请选择软件用户"
+        template: "{% if soft_user_type=='1' %}{{soft_user_id}}{%endif%}"
+        name: 软件用户
+      test_sql_dbuser:
+        check:
+          template: "{%if soft_user_type=='0' and not test_sql_dbuser %}False{% endif %}"
+          err_msg: "请输入软件用户"
+        template: "{% if soft_user_type=='0' %}{{test_sql_dbuser}}{% endif %}"
+        name: 软件用户名
+      test_sql_code:
+        check:
+          enable: "{{test_type=='3'}}"
+          service:
+            service: 'monitor.test_code_check'
+            test_sql_code: '{{test_sql_code}}'
+          template: "{{service_result|length <= 0}}"
+          err_msg: "{{service_result|foreach(template='sql 编码【{{test_sql_code}}】已经存在 ',join='\n')}}"
+        default: ''
+        name: "sql 编码"
+      test_sql:
+        check:
+          template: "{% if test_type == '3' %}{{test_sql|must}}{% endif %}"
+          err_msg: "sql 语句不能为空"
+        default: ''
+        name: "sql"
+      project_code:
+        template: "{{'monitor_project_code'|get_key}}"
+        name: 项目
+      alertitem_code:
+        default: 'CKE003'
+        name: 预警编码
+
+
+      test_type:
+        check:
+          template: "{{test_type|must}}"
+          err_msg: "类型不能为空"
+        default: '3'
+        name: '测试类型'
+
+      value_type:
+        template: '1'
+        default: 1
+        name: 数据类型
+
+      target_soft_id:
+        template: "{% if test_type ==  '6' %} {{test_proxy_param.pub_install_soft_id}} {% elif test_type ==  '3' %} {{test_install_soft_id}}  {% endif %}"
+
+      delay:
+        default: '120s'
+        name: 延迟时间
+      pub_install_soft_id:
+        check:
+          # 如果是3, oracle 监控，test_install_soft_id不能为空。
+          #如果是6，sql server 监控，test_proxy_param.install_soft_id 不能为空
+          switch:
+            - case: "{{test_type == '6'}}"
+              name: "SQL SERVER 监控判断"
+              template: "{{test_proxy_param.pub_install_soft_id|must}}"
+          err_msg: "发布端不能为空"
+        switch:
+          - case: "{{test_type=='3'}}"
+            name: "oracle 监控判断"
+            template: ""
+          - case: "{{test_type == '6'}}"
+            name: "SQL SERVER 监控判断"
+            template: "{{test_proxy_param.pub_install_soft_id}}"
+        name: 容灾端soft_id
+
+    handler_params:
+      - key: service2field # 获取天览hostid 和 interfaceid
+        service:
+          service: 'monitor.monitor_server_get'
+          install_soft_id: "{{test_install_soft_id}}"
+        save_field: 'monitor_server'
+      - key: service2field # 获取服务器key
+        service:
+          service: 'server.soft'
+          install_soft_id: "{{test_install_soft_id}}"
+          test_type: "test_type"
+          test_sql_code: "test_sql_code"
+          test_proxy_param: "test_proxy_param"
+        save_field: 'soft_server'
+    flow:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: create_item
+
+        - key: create_item
+          name: 创建监控项
+          type: node
+          service:
+            service: monitor.oracle_item_delay_create
+            install_soft_id: "{{target_soft_id}}"
+          save_field: "monitor_item"
+          fail: end
+          next: create_trigger
+
+        - key: create_trigger
+          name: 创建触发器
+          type: node
+          service:
+            service: 'monitor.trigger_create'
+          save_field: trigger
+          fail: delay_delete
+          next: create_record
+
+        - key: create_record
+          name: 创建数据库记录
+          type: node
+          service:
+            service: monitor.oracle_delay_record_save
+            item_id: "{{monitor_item.item_id}}"
+            host_id: "{{monitor_server.hostid}}"
+            host_name: "{{monitor_server.host}}"
+            trigger_id: "{{trigger.triggerid}}"
+            key_field: "{{soft_server.key}}"
+            active_test_target: "{{soft_server.active_test_target}}"
+          fail: delay_delete
+          next: end
+
+        - key: delay_delete
+          type: node
+          name: 删除监控项
+          service:
+            service: monitor.monitor_item_delete_by_item_id
+            item_id: "{{monitor_item.item_id}}"
+          next: end
+
+        - key: end
+          type: end
+          name: 结束
+  - key: "oracle_delay_monitor_update"
+    module: 'service_flow'
+    must_login: false
+    log: true
+    from: monitor.oracle_delay_monitor_create
+    extend_param: monitor.oracle_delay_monitor_create
+    extend_param_fields:
+      exclude:
+        - add_time
+    params:
+      active_test_id:
+        check:
+          template: "{{active_test_id|must}}"
+          err_msg: 拨测不能为空
+      test_sql_code:
+        check:
+          enable: "{{test_type=='3'}}"
+          service:
+            service: 'monitor.test_code_check'
+            test_sql_code: '{{test_sql_code}}'
+            active_test_id: '{{active_test_id}}'
+          template: "{{service_result|length <= 0}}"
+          err_msg: "{{service_result|foreach(template='sql 编码【{{test_sql_code}}】已经存在 ',join='\n')}}"
+        default: ''
+        name: "sql 编码"
+#      test_install_soft_id:
+#        check:
+#          template: "{{test_install_soft_id|must}}"
+#          err_msg: "数据库软件不能为空"
+#        name: 软件
+#      soft_user_type:
+#        check:
+#          template: "{{soft_user_type|must}}"
+#          err_msg: "用户类型不能为空"
+#        name: 用户类型
+#      soft_user_id:
+#        check:
+#          template: "{%if soft_user_type=='1' and not soft_user_id %}False{% endif %}"
+#          err_msg: "请选择软件用户"
+#        template: "{% if soft_user_type=='1' %}{{soft_user_id}}{%endif%}"
+#        name: 软件用户
+#      test_sql_dbuser:
+#        check:
+#          template: "{%if soft_user_type=='0' and not test_sql_dbuser %}False{% endif %}"
+#          err_msg: "请输入软件用户"
+#        template: "{% if soft_user_type=='0' %}{{test_sql_dbuser}}{% endif %}"
+#        name: 软件用户名
+#      test_sql_code:
+#        check:
+#          service:
+#            service: 'monitor.test_code_check'
+#            test_sql_code: '{{test_sql_code}}'
+#            active_test_id: '{{active_test_id}}'
+#          template: "{{service_result|length <= 0}}"
+#          err_msg: "{{service_result|foreach(template='sql 编码【{{test_sql_code}}】已经存在 ',join='\n')}}"
+#        default: ''
+#        name: "sql 编码"
+#      test_sql:
+#        check:
+#          template: "{{test_sql|must}}"
+#          err_msg: "sql 语句不能为空"
+#        default: ''
+#        name: "sql"
+#      project_code:
+#        template: "{{'monitor_project_code'|get_key}}"
+#        name: 项目
+#      alertitem_code:
+#        default: 'CKE003'
+#        name: 预警编码
+#      test_type:
+#        default: '3'
+#        name: '测试类型'
+#      value_type:
+#        template: '1'
+#        default: 1
+#        name: 数据类型
+#
+#      delay:
+#        default: '60s'
+#        name: 延迟时间
+    handler_params:
+      - key: service2field # 获取天览hostid 和 interfaceid
+        service:
+          service: 'monitor.monitor_server_get'
+          install_soft_id: "{{test_install_soft_id}}"
+        save_field: 'monitor_server'
+      - key: service2field # 获取item_id
+        service:
+          service: monitor.get_active_test_by_id
+          active_test_id: 'active_test_id'
+
+        save_field: 'active_test'
+      - key: service2field # 获取服务器key
+        service:
+          service: 'server.soft'
+          install_soft_id: "{{target_soft_id}}"
+          test_sql_code: "test_sql_code"
+          test_type: 'test_type'
+          test_proxy_param: "test_proxy_param"
+        save_field: 'soft_server'
+    flow:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: update_item
+
+        - key: update_item
+          name: 编辑监控项
+          type: node
+          service:
+            service: monitor.oracle_item_delay_update
+            install_soft_id: "{{target_soft_id}}"
+            item_id: "{{active_test.item_id}}"
+          save_field: "monitor_item"
+          fail: end
+          next: update_trigger
+
+
+        - key: update_trigger
+          name: 编辑触发器
+          type: node
+          service:
+            service: 'monitor.trigger_update'
+            trigger_id: '{{active_test.trigger_id}}'
+          fail: end
+          next: update_record
+
+        - key: update_record
+          name: 更新数据库记录
+          type: node
+          service:
+            service: monitor.oracle_delay_record_update
+            item_id: "{{active_test.item_id}}"
+            host_id: "{{monitor_server.hostid}}"
+            host_name: "{{monitor_server.host}}"
+            trigger_id: "{{active_test.trigger_id}}"
+            key_field: "{{soft_server.key}}"
+            active_test_target: "{{soft_server.active_test_target}}"
+          fail: next
+          next: end
+
+        - key: end
+          type: end
+          name: 结束
+  # 监控项删除
+  - key: "oracle_delay_monitor_delete"
+    module: 'service_flow'
+    must_login: false
+    log: true
+    params:
+      active_test_id_list:
+        check:
+          service:
+            service: "monitor.get_active_test_by_id_list"
+            active_test_id_list: "active_test_id_list"
+          template: "{{service_result|length > 0}}"
+          err_msg: 拨测记录不存在
+        name: 拨测
+    handler_params:
+      - key: service2field # 获取天览拨测主机
+        service:
+          service: 'monitor.get_active_test_by_id_list'
+          active_test_id_list: "active_test_id_list"
+        save_field: 'active_test'
+      - key: prop_arr
+        params:
+          from_field: "active_test"
+          to_field: "itemids"
+          template: "{{item_id}}"
+      - key: prop_arr
+        params:
+          from_field: "active_test"
+          to_field: "trigger_id_list"
+          template: "{{trigger_id}}"
+    flow:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: trigger_delete
+        - key: trigger_delete
+          name: 删除触发器
+          type: node
+          service:
+            service: "monitor.trigger_delete_by_trigger_id_list"
+            trigger_id_list: "trigger_id_list"
+          fail: end
+          next: item_delete
+          ignore_error: true
+        - key: item_delete
+          name: 删除监控
+          type: node
+          service:
+            service: "monitor.monitor_item_delete"
+            itemid_list: "itemids"
+          fail: end
+          next: delay_record_delete
+          ignore_error: true
+        - key: delay_record_delete
+          type: node
+          name: 拨测记录删除
+          service:
+            service: 'monitor.oracle_delay_record_delete_by_id_list'
+            active_test_id_list: 'active_test_id_list'
+          fail: end
+          next: end
+        - key: end
+          type: end
+          name: 结束
+
+  - key: "active_test_query"
+    module: 'mysql' # 执行mysql 查询
+    log: true
+    must_login: false
+    params:
+      pagination: # 查询分页
+        default: true
+        type: bool
+      page:
+        default: 1
+        type: int
+      size:
+        default: 20
+        type: int
+      start_row:
+        exp: '({page}-1)*{size}'
+        default: 0
+
+      active_test_name:
+        template: "{% if active_test_name%}%{{active_test_name}}%{% endif %}"
+        name: 名称
+      target_ip:
+        template: "{% if target_ip%}%{{target_ip}}%{% endif %}"
+        name: 名称
+    sql_file: 'active_test.sql'
+    count_params:
+      pagination: # 总数不分页
+        default: false
+        type: bool
+    count_sql: 'active_test_count.sql'
+    result_handler:
+      - key: val2param
+        params:
+          template: "{{item_id}}"
+          to_field: item_id_list
+      - key: combine_service
+        params:
+          service:
+            service: "monitor.item_query"
+          from_field: "itemid"
+          to_field: 'item_id'
+          save_field: 'monitor_item'
+
+
+

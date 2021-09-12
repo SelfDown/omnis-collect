@@ -1,0 +1,88 @@
+service:
+  # 项目
+  - key: "trigger_query"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    data_json: trigger_query.json
+    params:
+      hostids:
+        check:
+          template: "{{hostids |must_list}}"
+          err_msg: "监控主机列表不能为空"
+          name: 监控主机列表
+
+    log: true
+
+  - key: "trigger_create"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    data_json: trigger_create.json
+    params:
+      soft_server:
+        check:
+          template: "{{soft_server|must}}"
+          err_msg: "软件对应服务器不能为空"
+          name: 软件对应服务器
+      monitor_server:
+        check:
+          template: "{{monitor_server|must}}"
+          err_msg: "拨测主机不能为空"
+          name: 拨测主机
+      server_name:
+        template: "{%if soft_server.server_busi_name %}{{soft_server.server_busi_name}}{% else %}{{soft_server.server_ip}}{% endif  %}"
+      detail_info:
+        switch:
+          - case: "{{test_type=='3'}}"
+            template: "Oracle实时同步异常"
+          - case: "{{test_type=='6'}}"
+            template: "SQL SERVER实时同步异常"
+    result_handler:
+      - key: arr2obj
+        params:
+          field: triggerids
+      - key: new_col
+        params:
+          to_field:
+            - field: 'triggerid'
+              template: "{{triggerids}}"
+          remove:
+            - triggerids
+    log: true
+
+  - key: "trigger_delete"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    data_json: trigger_delete.json
+    params:
+      triggerid:
+        check:
+          template: "{{triggerid|must}}"
+          err_msg: "触发器不能为空"
+          name: 触发器
+
+    log: true
+  - key: "trigger_update"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    data_json: trigger_update.json
+    params:
+      trigger_id:
+        check:
+          template: "{{trigger_id|must}}"
+          err_msg: "触发器不能为空"
+          name: 触发器
+    extend_param: monitor.trigger_create
+
+
+    log: true
+  - key: "trigger_delete_by_trigger_id_list"
+    module: 'monitor'# 执行监控 查询
+    must_login: false
+    data_json: trigger_delete_by_trigger_id_list.json
+    params:
+      trigger_id_list:
+        check:
+          template: "{{trigger_id_list|must_list}}"
+          err_msg: "触发器不能为空"
+          name: 触发器
+    log: true

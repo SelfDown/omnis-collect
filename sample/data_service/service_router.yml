@@ -24,6 +24,9 @@ services:
   - key: 'grafana'
     name: '监控'
     path: 'grafana/service.yml'
+  - key: 'config'
+    name: '配置'
+    path: 'config/service.yml'
 
 # 返回结果转换规则
 rules:
@@ -62,13 +65,7 @@ request_rules:
 django_model:
   # django model 文件位置
   model_file: sample.models.models
-# 缓存
-cache:
-  # 默认60s
-  max: 60
-  # 获取django 的默认缓存对象
-  path: django.core.cache
-  obj: cache
+
 
 before_plugin:
   # 继承参数
@@ -166,7 +163,7 @@ result_handler:
     class_name: TreeNodeName
     method: handler
 
- # 添加请求参数
+  # 添加请求参数
   - key: add_param
     path: collect.service_imp.result_handlers.handlers.add_param
     class_name: AddParam
@@ -279,6 +276,11 @@ module_handler:
     path: collect.service_imp.empty.empty_service
     class_name: EmptyService
     method: handler
+  # config
+  - key: config
+    path: collect.service_imp.flow.config_service
+    class_name: ConfigService
+    method: handler
 
 
 filter_handler:
@@ -340,6 +342,11 @@ filter_handler:
     path: collect.service_imp.common.filters.template_filters.json_str
     class_name: JsonStr
     method: filter
+  # 获取目录
+  - key: dirname
+    path: collect.service_imp.common.filters.template_filters.dirname
+    class_name: DirnameFilter
+    method: filter
 
 # 第三方方法
 third_application:
@@ -357,8 +364,34 @@ third_application:
       path: "collect.service_imp.flow.common.server_copy"
       class_name: "ServerCopy"
       method: "handler"
+    - key: server_copy_tree
+      path: "collect.service_imp.flow.common.server_copy_tree"
+      class_name: "ServerCopyTree"
+      method: "handler"
 
     - key: server_archive
       path: "collect.service_imp.flow.common.server_archive"
       class_name: "ServerArchive"
+      method: "handler"
+    - key: dir_tree
+      path: "collect.service_imp.flow.common.dir_tree"
+      class_name: "DirTree"
+      method: "handler"
+    - key: file_content
+      path: "collect.service_imp.flow.common.file_content"
+      class_name: "FileContent"
+      method: "handler"
+  config:
+    - key: config_data
+      path: "collect.service_imp.flow.config.config_data"
+      class_name: "ConfigData"
+      method: "handler"
+
+    - key: node_data
+      path: "collect.service_imp.flow.config.node_data"
+      class_name: "NodeData"
+      method: "handler"
+    - key: init_node
+      path: "collect.service_imp.flow.config.init_node"
+      class_name: "InitNode"
       method: "handler"

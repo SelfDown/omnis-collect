@@ -1,0 +1,12 @@
+{
+    "method": "hostgroup.get",
+    "params": {
+        "output": "extend",
+        "filter": {
+
+            "name": "{{name}}"
+
+        }
+    },
+    require('../common/session.common')
+}

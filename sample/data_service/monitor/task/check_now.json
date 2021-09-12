@@ -1,0 +1,9 @@
+{
+
+  "method": "task.create",
+  "params": {
+      "type": "6",
+      "itemids": {{item_id_list|json_str}}
+  },
+   require('../common/session.common')
+}

@@ -1,0 +1,13 @@
+{
+
+    "method": "history.get",
+    "params": {
+        "output": "extend",
+        "history": "{{value_type}}",
+        "itemids": "{{item_id}}",
+        "sortfield": "clock",
+        "sortorder": "DESC",
+        "limit": 20
+    },
+   require('../common/session.common')
+}

@@ -1,0 +1,12 @@
+{
+    "method": "hostgroup.get",
+    "params": {
+        "output": "extend",
+        "search": {
+          "name": "[Templates]"
+        },
+        "selectTemplates": ["templateid","name","host"]
+
+    },
+    require('../common/session.common')
+}

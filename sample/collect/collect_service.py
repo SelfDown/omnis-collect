@@ -9,7 +9,7 @@
 # with open(sql_factory_config, 'r') as f:
 #     sql_config = yaml.load(f)
 
-from collect.utils.collect_utils import get_safe_data, is_empty, OmnisService, get_key
+from collect.utils.collect_utils import get_safe_data, is_empty, OmnisService, get_key, DateEncoder
 
 
 class CollectService:
@@ -119,6 +119,11 @@ class CollectService:
             "class_name": "BulkCreateService"
         }
     }
+
+    def get_render_tool(self):
+        from collect.service_imp.common.filters.template_tool import TemplateTool
+        tool = TemplateTool(op_user=self.op_user)
+        return tool
 
     def get_config_file(self, config_file_name, params):
         config_dir = self.get_config_dir()
@@ -240,7 +245,7 @@ class CollectService:
             param_result = params
 
         update_fields = self.get_update_fields(model_obj, param_result)
-        if len(update_fields)==0:
+        if len(update_fields) == 0:
             return self.fail(self.get_template_service_name() + " 没有找到任何更新属性")
         for key in update_fields:
             value = param_result[key]
@@ -254,7 +259,7 @@ class CollectService:
 
         if not service:
             import json
-            return self.fail(json.dumps(node) + "节点没有找到" + self.get_service_name())
+            return self.fail(json.dumps(node,cls=DateEncoder) + "节点没有找到" + self.get_service_name())
         # 处理service 的参数
         from collect.service_imp.common.filters.template_tool import TemplateTool
         template_tool = TemplateTool(op_user=self.op_user)
@@ -456,7 +461,7 @@ class CollectService:
         if not template:
             template = self.template
         import json
-        node_txt = json.dumps(node)
+        node_txt = json.dumps(node,cls=DateEncoder)
         name = get_safe_data(self.get_name_name(), node, node_txt)
         switch = get_safe_data(self.get_switch_name(), node)
         switch_default = get_safe_data(self.get_switch_default_name(), node)
@@ -971,6 +976,11 @@ class CollectService:
                     current_project_dict[item_key] = item
         return router_result_dict
 
+    def get_config_data(self):
+        from collect.service_imp.config_data.config_cache_data import ConfigCacheData
+        router_config = ConfigCacheData.get_router_config()
+        return router_config
+
     def load_router(self):
         """
           1.加载路由，设置些全局规则，比如路由规则、请求字段规则、数据转换规则、django 模型规则。
@@ -1214,7 +1224,7 @@ class CollectService:
         if self.can_log():
             self.log(self.op_user + "访问" + self.get_template_service_name())
             import json
-            tmp = json.dumps(params)
+            tmp = json.dumps(params, cls=DateEncoder)
             self.log(tmp)
         if self.get_before_plugin():
             from collect.service_imp.before_plugin.before_plugin import BeforePlugin

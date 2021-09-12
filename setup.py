@@ -6,13 +6,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="omnis-collect",
-    version="0.0.68",
+    version="0.0.72",
     author="zzhang",
     author_email="zzhang@cenboomh.com",
     description="一个web 接口配置工具",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/SelfDown/omnis-collect",
+    url="https://github.com/pypa/sampleproject",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 2",

@@ -1,0 +1,8 @@
+{
+
+  "method": "template.get",
+    "params": {
+        "hostids": ["{{hostid}}"]
+    },
+  require('../common/session.common')
+}
