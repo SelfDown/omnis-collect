@@ -7,17 +7,17 @@
 """
 import threading
 
-from collect.service_imp.mysql.mysql_service import MysqlService
+from collect.service_imp.sql.sql_service import SqlService
 from collect.utils.collect_utils import get_safe_data, executeSQLMany
 
 
-class MysqlUpdateService(MysqlService):
+class SqlUpdateService(SqlService):
     """
     mysql 更新
     """
 
     def __init__(self, op_user):
-        MysqlService.__init__(self, op_user)
+        SqlService.__init__(self, op_user)
 
     def handler_sql_params(self, param):
         """

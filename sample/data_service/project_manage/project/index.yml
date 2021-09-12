@@ -4,6 +4,7 @@ service:
     must_login: false
     module: 'sql'# 执行mysql 查询
     sql_file: 'project.sql'
+    log: true
     excel_out_path: './attendance_out/project.xls'
     file_name: '项目模板.xls'
     excel:

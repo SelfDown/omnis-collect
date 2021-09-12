@@ -26,18 +26,20 @@ def get_collect_log(file_name="./logs/collect.log"):
     formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
     # 创建日志：
     # 文件日志
-    file_handler = logging.FileHandler(file_name)
 
-    file_handler.setFormatter(formatter)
     # 终端日志
-    import sys
-    consle_handler = logging.StreamHandler(sys.stdout)
-    consle_handler.setFormatter(formatter)
+
     # 设置默认的日志级别
     logger.setLevel(logging.DEBUG)
     # 把文件日志和终端日志添加到日志处理器中
-    logger.addHandler(file_handler)
+    if len(logger.handlers) <= 0:
+        file_handler = logging.FileHandler(file_name)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
     if len(logger.handlers) <= 1:
+        import sys
+        consle_handler = logging.StreamHandler(sys.stdout)
+        consle_handler.setFormatter(formatter)
         logger.addHandler(consle_handler)
 
     _collect_tmp_logger = logger

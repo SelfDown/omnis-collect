@@ -926,7 +926,7 @@ class CollectService:
                 continue
             with open(project_path, 'r') as f:
                 import yaml
-                project_router = yaml.load(f)
+                project_router = yaml.load(f,Loader=yaml.FullLoader)
             if is_empty("service", project_router):
                 self.log(project_path + "配置文件没有找到 service 节点", "error")
                 continue
@@ -956,7 +956,7 @@ class CollectService:
                     continue
                 with open(config, 'r') as f:
                     import yaml
-                    config_keys = yaml.load(f)
+                    config_keys = yaml.load(f,Loader=yaml.FullLoader)
                 if is_empty("service", config_keys):
                     self.log(config + "配置文件没有找到 service 节点")
                     continue
@@ -998,7 +998,7 @@ class CollectService:
         self.log("加载配置文件：" + excel_data_path)
         with open(excel_data_path, 'r') as f:
             import yaml
-            router_all = yaml.load(f)
+            router_all = yaml.load(f,Loader=yaml.FullLoader)
         # 设置路由转换规则
         router_config = self.handler_services(router_all, excel_data_path)
         ConfigCacheData.set_router_config(router_config)

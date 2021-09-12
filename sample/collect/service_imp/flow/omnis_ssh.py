@@ -19,7 +19,7 @@ if not os.path.exists(ssh_error_info_path):
 with open(ssh_error_info_path, 'r') as f:
     import yaml
 
-    error_info = yaml.load(f)
+    error_info = yaml.load(f,Loader=yaml.FullLoader)
 
 
 class OmnisSSHService(ServiceOmnisFlowService):

@@ -9,7 +9,7 @@ from collect.collect_service import CollectService
 from collect.utils.collect_utils import is_empty, get_safe_data, sqlToData, connection_sql_to_data
 
 
-class MysqlService(CollectService):
+class SqlService(CollectService):
     def __init__(self, op_user):
         CollectService.__init__(self, op_user)
 
