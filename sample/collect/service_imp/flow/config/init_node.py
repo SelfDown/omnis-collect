@@ -62,7 +62,7 @@ class InitNode(ConfigService):
                 nodes = getattr(node, "nodes")
                 for node in nodes:
                     data = getattr(node, "data")
-                    node_list.append(data)
+                    node_list.append(data.strip())
             for l in "body", "elif_", "else_":
                 node_list += get_nodes(node, l)
             return node_list
@@ -130,6 +130,11 @@ class InitNode(ConfigService):
             key = get_safe_data(self.get_key_name(), node)
             node_dict[key] = node
         parse_node_dict = {}
+
+        def get_node_data(node_key):
+            node_key = node_key.strip()
+            return get_safe_data(node_key, parse_node_dict)
+
         for key in node_dict:
             node = node_dict[key]
             next = get_safe_data(self.get_next_name(), node)
@@ -173,7 +178,8 @@ class InitNode(ConfigService):
             return target
 
         def handler_target_node(key, parent, node_y=None, node_x=None):
-            current = get_safe_data(key, parse_node_dict)
+            # key = key.strip()
+            current = get_node_data(key)
             if "x" in current:
                 return
             # 设置首节点的坐标
@@ -181,8 +187,7 @@ class InitNode(ConfigService):
                 x = start_x
                 y = start_y
             else:
-
-                parent_node = get_safe_data(parent, parse_node_dict)
+                parent_node = get_node_data(parent)
                 x = get_safe_data("x", parent_node, 0)
                 y = get_safe_data("y", parent_node, 0)
                 x += x_distance
@@ -242,14 +247,14 @@ class InitNode(ConfigService):
 
         def handler_target_link(key, parent=None):
             links = []
-            current = get_safe_data(key, parse_node_dict)
+            current = get_node_data(key)
             next = get_safe_data(self.get_next_name(), current)
             if not next:
                 return links
 
             fail = get_safe_data(self.get_fail_name(), current)
 
-            def get_link_data(current_key, next_key, current_node, n_node,node_type="next"):
+            def get_link_data(current_key, next_key, current_node, n_node, node_type="next"):
                 link = {
                     'id': current_key + "_" + next_key,
                     'startId': current_key,
@@ -263,14 +268,15 @@ class InitNode(ConfigService):
                 return link
 
             if isinstance(next, str):
-                next_node = get_safe_data(next, parse_node_dict)
+                next_node = get_node_data(next)
                 links.append(get_link_data(key, next, current, next_node))
             else:
                 for next_child in next:
-                    next_child_node = get_safe_data(next_child, parse_node_dict)
+
+                    next_child_node = get_node_data(next_child)
                     links.append(get_link_data(key, next_child, current, next_child_node))
             if fail:
-                fail_node = get_safe_data(fail, parse_node_dict)
+                fail_node = get_node_data(fail)
                 # 如果是指向正常节点
                 fail_node_type = get_safe_data(self.get_type_name(), fail_node)
                 if fail_node_type != self.get_end_name():

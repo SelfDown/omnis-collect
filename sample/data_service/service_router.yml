@@ -9,6 +9,11 @@ services:
     name: '配置'
     path: 'config/service.yml'
 
+  - key: 'server'
+    name: '服务'
+    path: 'server/service.yml'
+
+
 
 # 返回结果转换规则
 rules:
