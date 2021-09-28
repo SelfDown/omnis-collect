@@ -12,7 +12,7 @@ setuptools.setup(
     description="一个web 接口配置工具",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/SelfDown/omnis-collect",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 2",
