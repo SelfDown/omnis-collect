@@ -7,7 +7,7 @@
 """
 from rest_framework.views import APIView
 
-from collect.utils.collect_utils import value_check, Result, get_safe_data
+from collect.utils.collect_utils import Result, get_safe_data
 
 
 class TemplateData(APIView):
