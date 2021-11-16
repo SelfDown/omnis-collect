@@ -19,7 +19,7 @@ if not os.path.exists(ssh_error_info_path):
 with open(ssh_error_info_path, 'r') as f:
     import yaml
 
-    error_info = yaml.load(f,Loader=yaml.FullLoader)
+    error_info = yaml.load(f)
 
 
 class OmnisSSHService(ServiceOmnisFlowService):
@@ -121,8 +121,8 @@ class OmnisSSHService(ServiceOmnisFlowService):
         return self.ssh_const["port_name"]
 
     def get_port(self):
-        timeout = get_safe_data(self.get_port_name(), self.get_params_result(), 22)
-        return int(timeout)
+        port = get_safe_data(self.get_port_name(), self.get_params_result(), 22)
+        return int(port)
 
     def __init__(self, op_user):
         ServiceOmnisFlowService.__init__(self, op_user=op_user)
@@ -238,7 +238,7 @@ class OmnisSSHService(ServiceOmnisFlowService):
         env = 'source .bash_profile;source /etc/profile;export LANG=en_US.UTF-8;'
         stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell))
         stdin.write("n")
-        result = ''.join(stdout.read() + stderr.read())
+        result = ''.join(str(stdout.read()) + str(stderr.read()))
         result = str(result).strip()
         return self.success(result)
 

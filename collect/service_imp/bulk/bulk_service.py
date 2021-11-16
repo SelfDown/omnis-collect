@@ -54,7 +54,7 @@ class BulkThreadList():
         """
         results = []
         start = 0
-        for th_item in xrange(0, len(self.li), self.max_once):
+        for th_item in range(0, len(self.li), self.max_once):
             uli = self.li[start:th_item + self.max_once]
             start = th_item + self.max_once
             for item in uli:

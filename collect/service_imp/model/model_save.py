@@ -24,8 +24,6 @@ class ModelSaveService(CollectService):
     def handler_model_params(self, params):
         return CollectService.result(self, params)
 
-
-
     def validate_model(self, model_obj):
         from django.core.exceptions import ValidationError
         try:
@@ -85,4 +83,27 @@ class ModelSaveService(CollectService):
             service_name = get_safe_data(self.get_service_name(), params)
             self.log("{service} 保存耗时 {spend}".format(service=service_name, spend=str(end - start)))
 
-        return self.success(data={}, msg="保存成功")
+        def getDict():
+            fields = []
+            for field in model_obj._meta.fields:
+                fields.append(field.name)
+
+            d = {}
+
+            def isAttrInstance(attr, clazz):
+                return isinstance(getattr(model_obj, attr), clazz)
+            import datetime
+            for attr in fields:
+                if isinstance(getattr(model_obj, attr), datetime.datetime):
+                    d[attr] = getattr(model_obj, attr).strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(getattr(model_obj, attr), datetime.date):
+                    d[attr] = getattr(model_obj, attr).strftime('%Y-%m-%d')
+                elif isAttrInstance(attr, int) or isAttrInstance(attr, float) \
+                        or isAttrInstance(attr, str):
+                    d[attr] = getattr(model_obj, attr)
+                # else:
+                #   d[attr] = getattr(self, attr)
+
+            return d
+
+        return self.success(data=getDict(), msg="保存成功")

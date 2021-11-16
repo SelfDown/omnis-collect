@@ -53,7 +53,8 @@ class TemplateTool(CollectService):
     def load_filter(self, env, templ, params, config_params, template):
         filter_config = self.get_filter_handler()
         for key in filter_config:
-            if key not in templ:
+
+            if isinstance(templ, str) and key not in templ:
                 continue
             rule = filter_config[key]
             path = rule[self.get_path_name()]
@@ -69,6 +70,8 @@ class TemplateTool(CollectService):
             env.filters[key] = method
 
     def render(self, templ, params, config_params=None, template=None):
+        if not isinstance(templ, str):
+            return templ
         env = Environment()
         self.load_filter(env, templ, params, config_params, template)
         t = env.from_string(templ)

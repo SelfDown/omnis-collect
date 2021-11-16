@@ -15,16 +15,16 @@ Including another URLconf
 """
 
 from django.conf.urls import url, include
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
-def index(request):
 
+
+def index(request):
     from django.shortcuts import redirect
     return redirect("/static/index.html")
+
+
 urlpatterns = [
     url(r'^template_data/', include("collect.template_urls")),
     url(r'^excel_data/', include("collect.urls")),
-    url(r"^$",index)
+    url(r"^$", index)
 
 ]

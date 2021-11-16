@@ -22,13 +22,13 @@ class Service2Field(RequestHandler):
         save_field = get_safe_data(self.get_save_field_name(), config)
         params[save_field] = self.get_data(service_result)
 
-        result_template = get_safe_data(self.get_template_name(), config)
-        err_msg = get_safe_data(self.get_err_msg_name(), config)
-        if result_template:
-            from collect.service_imp.common.filters.template_tool import TemplateTool
-            template_tool = TemplateTool(op_user=self.op_user)
-            check = template_tool.render(result_template, params)
-            if check != self.get_true_value():
-                return self.fail(err_msg)
+        # result_template = get_safe_data(self.get_template_name(), config)
+        # err_msg = get_safe_data(self.get_err_msg_name(), config)
+        # if result_template:
+        #     from collect.service_imp.common.filters.template_tool import TemplateTool
+        #     template_tool = TemplateTool(op_user=self.op_user)
+        #     check = template_tool.render(result_template, params)
+        #     if check != self.get_true_value():
+        #         return self.fail(err_msg)
 
         return self.success(params)

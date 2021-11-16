@@ -6,7 +6,7 @@
 @desc:
 """
 from collect.service_imp.flow.omnis_ssh import OmnisSSHService
-from collect.utils.collect_utils import get_safe_data
+from collect.utils.collect_utils import get_safe_data, get_uuid
 
 
 class DirTree(OmnisSSHService):
@@ -27,7 +27,10 @@ class DirTree(OmnisSSHService):
         tree = []
         file_list = []
         for current in dirs:
-            c = {"name": current}
+            c = {
+                "key": dir.replace("\\", "/") + "/" + current,
+                "name": current
+            }
             current_path = os.path.join(dir, current)
             if os.path.isdir(current_path):
                 c["type"] = "folder"

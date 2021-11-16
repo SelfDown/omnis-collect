@@ -1,0 +1,27 @@
+{
+  "log_create": {
+    "event_id": "{{service_item.id}}",
+    "group": "{{params.group}}",
+    "tag": "{{params.tag}}",
+    "from_service": "{{params.from_service}}",
+    "to_service": "{{service_item.service}}",
+    "params": "{{service_item|json_str}}",
+    "create_user_id": "{{params.session_user_id}}",
+    "create_time": "{{''|current_date_time}}"
+  },
+  "log_update": {
+    "event_id": "{{service_item.id}}",
+    "finish_time": "{{''|current_date_time}}",
+    "success": "{% if result.success %} 1 {% else %} 0 {% endif %}",
+    "result": "{{result.data|json_str}}",
+    "msg": "{{result.msg}}"
+  },
+  "log_save_service": {
+    "service": "event.event_log_bulk_save",
+    "log_list": "create_log_list"
+  },
+  "log_update_service": {
+    "service": "event.event_log_bulk_update",
+    "update_log_list": "update_log_list"
+  }
+}

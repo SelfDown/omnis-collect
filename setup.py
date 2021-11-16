@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="omnis-collect",
-    version="0.0.72",
+    version="0.0.80",
     author="zzhang",
     author_email="zzhang@cenboomh.com",
     description="一个web 接口配置工具",

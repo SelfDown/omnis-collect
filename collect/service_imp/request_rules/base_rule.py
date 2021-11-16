@@ -5,9 +5,11 @@
 @File: base_rule.py
 @desc:
 """
+import json
+
 from collect.collect_service import CollectService
 from collect.service_imp.common.filters.template_tool import TemplateTool
-from collect.utils.collect_utils import get_safe_data
+from collect.utils.collect_utils import get_safe_data, DateEncoder
 
 
 class BaseRule(CollectService):
@@ -86,6 +88,8 @@ class BaseRule(CollectService):
             if service_result:
                 return self.success(service_result)
             else:
+                self.log(json.dumps(node))
+                self.log("没有找到"+self.get_template_name()+"")
                 return self.success(params)
         # 普通模板
         # template_result = self.get_template_result(template_str, params, config_params, template)
@@ -96,7 +100,8 @@ class BaseRule(CollectService):
             if check and template_result_data == 'False':
                 err_msg = get_safe_data(self.get_err_msg_name(), node)
                 if not err_msg:
-                    return self.fail("检查结果失败,没有配置" + self.get_err_msg_name())
+                    node_info = json.dumps(node,cls=DateEncoder)
+                    return self.fail("检查结果失败,没有配置" + self.get_err_msg_name()+":"+node_info)
                 template_tool = TemplateTool(op_user=self.op_user)
                 msg = template_tool.render(err_msg, params, config_params, template)
                 return self.fail(msg)

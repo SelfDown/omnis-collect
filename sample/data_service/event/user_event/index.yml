@@ -1,0 +1,23 @@
+service:
+  #
+  - key: "event_user_create"
+    http: true
+    name: 创建用户事件
+    params:
+      from_service:
+        check:
+          template: "{{from_service|must}}"
+          err_msg: 来源服务不能为空
+
+    module: event
+    data_json: user_create_event.json
+    result_tag:
+      - id
+      - service
+    result_handler:
+      - key: param2result
+        params:
+          field: bulk_result
+      - key: result_msg
+        params:
+          template: "用户保存成功！"

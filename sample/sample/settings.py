@@ -26,8 +26,6 @@ SECRET_KEY = 'k&8-%57+$k@jmz7j#6bems38qd5g!c3qgu%4_o2syg%!uffuqr'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -69,13 +67,13 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'sample.wsgi.application'
-if get_key("memcache")=='true':
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': get_key("memcache_location"),
-        }
-    }
+# if get_key("memcache")=='true':
+#     CACHES = {
+#         'default': {
+#             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#             'LOCATION': get_key("memcache_location"),
+#         }
+#     }
 
 
 # Database
@@ -104,26 +102,30 @@ DATABASES = {
     #     'HOST': get_key("database.host"),
     #     'PORT': get_key("database.port", data_type="int"),
     # }
-    'default':{
-   	 	'ENGINE':  get_key("database.engine"),
-   		'NAME': get_key("database.name"),
+    'default': {
+        'ENGINE': get_key("database.engine"),
+        'NAME': get_key("database.name"),
+        'POOL_OPTIONS': {
+            'POOL_SIZE': 100,
+            'MAX_OVERFLOW': 50
+        }
 
     }
 }
-DATABASE_APPS_MAPPING = {
-    'zabbix': 'zabbix',
-}
-enable_proxy = get_key("zabbix_database_enable")
-if enable_proxy == "true":
-    DATABASES['zabbix'] = {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': get_key("zabbix_database.host"),
-        'NAME': get_key("zabbix_database.name"),
-        'USER': get_key("zabbix_database.user"),
-        'PASSWORD': base64.b64decode(get_key("zabbix_database.password")).decode(),
-        'PORT': get_key("zabbix_database.port", data_type="int"),
-        'CONN_MAX_AGE': 60 * 30,
-    }
+# DATABASE_APPS_MAPPING = {
+#     'zabbix': 'zabbix',
+# }
+# enable_proxy = get_key("zabbix_database_enable")
+# if enable_proxy == "true":
+#     DATABASES['zabbix'] = {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'HOST': get_key("zabbix_database.host"),
+#         'NAME': get_key("zabbix_database.name"),
+#         'USER': get_key("zabbix_database.user"),
+#         'PASSWORD': base64.b64decode(get_key("zabbix_database.password")).decode(),
+#         'PORT': get_key("zabbix_database.port", data_type="int"),
+#         'CONN_MAX_AGE': 60 * 30,
+#     }
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -147,7 +149,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -155,8 +157,7 @@ USE_L10N = True
 
 USE_TZ = False
 
-
-
+ALLOWED_HOSTS = ['*']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
