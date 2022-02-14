@@ -61,3 +61,4 @@ import collect.service_imp.common.filters.template_filters.date_time
 import collect.service_imp.common.filters.template_filters.current_day
 import collect.service_imp.sql.sql_service
 import collect.service_imp.after_plugin.plugin.handler_result
+import collect.service_imp.common.filters.template_filters.des

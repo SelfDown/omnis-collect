@@ -23,9 +23,9 @@ class DESFilter(BaseFilter):
                 return value
             value = value.encode()  # 这里中文要转成字节， 英文好像不用
             secret_bytes = des_obj.encrypt(value)
-            return des_wrap + str(base64.b64encode(secret_bytes), encoding="utf-8") + des_wrap
+            return des_wrap + str(base64.b64encode(secret_bytes)) + des_wrap
         else:
             if not value:
                 value = ""
             value = value.replace(des_wrap, "")
-            return str(des_obj.decrypt(base64.b64decode(value)),encoding="utf-8")
+            return str(des_obj.decrypt(base64.b64decode(value)))

@@ -1,7 +1,7 @@
 
 select *
 from sys_projects a
-where 1=1 and is_delete = '0'
+where 1=1
 {% if project_code %}
     and a.project_code = {{project_code}}
 {% endif  %}
