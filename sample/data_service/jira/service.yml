@@ -1,0 +1,3 @@
+service:
+  - name: "创建issue"
+    path: "create_issue/index.yml"

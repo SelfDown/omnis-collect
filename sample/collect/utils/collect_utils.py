@@ -20,9 +20,11 @@ if not os.path.exists(fact_item_config):
 props = Properties(fact_item_config)  # 读取文件
 
 
-def getDateTime():
-    import time
-    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+def getDateTime(fmt=None):
+    if not fmt:
+        fmt = "%Y-%m-%d %H:%M:%S"
+    from datetime import datetime
+    return datetime.utcnow().strftime(fmt)
 
 
 class data_value_check:
@@ -98,8 +100,6 @@ class OmnisService:
     def get_other(result):
         return get_safe_data("other", result)
 
-
-
     @staticmethod
     def success(data=[], msg="查询成功", count=-1, finish=False, other=None):
         result = {
@@ -166,13 +166,13 @@ class Result:
         pass
 
     @staticmethod
-    def success(data=[], msg="查询成功", count=-1,other=None):
-        result = OmnisService.success(data=data, msg=msg, count=count,other=other)
+    def success(data=[], msg="查询成功", count=-1, other=None):
+        result = OmnisService.success(data=data, msg=msg, count=count, other=other)
         return json.dumps(result, cls=DateEncoder)
 
     @staticmethod
-    def success_response(data=[], msg="查询成功", count=-1, cookies={},other=None):
-        result = Result.success(data, msg, count,other)
+    def success_response(data=[], msg="查询成功", count=-1, cookies={}, other=None):
+        result = Result.success(data, msg, count, other)
         response = HttpResponse(result, content_type="application/json;charset=utf-8")
         for item in cookies.keys():
             response.set_cookie(item, cookies[item])

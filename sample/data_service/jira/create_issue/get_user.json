@@ -1,0 +1,14 @@
+{
+  "url": "http://172.26.0.16:8080/rest/api/2/user/search",
+  "method": "get",
+  "headers": {
+    "Accept": "application/json"
+  },
+  "params": {
+    "query": "query"
+  },
+  "auth": {
+    "username": "zhangzhi",
+    "password": "zhang@888"
+  }
+}

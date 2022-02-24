@@ -72,17 +72,19 @@ class TemplateTool(CollectService):
             env.filters[key] = method
 
     def render(self, templ, params, config_params=None, template=None):
-        if not isinstance(templ, str):
-            return templ
-        if templ in _cache:
-            t = _cache[templ]["temp"]
-            env = _cache[templ]["env"]
-        else:
-            env = Environment()
-            t = env.from_string(templ)
-            _cache[templ] = {"temp": t, "env": env}
+        templ = str(templ)
+        # if not isinstance(templ, str):
+        #     return templ
+        # if templ in _cache:
+        #     t = _cache[templ]["temp"]
+        #     # env = _cache[templ]["env"]
+        # else:
+        env = Environment()
         self.load_filter(env, templ, params, config_params, template)
+        t = env.from_string(templ)
         try:
+            if params and isinstance(params,dict) and 'self' in params :
+                del params['self']
             result_content = t.render(**params)
         except Exception as e:
             self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！")

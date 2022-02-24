@@ -13,4 +13,4 @@ class CurrentDateTime(BaseFilter):
     # @staticmethod
     def filter(self, value):
         from collect.utils.collect_utils import getDateTime
-        return getDateTime()
+        return getDateTime(value)

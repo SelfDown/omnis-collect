@@ -1,0 +1,50 @@
+{
+  "url": "http://172.26.0.16:8080/rest/api/2/issue",
+  "method": "post",
+  "headers": {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  "data": {
+    "fields": {
+      "project": {
+        "id": "10102"
+      },
+      "summary": "测试",
+      "issuetype": {
+        "id": "10100"
+      },
+      "description": " this is a 测试",
+      "assignee": {
+        "name": "zhangzhi"
+      },
+      "reporter": {
+        "name": "zhangzhi"
+      },
+      "priority": {
+        "id": "5"
+      },
+      "fixVersions": [
+        {
+          "id": "10303"
+        }
+      ],
+      "components": [
+        {
+          "id": "10203"
+        }
+      ],
+      "customfield_10301": 1,
+      "labels": []
+      {% if False %}
+        ,
+            "customfield_10241": "否",
+            "duedate": "2022-02-1"
+      {% endif %}
+    }
+  },
+  "auth": {
+    "username": "zhangzhi",
+    "password": "zhang@888"
+  }
+}

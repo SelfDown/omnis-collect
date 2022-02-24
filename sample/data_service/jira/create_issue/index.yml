@@ -1,0 +1,42 @@
+service:
+  - key: createIssue
+    name: 创建Issue
+    module: "http"
+    http: true
+    must_login: false
+    data_json: create_issue.json
+
+  - key: getIssue
+    name: 获取issue
+    module: "http"
+    http: true
+    must_login: false
+    data_json: get_issue.json
+
+  - key: getUser
+    name: 获取用户
+    module: "http"
+    http: true
+    must_login: false
+    data_json: get_user.json
+
+  - key: getIssueMetadata
+    module: http
+    http: true
+    must_login: false
+    data_json: issue_metadata.json
+
+
+  - key: getVersion
+    name: 获取版本
+    module: http
+    http: true
+    must_login: false
+    data_json: get_version.json
+
+  - key: getComponents
+    name: 获取模块
+    module: http
+    http: true
+    must_login: false
+    data_json: get_components.json

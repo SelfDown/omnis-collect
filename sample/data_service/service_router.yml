@@ -21,6 +21,9 @@ services:
   - key: 'server'
     name: '服务器模块'
     path: 'server/service.yml'
+  - key: 'jira'
+    name: 'jira 模块'
+    path: 'jira/service.yml'
 
 
 

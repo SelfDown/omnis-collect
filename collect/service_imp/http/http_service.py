@@ -70,8 +70,8 @@ class HttpService(CollectService):
         params_result = self.get_params_result()
 
         success_temp = get_safe_data(self.get_success_name(), self.template)
-        if not success_temp:
-            return self.fail("HTTP请求模块没有配置" + self.get_success_name())
+        # if not success_temp:
+        #     return self.fail("HTTP请求模块没有配置" + self.get_success_name())
         data_json_result = self.get_data_json(params_result)
         if not self.is_success(data_json_result):
             return data_json_result
@@ -84,7 +84,7 @@ class HttpService(CollectService):
         if not self.is_success(result):
             return result
         result_data = self.get_data(result)
-        if isinstance(result_data, dict):
+        if success_temp and isinstance(result_data, dict):
             from collect.service_imp.common.filters.template_tool import TemplateTool
             tool = TemplateTool(op_user=self.op_user)
             val = tool.render(success_temp, result_data)
@@ -106,16 +106,40 @@ class HttpApi(CollectService):
         """
         CollectService.__init__(self, op_user)
 
+    def handler_param(self, data):
+        """
+         处理参数
+        """
+        if "auth" in data:
+            # 处理登录
+            from requests.auth import HTTPBasicAuth
+            auth = HTTPBasicAuth(**data["auth"])
+            data["auth"] = auth
+        if "data" in data and "headers" in data:
+            target = data["data"]
+            headers = data["headers"]
+            for key in data["headers"]:
+                content = headers[key].lower()
+                if key.lower() == 'content-type' and content == 'application/json':
+                    try:
+                        import json
+                        data["data"] = json.dumps(target)
+                    except Exception as e:
+                        self.log("JSON格式失败", level="error")
+                        self.log(target)
+
     def send(self, data):
         import requests
         import json
+        self.handler_param(data)
         try:
             r = requests.request(**data)
         except Exception as e:
             self.log("监控请求发送失败", level="error")
             return self.fail(msg=str(e))
-        if r.status_code != 200:
+        if r.status_code >= 400:
             self.log(r.text)
+            return self.fail(r.text)
         try:
             result_data = json.loads(r.text)
         except Exception as e:

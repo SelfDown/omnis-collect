@@ -1,0 +1,11 @@
+{
+  "url": "http://172.26.0.16:8080/rest/api/2/project/PHOENIX/components",
+  "method": "get",
+  "headers": {
+    "Accept": "application/json"
+  },
+  "auth": {
+    "username": "zhangzhi",
+    "password": "zhang@888"
+  }
+}
