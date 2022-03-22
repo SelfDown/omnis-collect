@@ -50,7 +50,10 @@ class ModelDeleteService(ModelSaveService):
         c = self.get_count(filter_result)
         query_filter = self.get_data(filter_result)
         delete_sum, data = query_filter.delete()
+        if self.can_log():
+            self.log("总共删除【{c}】 条。删除 【{delete_sum}】条记录成功".format(c=str(c),delete_sum=str(delete_sum)))
         if delete_sum != c:
+
             return self.success(data=[], msg="总共删除【{c}】 条。删除 【{delete_sum}】条记录成功".format(c=str(c),
                                                                                          delete_sum=str(delete_sum)))
         return self.success(data=[], msg="删除 【{c}】条记录成功".format(c=str(delete_sum)))

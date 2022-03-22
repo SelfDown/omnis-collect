@@ -6,6 +6,7 @@
 @desc:
 """
 import sys
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -98,7 +99,10 @@ class CollectService:
         "after_plugin_name": "after_plugin",
         "exclude_name": "exclude",
         "third_application_name": "third_application",
-        "from_service_name": "from_service"
+        "from_service_name": "from_service",
+        "request_register_name": "request_register",
+        "session_name": "session",
+        "header_name": "header"
 
     }
     router = {
@@ -124,6 +128,18 @@ class CollectService:
             "class_name": "BulkCreateService"
         }
     }
+
+    def setIsHttp(self, is_http):
+        self.template["is_http"] = is_http
+
+    def get_session_name(self):
+        return self.const["session_name"]
+
+    def get_header_name(self):
+        return self.const["header_name"]
+
+    def get_request_register_name(self):
+        return self.const["request_register_name"]
 
     def get_from_service_name(self):
         return self.const["from_service_name"]
@@ -225,10 +241,21 @@ class CollectService:
         return self.const["switch_default_name"]
 
     def get_render_data(self, templ, params, tool):
+        # if templ in params:
+        #     return params[templ]
+        # else:
+        #     return tool.render(str(templ), params)
+        # 如果配置的值存在，参数中，就取参数
+        # 匹配第一级
+        field_arr = templ.split(".")
         if templ in params:
-            return params[templ]
+            value = params[templ]
+        # 匹配第二级
+        elif len(field_arr) == 2 and field_arr[0] in params and field_arr[1] in params[field_arr[0]]:
+            value = params[field_arr[0]][field_arr[1]]
         else:
-            return tool.render(str(templ), params)
+            value = tool.render(templ, params)
+        return value
 
     def get_update_fields(self, model_obj,
                           param_result=None,
@@ -277,19 +304,17 @@ class CollectService:
         if not params:
             params = self.get_params_result()
 
-        if not service :
+        if not service:
             import json
             return self.fail(json.dumps(node, cls=DateEncoder) + "节点没有找到" + self.get_service_name())
         # 处理service 的参数
         from collect.service_imp.common.filters.template_tool import TemplateTool
         template_tool = TemplateTool(op_user=self.op_user)
         for key in service:
+            if key == self.get_service_name():
+                continue
             value_template = service[key]
-            # 如果配置的值存在，参数中，就取参数
-            if value_template in params:
-                value = params[value_template]
-            else:
-                value = template_tool.render(value_template, params)
+            value = self.get_render_data(value_template, params, template_tool)
             service[key] = value
         # 拼接其他参数
         if append_param:
@@ -617,6 +642,10 @@ class CollectService:
         from collect.service_imp.config_data.config_cache_data import ConfigCacheData
         ConfigCacheData.set_sql(self.get_sql_key(), sql_content)
 
+    def get_request_register(self):
+        from collect.service_imp.config_data.config_cache_data import ConfigCacheData
+        return ConfigCacheData.get_request_register()
+
     def get_before_plugin(self):
         from collect.service_imp.config_data.config_cache_data import ConfigCacheData
         return ConfigCacheData.get_before_plugin()
@@ -722,10 +751,23 @@ class CollectService:
         self.finish = True
         self.op_user = op_user
         self.session = None
+        self.header = None
 
         pass
 
+    def setIsHttp(self, is_http):
+        self.template["is_http"] = is_http
+
+    def set_header(self, header):
+        self.header = header
+        self.template[self.get_header_name()] = header
+
+    def get_header(self):
+
+        return self.header
+
     def set_session(self, session):
+        self.template[self.get_session_name()] = session
         self.session = session
 
     def get_session(self):
@@ -902,6 +944,16 @@ class CollectService:
         filter_handlers = get_safe_data(handler_name, router_all)
         return filter_handlers
 
+    def handler_request_register(self, router_all):
+        """
+         处理 请求的request 对象
+        """
+        handler_name = self.get_request_register_name()
+        if is_empty(handler_name, router_all):
+            return
+        filter_handlers = get_safe_data(handler_name, router_all)
+        return filter_handlers
+
     def handler_third_application_handler(self, router_all):
         """
          加载第三方应用
@@ -1055,13 +1107,13 @@ class CollectService:
         if router_config:
             return
 
-        excel_data_path = get_key("collect_file_path")
-        self.log("加载配置文件：" + excel_data_path)
-        with open(excel_data_path, 'r') as f:
+        collect_file_path = get_key("collect_file_path")
+        self.log("加载配置文件：" + collect_file_path)
+        with open(collect_file_path, 'r') as f:
             import yaml
             router_all = yaml.load(f)
         # 设置路由转换规则
-        router_config = self.handler_services(router_all, excel_data_path)
+        router_config = self.handler_services(router_all, collect_file_path)
         ConfigCacheData.set_router_config(router_config)
         # 设置数据结果转换规则
         rules = self.handler_rules(router_all)
@@ -1099,6 +1151,9 @@ class CollectService:
         self.log("加载第三方应用")
         third_application = self.handler_third_application_handler(router_all)
         ConfigCacheData.set_third_application(third_application)
+        self.log("加载请求注册器")
+        request_register = self.handler_request_register(router_all)
+        ConfigCacheData.set_request_register(request_register)
 
     def fail(self, msg):
         return OmnisService.fail(msg=msg)
@@ -1152,7 +1207,7 @@ class CollectService:
         collect_factory = importlib.import_module(path)
         collect_obj = getattr(collect_factory, class_name)(op_user=self.op_user)
         collect_obj.set_template(data)
-        collect_obj.set_session(self.get_session())
+        # collect_obj.set_session(self.get_session())
         return self.success(data=collect_obj)
 
     def get_default_name(self):
@@ -1307,8 +1362,12 @@ class CollectService:
         if self.can_log():
             self.log(self.op_user + "访问" + self.get_template_service_name())
             import json
-            tmp = json.dumps(params, cls=DateEncoder)
-            self.log(tmp)
+            try:
+                tmp = json.dumps(params, cls=DateEncoder)
+                self.log(tmp)
+            except Exception as e:
+                pass
+
         if self.get_before_plugin():
             from collect.service_imp.before_plugin.before_plugin import BeforePlugin
             before_plugin = BeforePlugin(op_user=self.op_user)

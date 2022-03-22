@@ -11,6 +11,13 @@ from collect.utils.collect_utils import get_safe_data
 
 
 class PropArr(RequestHandler):
+    paConst = {
+        "unique_name": "unique"
+    }
+
+    def get_unique_name(self):
+        return self.paConst["unique_name"]
+
     def handler(self, params, config, template):
 
         config_params = get_safe_data(self.get_params_name(), config)
@@ -32,10 +39,13 @@ class PropArr(RequestHandler):
         from_list = get_safe_data(from_field, params)
         if not isinstance(from_list, list):
             return self.fail("值列表处理器 请求参数" + from_field + " 不是数组")
+        unique = get_safe_data(self.get_unique_name(), config_params)
         result_list = []
         tool = TemplateTool(op_user=self.op_user)
         for item in from_list:
-            val = tool.render(templ, item)
+            val = self.get_render_data(templ, item, tool)
+            if unique and val in result_list:
+                continue
             result_list.append(val)
 
         params[to_field] = result_list

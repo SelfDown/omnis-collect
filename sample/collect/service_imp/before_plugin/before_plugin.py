@@ -10,6 +10,10 @@ from collect.utils.collect_utils import get_safe_data
 
 
 class BeforePlugin(CollectService):
+
+    def get_header(self, template):
+        return get_safe_data(self.get_header_name(), template, {})
+
     def handler(self, params, template):
         before_plugin = self.get_before_plugin()
         if not before_plugin:

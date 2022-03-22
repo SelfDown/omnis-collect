@@ -12,7 +12,7 @@ from collect.utils.collect_utils import get_safe_data
 class SessionService(CollectService):
     data_json_dict = {}
     SSConst = {
-        "session_name": "session",
+        "session_op_name": "session_op",
         "add_key_name": "add_key",
         "remove_key_name": "remove_key"
     }
@@ -22,8 +22,8 @@ class SessionService(CollectService):
 
         pass
 
-    def get_session_name(self):
-        return self.SSConst["session_name"]
+    def get_session_op_name(self):
+        return self.SSConst["session_op_name"]
 
     def add_key_name(self):
         return self.SSConst["add_key_name"]
@@ -32,7 +32,7 @@ class SessionService(CollectService):
         return self.SSConst["remove_key_name"]
 
     def get_session_config(self):
-        return get_safe_data(self.get_session_name(), self.template)
+        return get_safe_data(self.get_session_op_name(), self.template)
 
     def result(self, params=None):
         session = self.get_session()

@@ -38,6 +38,7 @@
 #
 #
 # print get_template_nodes(templ)
+import collect.service_imp.result_handlers.handlers.result2excel
 import collect.service_imp.request_rules.check
 import collect.service_imp.before_plugin.plugin.handler_params
 import collect.service_imp.request_handlers.handlers.service2field
@@ -65,3 +66,14 @@ import collect.service_imp.common.filters.template_filters.des
 import collect.service_imp.common.filters.template_filters.date_time
 import collect.service_imp.session.session_service
 from jira import JIRA
+import collect.service_imp.model.model_delete
+import collect.service_imp.request_handlers.handlers.service2field
+import  collect.service_imp.request_handlers.handlers.excelData
+import collect.service_imp.request_handlers.handlers.update_data
+import collect.service.template_service
+import collect.service_imp.flow.common.gen_template
+import collect.service_imp.request_register.register.session
+import collect.service_imp.request_register.register.session
+
+import collect.service_imp.common.filters.template_filters.ldap_password
+import collect.service_imp.request_handlers.handlers.new_field

@@ -27,5 +27,7 @@ class DESFilter(BaseFilter):
         else:
             if not value:
                 value = ""
+            if not value.startswith(des_wrap):
+                return value
             value = value.replace(des_wrap, "")
             return str(des_obj.decrypt(base64.b64decode(value)))

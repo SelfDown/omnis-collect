@@ -21,6 +21,7 @@ class Param2Result(ResultHandler):
                 "值转参数处理器没有找到 {params} 节点 没有找到{field}".format(params=self.get_params_name(),
                                                              field=self.get_field_name()))
 
-
-        result = get_safe_data(field, self.get_params_result(template))
+        from collect.service_imp.common.filters.template_tool import TemplateTool
+        tool = TemplateTool(op_user=self.op_user)
+        result = self.get_render_data(field, self.get_params_result(template), tool)
         return self.success(result)

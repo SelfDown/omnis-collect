@@ -71,11 +71,15 @@ class BulkThreadList():
 class ServiceBulkService(CollectService):
     bs_const = {
         "batch_name": "batch",
-        "item_name": "item"
+        "item_name": "item",
+        "max_once_name": "max_once",
     }
 
     def get_item_name(self):
         return self.bs_const["item_name"]
+
+    def get_max_once_name(self):
+        return self.bs_const["max_once_name"]
 
     def get_batch_name(self):
         return self.bs_const["batch_name"]
@@ -87,7 +91,9 @@ class ServiceBulkService(CollectService):
         CollectService.__init__(self, op_user=op_user)
 
     def get_node_result(self, node, params, template):
-
+        from django.http import QueryDict
+        if isinstance(params, QueryDict):
+            params = params.dict()
         service_data = self.get_node_service(node=node, params=params, template=template,
                                              append_param=True)
         if not service_data:
@@ -105,6 +111,7 @@ class ServiceBulkService(CollectService):
         foreach_name = get_safe_data(self.get_foreach_name(), batch)
         if not foreach_name:
             return self.fail("配置中没有找到【" + self.get_foreach_name() + "】标签")
+        max_once = get_safe_data(self.get_max_once_name(), batch, 30)
         foreach = get_safe_data(foreach_name, params_result)
         if not foreach:
             return self.fail("参数中没有找到【" + foreach_name + "】变量")
@@ -113,13 +120,12 @@ class ServiceBulkService(CollectService):
             return self.fail("配置中没有找到【" + self.get_item_name() + "】标签")
 
         result_list = []
-        btl = BulkThreadList(func=self.get_node_result)
-        if len(foreach)>100:
+        btl = BulkThreadList(func=self.get_node_result, max_once=max_once)
+        if len(foreach) > 100:
             return self.fail("服务不能超过100个")
         if self.can_log():
             self.log("总共运行" + str(len(foreach)) + "服务")
-
-
+        reqList = []
         for index, item in enumerate(foreach):
             import copy
             batch_tmp = copy.deepcopy(batch)
@@ -127,9 +133,11 @@ class ServiceBulkService(CollectService):
             if self.can_log():
                 self.log(self.get_template_service_name() + "添加第 " + str(index + 1) + " 个服务")
             params_tmp[item_name] = item
+            reqList.append(item)
             btl.add_data(args=(batch_tmp, params_tmp, self.template))
         results = btl.get_results()
-        for service_result in results:
+        for service_result, req in zip(results, reqList):
+            service_result[self.get_item_name()] = req
             result_list.append(service_result)
         save_field = get_safe_data(self.get_save_field_name(), batch)
         if save_field:

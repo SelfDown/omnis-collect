@@ -134,7 +134,7 @@ class Result2Excel(ResultHandler):
             sheet.set_vert_split_pos(get_safe_data(self.get_frozen_col_name(), excel_template, 1))
 
             for col, field in enumerate(fields):
-                field_name = field[self.get_value_name()]
+                field_name = get_safe_data(self.get_value_name(), field)
                 name = field[self.get_name_name()]
                 col_info = sheet.col(col)
                 width = get_safe_data(self.get_width_name(), field, 80)

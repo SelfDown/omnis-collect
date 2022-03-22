@@ -21,8 +21,9 @@ class TemplateData(APIView):
         user_id = get_safe_data("user_id", request.session, "-1")
         from collect.service.template_service import TemplateService
         template = TemplateService(op_user=user_id)
-        # 设置session
-        template.set_session(request.session)
+        # # 设置session
+        # template.set_session(request.session)
+        template.set_request(request)
         # 获取结果
         data_result = template.result(data, is_http=True)
         if not template.is_success(data_result):

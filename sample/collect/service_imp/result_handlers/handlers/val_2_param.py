@@ -32,10 +32,10 @@ class Val2Param(ResultHandler):
         tool = TemplateTool(op_user=self.op_user)
         param_result = self.get_params_result(template)
         if isinstance(result, dict):
-            param_result[to_field] = tool.render(templ, result)
+            param_result[to_field] = self.get_render_data(templ, result, tool)
         elif isinstance(result, list):
             data = []
             for item in result:
-                data.append(tool.render(templ, item))
+                data.append(self.get_render_data(templ, item, tool))
             param_result[to_field] = data
         return self.success(result)

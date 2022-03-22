@@ -57,9 +57,27 @@ django_model:
   model_file: sample.models.models
 
 
+request_register:
+  - name: session
+    path: collect.service_imp.request_register.register.session
+    class_name: Session
+    method: get_register_data
+    set_template_method: "set_session"
 
+  - name: meta
+    path: collect.service_imp.request_register.register.header
+    class_name: Header
+    method: get_register_data
+    set_template_method: "set_header"
 
 before_plugin:
+  # 登录检查
+  - name: login_check
+    path: collect.service_imp.before_plugin.plugin.login_check
+    class_name: LoginCheck
+    method: handler
+    template: "{% if http and is_http %} True {% endif %}"
+
   # 继承参数
   - name: extend_param
     path: collect.service_imp.before_plugin.plugin.extend_param
@@ -108,6 +126,11 @@ request_handler:
     path: collect.service_imp.request_handlers.handlers.field2array
     class_name: Field2Array
     method: handler
+  # 获取数组里面的值
+  - key: arrayValue
+    path: collect.service_imp.request_handlers.handlers.arrayValue
+    class_name: arrayValue
+    method: handler
   # 服务转字段
   - key: service2field
     path: collect.service_imp.request_handlers.handlers.service2field
@@ -149,6 +172,21 @@ request_handler:
   - key: get_array_obj
     path: collect.service_imp.request_handlers.handlers.get_array_obj
     class_name: GetArrayObj
+    method: handler
+  # excel 解析
+  - key: excel_data
+    path: collect.service_imp.request_handlers.handlers.excelData
+    class_name: excelData
+    method: handler
+  # 数组更新数组
+  - key: update_data_from_array
+    path: collect.service_imp.request_handlers.handlers.update_data_from_array
+    class_name: UpdateDataFromArray
+    method: handler
+  # 添加字段
+  - key: new_field
+    path: collect.service_imp.request_handlers.handlers.new_field
+    class_name: NewField
     method: handler
 
 # 结果处理器

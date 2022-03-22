@@ -36,7 +36,11 @@ before_plugin = None
 after_plugin = None
 
 # 第三方插件
-third_application=None
+third_application = None
+
+# 请求注册器
+request_register = None
+
 
 class ConfigCacheData:
     """
@@ -159,6 +163,7 @@ class ConfigCacheData:
     def get_module_handler():
         global module_handler
         return module_handler
+
     @staticmethod
     def set_filter_handler(filter_handler_data):
         global filter_handler
@@ -179,7 +184,6 @@ class ConfigCacheData:
         global before_plugin
         return before_plugin
 
-
     @staticmethod
     def set_after_plugin(after_plugin_data):
         global after_plugin
@@ -199,3 +203,13 @@ class ConfigCacheData:
     def get_third_application():
         global third_application
         return third_application
+
+    @staticmethod
+    def get_request_register():
+        global request_register
+        return request_register
+
+    @staticmethod
+    def set_request_register(request_register_data):
+        global request_register
+        request_register = request_register_data

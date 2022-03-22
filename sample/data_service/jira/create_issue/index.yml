@@ -1,4 +1,66 @@
 service:
+  - key: test_check_ip_must_token
+    name: 测试IP+token
+    http: true
+    check_ip: true
+    must_token: true
+    module: empty
+
+  - key: test_must_token
+    name: 测试token
+    http: true
+    must_token: true
+    module: empty
+
+  - key: test_check_ip
+    name: 测试IP
+    http: true
+    must_login: false
+    check_ip: true
+    module: empty
+
+  - key: test_must_login
+    name: 测试不要登录
+    http: true
+    must_login: false
+    module: empty
+
+  - key: test_normal
+    name: 测试普通
+    http: true
+    module: empty
+
+
+
+
+
+  - key: uploadExcel
+    must_login: false
+    name: 上传excel
+    module: empty
+    http: true
+    handler_params:
+      - key: excel_data
+        file_field: file
+        sheets:
+          - key: page1
+            name: "第一页"
+            sheet_index: 0
+            start_row: 1
+            start_col: 0
+            fields:
+              - key: issueKey
+                name: 空间
+                must: true
+              - key: summary
+                name: 标题
+                must: true
+            save_field: 'issueList'
+    result_handler:
+      - key: param2result
+        params:
+          field: issueList
+
   - key: createIssue
     name: 创建Issue
     module: "http"

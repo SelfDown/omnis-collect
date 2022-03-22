@@ -193,7 +193,11 @@ class LdapService(CollectService):
                     if isinstance(val, str):
                         obj[field] = val
                     else:
-                        obj[field] = val.value
+                        if isinstance(val,str) or isinstance(val,unicode):
+                            obj[field] = str(val)
+                        else:
+                            obj[field] = val.value
+
             return obj
 
         if result and result_field and len(entries) > 0:

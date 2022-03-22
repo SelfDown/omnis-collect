@@ -43,7 +43,7 @@ class Split(ResultHandler):
             val = get_safe_data(field, item)
             if not val:
                 return
-            if isinstance(val, str):
+            if isinstance(val, str) or isinstance(val,unicode):
                 item[field] = val.split(split)
 
         if isinstance(result, list):

@@ -95,7 +95,10 @@ class HttpService(CollectService):
                 message = self.get_render_data(err_msg, result_data, tool)
                 return self.fail(message)
         params_result["http_send"] = data_json
-        return self.success(data=result_data, msg="发送成功")
+        msg = self.get_msg(result_data)
+        if not msg:
+            msg = "发送成功"
+        return self.success(data=result_data, msg=msg)
 
 
 class HttpApi(CollectService):
@@ -142,6 +145,8 @@ class HttpApi(CollectService):
             return self.fail(r.text)
         try:
             result_data = json.loads(r.text)
+            r.close()
+            del (r)
         except Exception as e:
             self.log("数据返回错误：" + str(e) + "\n\n" + r.text)
             return self.fail(msg="数据返回格式错误")

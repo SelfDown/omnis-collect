@@ -20,6 +20,9 @@ class Properties:
             for line in fopen:
                 line = line.strip()
                 if line.find('=') > 0 and not line.startswith('#'):
+                    # 去掉文件读取转义问题
+                    line = line.replace("\\n", "\n")
+                    line = line.replace("\\t", "\t")
                     strs = line.split('=')
                     # 解决值里面包含‘=’特殊符号
                     self.properties[strs[0].strip()] = line[line.find("=") + 1:].strip()

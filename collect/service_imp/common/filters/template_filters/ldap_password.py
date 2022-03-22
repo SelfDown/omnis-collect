@@ -15,5 +15,5 @@ class LdapPasswordFilter(BaseFilter):
     def filter(value):
         from ldap3 import HASHED_SALTED_SHA
         from ldap3.utils.hashed import hashed
-        hashed_password = hashed(HASHED_SALTED_SHA, value)
+        hashed_password = hashed(HASHED_SALTED_SHA, str(value))
         return hashed_password

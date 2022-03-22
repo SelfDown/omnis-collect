@@ -9,6 +9,7 @@ import datetime
 import json
 import os
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import HttpResponse
 
 from collect.utils.property import Properties
@@ -24,7 +25,7 @@ def getDateTime(fmt=None):
     if not fmt:
         fmt = "%Y-%m-%d %H:%M:%S"
     from datetime import datetime
-    return datetime.utcnow().strftime(fmt)
+    return datetime.now().strftime(fmt)
 
 
 class data_value_check:
@@ -142,7 +143,7 @@ class OmnisService:
 
     @staticmethod
     def get_msg(result):
-        return result["msg"]
+        return get_safe_data("msg",result)
 
 
 class DateEncoder(json.JSONEncoder):
@@ -154,6 +155,8 @@ class DateEncoder(json.JSONEncoder):
             return obj.strftime("%Y-%m-%d")
         elif isinstance(obj, Decimal):
             return float(obj)
+        elif isinstance(obj,InMemoryUploadedFile):
+            return obj.name
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -396,7 +399,7 @@ def get_safe_data(name, data, default_value=None):
 
 # 支持多级查询
 def get_key(key, default_value=None, data_type="", decode_type=""):
-    # type: (object, object, object) -> object
+    # type: (object, object, object) -> AnyStr
     value = props.get(key, default_value, data_type)
     if value is None:
         from collect.utils.log import get_collect_log

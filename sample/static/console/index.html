@@ -8,22 +8,23 @@
         }
 
 
-
-
-
-
-
-
-
-
-
-
     </style>
 
 </header>
 <body style="padding: 0;margin: 0px">
 <div id="app">
     <el-row style="padding: 10px;background: #f0fff0;height: 100%">
+        <el-row style="display: flex">
+            <form id="form">
+                <input name="service" value="jira.uploadExcel"/>
+                <input type="file" name="file">
+
+            </form>
+            <button
+                    @click="upload"
+                    size="mini" type="primary">JIRA文件解析</button>
+
+        </el-row>
 
         <el-row>
             <el-col :span="16">
@@ -80,7 +81,7 @@
             <hr>
 
 
-             <div>
+            <div>
                 <a href="javascript:void (0)" @click="change('result23_search')">
                     [总体]创建用户
                 </a>
@@ -125,9 +126,6 @@
             </div>
 
             <hr>
-
-
-
 
 
             <div>
@@ -338,55 +336,75 @@
 
         },
         methods: {
+            upload(){
+                let formData = new FormData($("#form")[0])
+                 let _this = this
+                $.ajax({
+                    url: _this.url,
+                    type: "post",
+                    data:formData,
+                    cache:false,
+                    contentType:false,
+                    processData:false,
+                    success: function (res) {
+                        // console.log(res)
+                        _this.result = JSON.stringify(res, null, "\t")
+                    },
+                    error: function (res) {
+                        console.log(res)
 
-            convertRes2Blob(response) {
-              // 提取文件名
-              const fileName = response.headers['content-disposition'].match(
-                /filename=(.*)/
-              )[1]
-              // 将二进制流转为blob
-              const blob = new Blob([response.data], { type: 'application/octet-stream' })
-              if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                // 兼容IE，window.navigator.msSaveBlob：以本地方式保存文件
-                window.navigator.msSaveBlob(blob, decodeURI(fileName))
-              } else {
-                // 创建新的URL并指向File对象或者Blob对象的地址
-                const blobURL = window.URL.createObjectURL(blob)
-                // 创建a标签，用于跳转至下载链接
-                const tempLink = document.createElement('a')
-                tempLink.style.display = 'none'
-                tempLink.href = blobURL
-                tempLink.setAttribute('download', decodeURI(fileName))
-                // 兼容：某些浏览器不支持HTML5的download属性
-                if (typeof tempLink.download === 'undefined') {
-                  tempLink.setAttribute('target', '_blank')
-                }
-                // 挂载a标签
-                document.body.appendChild(tempLink)
-                tempLink.click()
-                document.body.removeChild(tempLink)
-                // 释放blob URL地址
-                window.URL.revokeObjectURL(blobURL)
-              }
+                    }
+                })
             },
 
-            download(){
+            convertRes2Blob(response) {
+                // 提取文件名
+                const fileName = response.headers['content-disposition'].match(
+                    /filename=(.*)/
+                )[1]
+                // 将二进制流转为blob
+                const blob = new Blob([response.data], {type: 'application/octet-stream'})
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // 兼容IE，window.navigator.msSaveBlob：以本地方式保存文件
+                    window.navigator.msSaveBlob(blob, decodeURI(fileName))
+                } else {
+                    // 创建新的URL并指向File对象或者Blob对象的地址
+                    const blobURL = window.URL.createObjectURL(blob)
+                    // 创建a标签，用于跳转至下载链接
+                    const tempLink = document.createElement('a')
+                    tempLink.style.display = 'none'
+                    tempLink.href = blobURL
+                    tempLink.setAttribute('download', decodeURI(fileName))
+                    // 兼容：某些浏览器不支持HTML5的download属性
+                    if (typeof tempLink.download === 'undefined') {
+                        tempLink.setAttribute('target', '_blank')
+                    }
+                    // 挂载a标签
+                    document.body.appendChild(tempLink)
+                    tempLink.click()
+                    document.body.removeChild(tempLink)
+                    // 释放blob URL地址
+                    window.URL.revokeObjectURL(blobURL)
+                }
+            },
+
+            download() {
 
 
-                    let _this = this
-                    axios.post(this.url, JSON.parse(this.params),{
-                        responseType:"blob"
-                    }).then(res => {
-                            debugger
-                          if (res.data instanceof  Blob){
-                              this.convertRes2Blob(res)
+                let _this = this
+                axios.post(this.url, JSON.parse(this.params), {
+                    responseType: "blob"
+                }).then(res => {
+                    debugger
+                    if (res.data instanceof Blob) {
+                        this.convertRes2Blob(res)
 
-                          }else{
-                             _this.result = JSON.stringify(res.data, null, "\t")
-                          }
+                    } else {
+                        _this.result = JSON.stringify(res.data, null, "\t")
+                    }
 
 
-                    })
+                })
 
             },
             change(t) {
@@ -425,6 +443,9 @@
                 let _this = this
                 $.ajax({
                     url: _this.url,
+                    headers:{
+                      'token':'weigao'
+                    },
                     type: "post",
                     data: _this.params,
                     contentType: "application/json",
@@ -502,16 +523,6 @@
 
 
     })
-
-
-
-
-
-
-
-
-
-
 
 
 </script>
