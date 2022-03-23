@@ -1,0 +1,53 @@
+{
+  "name": "测试用户查询，模块sql",
+  "params": {
+    "service": "hrm.user_account_query"
+  },
+  "op_user": "-1",
+  "thread_count": 1000,
+  "thread_max_once": 50,
+  "success": "{% if success %} True {% else %} {% endif%}",
+  "msg": "{{msg}}",
+  "select_fields": [
+    {
+      "key": "page",
+      "type": "randomInt",
+      "from": [
+        0,
+        1000
+      ]
+    },
+    {
+      "key": "size",
+      "type": "randomInt",
+      "from": [
+        0,
+        1000
+      ]
+    },
+    {
+      "key": "user_id_list",
+      "type": "randomStrList",
+      "length": [
+        0,
+        1000
+      ]
+    },
+    {
+      "key": "create_ldap",
+      "type": "randomStr",
+      "from": [
+        "0",
+        "1"
+      ]
+    },
+    {
+      "key": "role_code",
+      "type": "randomStr"
+    },
+    {
+      "key": "pagination",
+      "type": "randomBoolean"
+    }
+  ]
+}

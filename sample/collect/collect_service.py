@@ -774,6 +774,9 @@ class CollectService:
         return self.session
 
     def log(self, msg, level=None):
+        if isinstance(msg,dict):
+            import json
+            msg = json.dumps(msg)
         if not level:
             self.logger.info(msg)
         elif level == "error":

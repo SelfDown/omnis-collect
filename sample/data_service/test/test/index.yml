@@ -1,0 +1,13 @@
+service:
+  # 项目
+  - key: "module_test"
+    name: 菜单栏查询
+    module: 'test'
+    http: true
+    must_login: false
+    params:
+      script_path:
+        template: "../../script/test.json"
+    script_path_key: script_path
+
+

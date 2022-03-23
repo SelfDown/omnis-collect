@@ -21,9 +21,14 @@ services:
   - key: 'server'
     name: '服务器模块'
     path: 'server/service.yml'
+
   - key: 'jira'
     name: 'jira 模块'
     path: 'jira/service.yml'
+
+  - key: 'test'
+    name: '测试模块'
+    path: 'test/service.yml'
 
 
 
@@ -63,12 +68,14 @@ request_register:
     class_name: Session
     method: get_register_data
     set_template_method: "set_session"
+    get_template_method: "get_session"
 
   - name: meta
     path: collect.service_imp.request_register.register.header
     class_name: Header
     method: get_register_data
     set_template_method: "set_header"
+    get_template_method: "get_header"
 
 before_plugin:
   # 登录检查
@@ -344,6 +351,12 @@ module_handler:
   - key: http
     path: collect.service_imp.http.http_service
     class_name: HttpService
+    method: handler
+
+  # http
+  - key: test
+    path: collect.service_imp.test.test_service
+    class_name: TestService
     method: handler
 
   # empty

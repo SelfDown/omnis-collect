@@ -58,6 +58,8 @@ class HttpService(CollectService):
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(op_user=self.op_user)
         data_json = tool.render(data_json_templ, params_result)
+        if self.can_log():
+            self.log(data_json)
         try:
             import json
             data_json = json.loads(data_json)
@@ -80,6 +82,7 @@ class HttpService(CollectService):
         if not self.is_success(data_json_result):
             return data_json_result
         data_json = self.get_data(data_json_result)
+
         result = self.api.send(data_json)
         if not self.is_success(result):
             return result

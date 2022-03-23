@@ -74,6 +74,8 @@ import collect.service.template_service
 import collect.service_imp.flow.common.gen_template
 import collect.service_imp.request_register.register.session
 import collect.service_imp.request_register.register.session
+import collect.service_imp.http.http_service
 
 import collect.service_imp.common.filters.template_filters.ldap_password
 import collect.service_imp.request_handlers.handlers.new_field
+import collect.service_imp.test.test_service
