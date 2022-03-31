@@ -114,7 +114,7 @@ class OmnisSSHService(ServiceOmnisFlowService):
         return self.ssh_const["timeout_name"]
 
     def get_timeout(self):
-        timeout = get_safe_data(self.get_timeout_name(), self.get_params_result(), 30)
+        timeout = get_safe_data(self.get_timeout_name(), self.get_params_result(), 15)
         return int(timeout)
 
     def get_port_name(self):
@@ -209,13 +209,17 @@ class OmnisSSHService(ServiceOmnisFlowService):
         return flow_result
 
     def execute_finish(self):
-        ssh = get_safe_data(self.get_ssh_client_name(), self.get_params_result())
+        params_result=self.get_params_result()
+        ssh = get_safe_data(self.get_ssh_client_name(), params_result)
 
         if ssh:
             ssh.close()
-        scp = get_safe_data(self.get_scp_client_name(), self.get_params_result())
+            del params_result[self.get_ssh_client_name()]
+        scp = get_safe_data(self.get_scp_client_name(), params_result)
         if scp:
             scp.close()
+            del params_result[self.get_scp_client_name()]
+
         return self.success("执行结束")
 
     def get_node_shell(self, node):

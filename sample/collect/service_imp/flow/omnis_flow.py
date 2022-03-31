@@ -18,6 +18,9 @@ class ServiceOmnisFlowService(CollectService):
         "next_name": "next",
         "fail_name": "fail",
         "ignore_error_name": "ignore_error",
+        "finish_name": "finish",
+        "flow_success_name": "flow_success",
+        "flow_msg_name": "flow_msg"
     }
 
     # 最大服务运行次数
@@ -31,6 +34,18 @@ class ServiceOmnisFlowService(CollectService):
 
     def get_ignore_error_name(self):
         return self.flow_const["ignore_error_name"]
+
+    def get_finish_name(self):
+        return self.flow_const["finish_name"]
+
+    def get_flow_sucess_name(self):
+        return self.flow_const["flow_success_name"]
+
+    def get_flow_msg_name(self):
+        return self.flow_const["flow_msg_name"]
+
+    def get_finish_name(self):
+        return self.flow_const["finish_name"]
 
     def set_must_node_names(self, names):
         self.must_node_names = names
@@ -55,6 +70,12 @@ class ServiceOmnisFlowService(CollectService):
         if not flow:
             return
         return get_safe_data(self.get_services_name(), flow)
+
+    def get_finish(self):
+        flow = self.get_flow()
+        if not flow:
+            return
+        return get_safe_data(self.get_finish_name(), flow)
 
     def get_services_name(self):
         return self.flow_const["services_name"]
@@ -127,49 +148,42 @@ class ServiceOmnisFlowService(CollectService):
         import json
         if self.can_log():
             self.log(json.dumps(node_result))
-        if not node_result or self.is_success(node_result): # 运行正常
+        if not node_result or self.is_success(node_result):  # 运行正常
             field = self.get_next_name()
             # 获取下个节点
             node_result = self.get_node_template_result(node, params, field=field, template=self.get_template())
             if self.can_log():
                 self.log(json.dumps(node_result))
-        else: # 运行错误
-            fail = get_safe_data(self.get_fail_name(),node)
+        else:  # 运行错误
+            fail = get_safe_data(self.get_fail_name(), node)
             if not fail:
-                self.log("流程结果返回错误，但是" + current_name + "没有配置" + self.get_fail_name() )
-            node_result = self.get_template_result(fail, params,template=self.get_template())
+                self.log("流程结果返回错误，但是" + current_name + "没有配置" + self.get_fail_name())
+            node_result = self.get_template_result(fail, params, template=self.get_template())
         next = self.get_data(node_result)
         next_node = get_safe_data(next, service_dict)
         if not next_node:
-            self.log("流程结果返回错误，但是" + current_name + "没有找到" + next+"节点")
+            self.log("流程结果返回错误，但是" + current_name + "没有找到" + next + "节点")
             return
         return get_safe_data(next, service_dict)
-        # current_name = get_safe_data(self.get_name_name(), node)
-        # if not node_result or self.is_success(node_result):
-        #     next = get_safe_data(self.get_next_name(), node)
-        # else:
-        #     next = get_safe_data(self.get_fail_name(), node)
-        #     if not next:
-        #         self.log("流程结果返回错误，但是" + current_name + "没有配置" + self.get_fail_name())
-        #         return
-        #
-        # if not next in service_dict and self.is_template_text(next):
-        #     # from collect.service_imp.common.filters.template_tool import TemplateTool
-        #     # template_tool = TemplateTool(op_user=self.op_user)
-        #     params = self.get_params_result()
-        #     node_result = self.get_node_template_result(node, params,field="next", template=self.get_template())
-        #     if not self.is_success(node_result):
-        #         return node_result
-        #     next = self.get_data(node_result)
-        #     # try:
-        #     #     next = template_tool.render(next, params)
-        #     # except Exception as e:
-        #     #     self.log(current_name + "模板渲染获取下个节点失败" + str(e))
-        #     #     return
-
-
 
     def flow(self, handler_node):
+        flow_result = self._execute_flow(handler_node)
+        finish = self.get_finish()
+        if finish:
+            finsih_service = self.get_node_service(finish, self.get_params_result())
+            if not self.is_success(finsih_service):
+                return finsih_service
+            finsih_service = self.get_data(finsih_service)
+            # 设置消息
+            finsih_service[self.get_flow_msg_name()] = self.get_msg(flow_result)
+            # 设置流程状态
+            finsih_service[self.get_flow_sucess_name()] = self.is_success(flow_result)
+            finsih_service_result = self.get_service_result(finsih_service)
+            if not self.is_success(finsih_service_result):
+                return finsih_service_result
+        return flow_result
+
+    def _execute_flow(self, handler_node):
         services = self.get_services()
         if not services:
             return self.fail(msg=self.get_flow_name() + "节点,没有找到" + self.get_services_name() + "节点，请检查配置")
@@ -202,7 +216,7 @@ class ServiceOmnisFlowService(CollectService):
 
             node_result = handler_node(current)
             nodes = self.get_data(node_result)
-            if self.can_log() and nodes and isinstance(nodes,list):
+            if self.can_log() and nodes and isinstance(nodes, list):
                 for n_item in nodes:
                     if isinstance(n_item, dict) and "success" in n_item and not self.is_success(n_item):
                         self.log(n_item)

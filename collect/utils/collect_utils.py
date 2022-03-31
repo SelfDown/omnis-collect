@@ -121,7 +121,7 @@ class OmnisService:
         return result
 
     @staticmethod
-    def fail(data=[], code="1", msg=""):
+    def fail(data=None, code="1", msg=""):
         result = {"code": code, "msg": msg, "success": False, 'data': data}
         return result
 

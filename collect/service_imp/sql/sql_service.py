@@ -21,27 +21,7 @@ class SqlService(CollectService):
             self.log(self.get_msg(config_file_result), level="error")
             return
         return self.get_data(config_file_result)
-        # import os
-        # config_dir = self.get_config_dir()
-        # sql_file = config_dir + "/" + sql_file
-        # if not os.path.exists(sql_file):
-        #     self.log(sql_file + "不存在", "error")
-        #     return self.fail(sql_file + "文件不存在")
-        # with open(sql_file, 'r') as f:
-        #     sql_file_content = f.read()
-        # key_word_rules = self.get_key_word_rules()
-        # for key_word in key_word_rules:
-        #     config_rule = key_word_rules[key_word]
-        #     path = config_rule["path"]
-        #     class_name = config_rule["class_name"]
-        #     import importlib
-        #     key_rule_class = importlib.import_module(path)
-        #     key_rule_class = getattr(key_rule_class, class_name)()
-        #     rule_result = key_rule_class.handler(self.template, sql_file_content, params, config_rule, config_dir)
-        #     if not self.is_success(rule_result):
-        #         return rule_result
-        #     sql_file_content = self.get_data(rule_result)
-        # return sql_file_content
+
 
     def content2Sql(self, sql_content, params, to_param_key=True, from_config=False):
         """
@@ -104,7 +84,7 @@ class SqlService(CollectService):
             # 转换为sql的占位符
             result_content, param_keys = self.content2Sql(result_content, params, False, from_config)
             # 去掉html
-            result_content = self.xml_to_plain_text(result_content)
+            # result_content = self.xml_to_plain_text(result_content)
             data = {
                 self.get_sql_content_name(): result_content,
                 self.get_sql_param_name(): param_keys

@@ -317,9 +317,14 @@ class CollectService:
             value = self.get_render_data(value_template, params, template_tool)
             service[key] = value
         # 拼接其他参数
+
         if append_param:
+            exclude = ["SFTPClient", "SSHClient"]
             for key in params:
                 if key not in service:
+                    t = type(params[key]).__name__
+                    if t in exclude:
+                        continue
                     service[key] = params[key]
         return self.success(service)
 
@@ -774,7 +779,7 @@ class CollectService:
         return self.session
 
     def log(self, msg, level=None):
-        if isinstance(msg,dict):
+        if isinstance(msg, dict):
             import json
             msg = json.dumps(msg)
         if not level:
@@ -1221,7 +1226,7 @@ class CollectService:
         # params = json.loads(json.dumps(params))
         import copy
         params = copy.deepcopy(params)
-        # 替换请求参数
+        # # 替换请求参数
         for key in params:
             config_param = get_safe_data(key, config_params)
             if not config_param:
