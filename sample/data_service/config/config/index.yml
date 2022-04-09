@@ -1,4 +1,43 @@
 service:
+  - key: template_log_save
+    module: empty
+    params:
+      data_list:
+        check:
+          template: "{{data_list|must}}"
+          err_msg: 数据列表不能为空
+    handler_params:
+      - key: template_log_msg
+        type: template_event_log
+        save_field: template_event_log_list
+      - key: service2field
+        enable: "{% if template_event_log_list|length >0 %} True {% else %} False {% endif%}"
+        service:
+          service: config.save_template_log
+          template_event_log_list: template_event_log_list
+        save_field: log_save
+    result_handler:
+      - key: add_param
+        params:
+          from_field: template_event_log_list
+          to_field: template_event_log_list
+  - key: save_template_log
+    module: bulk_create
+    params:
+      template_event_log_list:
+        check:
+          template: "{{template_event_log_list|must}}"
+          err_msg: 保存列表不能为空
+
+    handler_params:
+      - key: update_data
+        foreach: template_event_log_list
+        item: item
+        fields:
+          - field: template_event_log_id
+            template: "{{''|uuid}}"
+    model_field: template_event_log_list
+    model: TemplateEventLog
   - key: router
     log: true
     params:

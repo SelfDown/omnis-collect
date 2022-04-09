@@ -209,7 +209,7 @@ class OmnisSSHService(ServiceOmnisFlowService):
         return flow_result
 
     def execute_finish(self):
-        params_result=self.get_params_result()
+        params_result = self.get_params_result()
         ssh = get_safe_data(self.get_ssh_client_name(), params_result)
 
         if ssh:
@@ -225,17 +225,17 @@ class OmnisSSHService(ServiceOmnisFlowService):
     def get_node_shell(self, node):
         return get_safe_data(self.get_shell_name(), node)
 
-    def log_shell(self, shell, password=None):
+    def log_shell(self, shell, password=None, template=None):
         if password:
             shell_show = shell.replace(password, "******")
         else:
             shell_show = shell
-        self.log(shell_show)
+        self.log(shell_show, template=template)
 
     def execute_base_shell_with_log(self, shell, ssh=None, password=None, template=None):
         template = self.get_template_data(template)
         if self.can_log(template):
-            self.log_shell(shell, password)
+            self.log_shell(shell, password, template=template)
         if not ssh:
             ssh = self.get_ssh_data()
 

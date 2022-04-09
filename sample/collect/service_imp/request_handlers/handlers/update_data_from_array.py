@@ -128,6 +128,6 @@ class UpdateDataFromArray(RequestHandler):
                         return result
 
         if self.can_log(template):
-            self.log(params)
+            self.log(params,template=template)
 
         return self.success(params)

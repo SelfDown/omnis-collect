@@ -2,6 +2,7 @@ service:
   # 登陆
   - key: "user_login"
     name: 用户登陆
+    http: true
     must_login: false
     module: 'session'# 执行mysql 查询
     params:
@@ -9,7 +10,7 @@ service:
         check:
           template: "{{user_id|must}}"
           err_msg: 用户不能为空
-    session:
+    session_op:
       - key: add_key
         name: user_id
         template: "{{user_id}}"

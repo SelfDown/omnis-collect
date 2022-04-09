@@ -2,9 +2,12 @@ service:
   # 项目
   - key: "project_query"
     http: true
+    log: true
     params:
       to_obj:
-        default: false
+        default: true
+      test:
+        template: "{{'1'}}"
     module: 'sql'# 执行mysql 查询
     must_login: false
     sql_file: 'project.sql'

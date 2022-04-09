@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import collect.service_imp.before_plugin.plugin.handler_req_param
+import collect.service_imp.before_plugin.plugin.handler_params
 # templ = "{% if is_windows== 'True' %}get_host{% else %}agentd_soft_install{% endif %}"
 # # templ = "get_host"
 # print templ
@@ -38,6 +40,7 @@
 #
 #
 # print get_template_nodes(templ)
+import collect.service_imp.before_plugin.plugin.handler_params
 import collect.service_imp.result_handlers.handlers.result2excel
 import collect.service_imp.request_rules.check
 import collect.service_imp.before_plugin.plugin.handler_params

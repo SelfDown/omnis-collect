@@ -6,9 +6,10 @@
 @desc:
 """
 from collect.collect_service import CollectService
-from collect.utils.collect_utils import get_safe_data
+from collect.utils.collect_utils import get_safe_data, Singleton
 
 
+@Singleton
 class TemplateService(CollectService):
     TSConst = {
         "http_name": "http",
@@ -82,6 +83,7 @@ class TemplateService(CollectService):
                     import importlib
                     register_factory = importlib.import_module(path)
                     register_obj = getattr(register_factory, class_name)(op_user=self.op_user)
+                    # 插件设置请求对象，
                     register_obj.set_request(self.get_request())
                     get_data_method = getattr(register_obj, register[self.get_method_name()])
                     register_data = get_data_method()

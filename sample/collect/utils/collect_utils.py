@@ -143,7 +143,7 @@ class OmnisService:
 
     @staticmethod
     def get_msg(result):
-        return get_safe_data("msg",result)
+        return get_safe_data("msg", result)
 
 
 class DateEncoder(json.JSONEncoder):
@@ -155,7 +155,7 @@ class DateEncoder(json.JSONEncoder):
             return obj.strftime("%Y-%m-%d")
         elif isinstance(obj, Decimal):
             return float(obj)
-        elif isinstance(obj,InMemoryUploadedFile):
+        elif isinstance(obj, InMemoryUploadedFile):
             return obj.name
         else:
             return json.JSONEncoder.default(self, obj)
@@ -415,3 +415,31 @@ def get_key(key, default_value=None, data_type="", decode_type=""):
         else:
             value = value.decode(decode_type)
     return value
+
+
+def Singleton(clsObject):
+    """
+    单例模式
+    @Singleton
+    class test:
+        def __init__(self):
+           print "xx",id(self)
+        pass
+    """
+    import threading
+    lock = threading.Lock()
+
+    def inner(*args, **kwargs):
+
+        if not hasattr(clsObject, "ins"):
+            with lock:
+                # 这个if 判断非常必要，如果之前被锁住，然后已经处理好。没有它，ins 又会被重复替换
+                # 实际上锁是个队列，再setattr 过程中，会有几个在排队。恰恰这个一个排队，会重复替换
+                # 试了下100线程初始化，个大约出现3-4个新对象
+                if not hasattr(clsObject, "ins"):
+                    insObject = clsObject(*args, **kwargs)
+                    setattr(clsObject, "ins", insObject)
+        ins = getattr(clsObject, "ins")
+        return ins
+
+    return inner

@@ -29,6 +29,9 @@ services:
   - key: 'test'
     name: '测试模块'
     path: 'test/service.yml'
+  - key: 'config'
+    name: '配置模块'
+    path: 'config/service.yml'
 
 
 
@@ -76,6 +79,13 @@ request_register:
     method: get_register_data
     set_template_method: "set_header"
     get_template_method: "get_header"
+
+  - name: event_id
+    path: collect.service_imp.request_register.register.template_event_id
+    class_name: TemplateEventID
+    method: get_register_data
+    set_template_method: "set_template_log_event_id"
+    get_template_method: "get_template_log_event_id"
 
 before_plugin:
   # 登录检查
@@ -194,6 +204,16 @@ request_handler:
   - key: new_field
     path: collect.service_imp.request_handlers.handlers.new_field
     class_name: NewField
+    method: handler
+  # 添加字段
+  - key: new_field
+    path: collect.service_imp.request_handlers.handlers.new_field
+    class_name: NewField
+    method: handler
+  # 处理消息
+  - key: template_log_msg
+    path: collect.service_imp.request_handlers.handlers.template_log_msg
+    class_name: TemplateLogMsg
     method: handler
 
 # 结果处理器
