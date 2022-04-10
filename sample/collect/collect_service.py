@@ -333,6 +333,25 @@ class CollectService:
                     service[key] = params[key]
         return self.success(service)
 
+    def get_get_template_method_name(self):
+        return "get_template_method"
+
+    def get_set_template_method_name(self):
+        return "set_template_method"
+
+    def handler_self_register_data(self, service_obj, template=None):
+        request_register = self.get_request_register()
+        for register in request_register:
+            path = register[self.get_path_name()]
+            class_name = register[self.get_class_name()]
+            try:
+                get_data_method = getattr(self, register[self.get_get_template_method_name()])
+                register_data = get_data_method(template)
+                set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
+                set_data_method(register_data)
+            except Exception as e:
+                return self.fail(class_name + "找不到，请检查配置" + str(e))
+
     def get_service_result(self, service, template=None):
         """
             调用模板服务
@@ -343,6 +362,20 @@ class CollectService:
         from collect.service.template_service import TemplateService
         template_service = TemplateService(op_user=self.op_user)
         template_service.set_session(self.get_session())
+        self.handler_self_register_data(template_service,template)
+
+        # request_register = self.get_request_register()
+        # for register in request_register:
+        #     path = register[self.get_path_name()]
+        #     class_name = register[self.get_class_name()]
+        #     try:
+        #         get_data_method = getattr(self, register["get_template_method"])
+        #         register_data = get_data_method(template)
+        #         set_data_method = getattr(template_service, register["set_template_method"])
+        #         set_data_method(register_data)
+        #     except Exception as e:
+        #         return self.fail(class_name + "找不到，请检查配置" + str(e))
+
         template_result = template_service.result(service)
 
         end = time.time()
@@ -519,12 +552,12 @@ class CollectService:
         if not template:
             template = self.template
         import json
-        node_txt = json.dumps(node, cls=DateEncoder)
-        name = get_safe_data(self.get_name_name(), node, node_txt)
+
+        name = get_safe_data(self.get_name_name(), node)
         switch = get_safe_data(self.get_switch_name(), node)
         switch_default = get_safe_data(self.get_switch_default_name(), node)
         if self.can_log(template):
-            self.log(node_txt, template=template)
+            self.log(node, template=template)
         if switch and isinstance(switch, list):
             if self.can_log(template):
                 self.log("获取switch 判断", template=template)
@@ -760,7 +793,7 @@ class CollectService:
         self.logger = get_collect_log()
         self.op_user = op_user
         self.template_log_event_id = None
-        self.template = None
+        self.template = {}
         self.load_router()
 
         self.finish = True
@@ -782,10 +815,6 @@ class CollectService:
         self.header = header
         self.template[self.get_header_name()] = header
 
-    def get_header(self):
-
-        return self.header
-
     def get_template_log_event_id_name(self):
         return self.const["template_log_event_id_name"]
 
@@ -793,17 +822,24 @@ class CollectService:
         self.template_log_event_id = template_log_event_id
         self.template[self.get_template_log_event_id_name()] = template_log_event_id
 
-    def get_template_log_event_id(self, template=None):
-        if template:
-            return template[self.get_template_log_event_id_name()]
-        return self.template_log_event_id
-
     def set_session(self, session):
         self.template[self.get_session_name()] = session
         self.session = session
 
-    def get_session(self):
+    def get_session(self, template=None):
+        if template:
+            return template[self.get_session_name()]
         return self.session
+
+    def get_header(self, template=None):
+        if template:
+            return template[self.get_header_name()]
+        return self.header
+
+    def get_template_log_event_id(self, template=None):
+        if template:
+            return template[self.get_template_log_event_id_name()]
+        return self.template_log_event_id
 
     def log(self, msg, level=None, template=None):
 
@@ -816,10 +852,9 @@ class CollectService:
                 "datetime": getDateTime(),
                 "from_service": self.get_template_service_name(template)
             })
-
-        write_file_log = get_key("write_file_log", "true")
-        if write_file_log != "true":
-            return
+            write_file_log = get_key("write_file_log", "true")
+            if write_file_log != "true":
+                return
 
         if isinstance(msg, dict):
             import json
@@ -859,8 +894,11 @@ class CollectService:
 
     def set_template(self, template):
         # 复制模板
+        """
+        这个千万不要乱改，已经验证过，将copy 去掉必报错，因为模板被改了
+        """
         import copy
-        self.template = template
+        self.template = copy.deepcopy(template)
 
     def get_django_model_config(self):
         from collect.service_imp.config_data.config_cache_data import ConfigCacheData

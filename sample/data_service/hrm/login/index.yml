@@ -4,6 +4,7 @@ service:
     name: 用户登陆
     http: true
     must_login: false
+    log: true
     module: 'session'# 执行mysql 查询
     params:
       user_id:

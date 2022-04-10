@@ -4,6 +4,7 @@ service:
     name: 菜单栏查询
     module: 'test'
     http: true
+    log: true
     must_login: false
     params:
       script_path:

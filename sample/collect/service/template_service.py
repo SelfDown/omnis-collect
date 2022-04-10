@@ -48,8 +48,8 @@ class TemplateService(CollectService):
     def set_request(self, request):
         self.request = request
 
-    def get_session(self):
-        return self.session
+    # def get_session(self,template=None):
+    #     return self.session
 
     def result(self, data, is_http=False):
         service = get_safe_data("service", data)
@@ -70,7 +70,7 @@ class TemplateService(CollectService):
         # 如果是http 直接请求
         # 数据对象的设置，设置session，header
         request_register = self.get_request_register()
-        if is_http:# 如果是http 就生成
+        if is_http:  # 如果是http 就生成
             http_result = self.http_check(service_obj.get_template())
             # http 检查返回结果
             if not collect_service.is_success(http_result):
@@ -94,17 +94,18 @@ class TemplateService(CollectService):
                     set_data_method(register_data)
                 except Exception as e:
                     return self.fail(class_name + "找不到，请检查配置" + str(e))
-        else: # 如果非http 就从上级获取
-            for register in request_register:
-                path = register[self.get_path_name()]
-                class_name = register[self.get_class_name()]
-                try:
-                    get_data_method = getattr(self, register[self.get_get_template_method_name()])
-                    register_data = get_data_method()
-                    set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
-                    set_data_method(register_data)
-                except Exception as e:
-                    return self.fail(class_name + "找不到，请检查配置" + str(e))
+        else:  # 如果非http 就从上级获取
+            self.handler_self_register_data(service_obj)
+            # for register in request_register:
+            #     path = register[self.get_path_name()]
+            #     class_name = register[self.get_class_name()]
+            #     try:
+            #         get_data_method = getattr(self, register[self.get_get_template_method_name()])
+            #         register_data = get_data_method()
+            #         set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
+            #         set_data_method(register_data)
+            #     except Exception as e:
+            #         return self.fail(class_name + "找不到，请检查配置" + str(e))
 
         # 查询数据
         params = data

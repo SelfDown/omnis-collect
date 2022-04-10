@@ -27,8 +27,6 @@ class TemplateLogMsg(RequestHandler):
         return self.TLMConst["msg_name"]
 
     def handler(self, params, config, template):
-
-        template_tool = TemplateTool(op_user=self.op_user)
         data_list = get_safe_data(self.get_data_list_name(), params)
         if not data_list:
             return self.fail(self.get_data_list_name() + "字段参数没有找到")
@@ -51,7 +49,7 @@ class TemplateLogMsg(RequestHandler):
                     data_item = item[data_name]
                     if msg_name in data_item and isinstance(data_item[msg_name],dict):
                         import json
-                        data_item[msg_name] = json.dumps(data_item[msg_name], cls=DateEncoder)
+                        data_item[msg_name] = json.dumps(data_item[msg_name], cls=DateEncoder,ensure_ascii=False)
                     result_list.append(data_item)
         params[save_field] = result_list
         return self.success(params)

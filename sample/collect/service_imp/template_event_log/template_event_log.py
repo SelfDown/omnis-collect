@@ -49,8 +49,10 @@ class TemplateEventLog:
                             self.log(t.get_msg(result), "error")
                     except Exception as e:
                         self.log("系统运行错误:" + str(e))
-                        pass
+                        # raise e
+
             time.sleep(5)
+        self.log("结束日志消息")
 
     def log(self, msg, level=None):
         if not level:
