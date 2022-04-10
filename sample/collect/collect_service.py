@@ -340,6 +340,9 @@ class CollectService:
         return "set_template_method"
 
     def handler_self_register_data(self, service_obj, template=None):
+        """
+        将数据从上级往下级传递，优先模板
+        """
         request_register = self.get_request_register()
         for register in request_register:
             path = register[self.get_path_name()]
