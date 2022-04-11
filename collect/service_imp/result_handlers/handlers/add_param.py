@@ -23,12 +23,14 @@ class AddParam(ResultHandler):
         to_field = get_safe_data(to_field_name, params)
         # if not result:
         #     return self.success(result)
-        if from_field in param_result:
-            val = param_result[from_field]
-        else:
-            t = TemplateTool()
-            val = t.render(from_field, param_result)
-        if isinstance(result, object):
+        # if from_field in param_result:
+        #     val = param_result[from_field]
+        # else:
+        #     t = TemplateTool()
+        #     val = t.render(from_field, param_result)
+        t = TemplateTool(self.op_user)
+        val = self.get_render_data(from_field,param_result,t)
+        if isinstance(result, dict):
             result[to_field] = val
         elif isinstance(result, list):
             for item in result:

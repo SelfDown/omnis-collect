@@ -23,5 +23,5 @@ class Param2Result(ResultHandler):
 
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(op_user=self.op_user)
-        result = self.get_render_data(field, self.get_params_result(template), tool)
+        result = self.get_render_data(field, self.get_params_result(template), tool,nullToTemplateField=False)
         return self.success(result)
