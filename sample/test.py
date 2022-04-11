@@ -82,3 +82,4 @@ import collect.service_imp.http.http_service
 import collect.service_imp.common.filters.template_filters.ldap_password
 import collect.service_imp.request_handlers.handlers.new_field
 import collect.service_imp.test.test_service
+import collect.service_imp.result_handlers.handlers.add_param

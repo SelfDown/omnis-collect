@@ -245,7 +245,10 @@ class CollectService:
     def get_switch_default_name(self):
         return self.const["switch_default_name"]
 
-    def get_render_data(self, templ, params, tool):
+    def get_render_data(self, templ, params, tool,nullToTemplateField=True):
+        """
+        nullToTemplateField 如果值为空则设置模板的变量，一般用于检查字段是否设置值
+        """
         # if templ in params:
         #     return params[templ]
         # else:
@@ -258,8 +261,18 @@ class CollectService:
         # 匹配第二级
         elif len(field_arr) == 2 and field_arr[0] in params and field_arr[1] in params[field_arr[0]]:
             value = params[field_arr[0]][field_arr[1]]
-        else:
+        elif self.is_template_text(templ):
             value = tool.render(templ, params)
+        else:
+            # 如果里面 . 在里面
+            # if len(field_arr) >0:
+            #     value = ""
+            # else:
+            # 允许没有找到值，则设置模板字段
+            if nullToTemplateField:
+                value = templ
+            else:
+                value = ""
         return value
 
     def get_update_fields(self, model_obj,

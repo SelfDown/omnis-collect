@@ -99,9 +99,10 @@ class HttpService(CollectService):
                 return self.fail(message)
         params_result["http_send"] = data_json
         msg = self.get_msg(result_data)
+        count = self.get_count(result_data)
         if not msg:
             msg = "发送成功"
-        return self.success(data=result_data, msg=msg)
+        return self.success(data=result_data, msg=msg,count=count)
 
 
 class HttpApi(CollectService):

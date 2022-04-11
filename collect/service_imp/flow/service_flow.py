@@ -12,21 +12,27 @@ from collect.utils.collect_utils import get_safe_data, get_key
 class ServiceFlowService(ServiceOmnisFlowService):
     sf_const = {
         "flow_name": "flow",
+        "strict_name": "strict",
     }
 
     def get_flow_name(self):
         return self.sf_const["flow_name"]
+
+    def get_strict_name(self):
+        return self.sf_const["strict_name"]
 
     def get_flow(self):
         return get_safe_data(self.get_flow_name(), self.template)
 
     def handler_current_node(self, current):
         params_result = self.get_params_result()
-
+        strict = get_safe_data(self.get_strict_name(), current,False)
+        append_param = not strict
         # service = get_safe_data(self.get_service_name(), current)
         from collect.service_imp.common.filters.template_tool import TemplateTool
+
         template_tool = TemplateTool(op_user=self.op_user)
-        service = self.get_node_service(current, params_result, template_tool)
+        service = self.get_node_service(current, params_result, template_tool, append_param=append_param)
         if not self.is_success(service):
             return service
         service = self.get_data(service)
