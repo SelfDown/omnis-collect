@@ -866,7 +866,7 @@ class CollectService:
                 "user_id": self.op_user,
                 "event_id": event_id,
                 "msg": msg,
-                "datetime": getDateTime(),
+                "datetime": getDateTime("%Y-%m-%d %H:%M:%S.%f"),
                 "from_service": self.get_template_service_name(template)
             })
             write_file_log = get_key("write_file_log", "true")
@@ -875,7 +875,7 @@ class CollectService:
 
         if isinstance(msg, dict):
             import json
-            msg = json.dumps(msg, cls=DateEncoder)
+            msg = json.dumps(msg, cls=DateEncoder,ensure_ascii=False)
         if not level:
             self.logger.info(msg)
         elif level == "error":

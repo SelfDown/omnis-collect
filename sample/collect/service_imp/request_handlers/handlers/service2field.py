@@ -13,11 +13,13 @@ from collect.utils.collect_utils import get_safe_data
 class Service2Field(RequestHandler):
     def handler(self, params, config, template):
         service_data = self.get_node_service(node=config,params=params,template=template,append_param=False)
-        if not service_data:
+        if not self.is_success(service_data):
             return service_data
         service = self.get_data(service_data)
         service_result = self.get_service_result(service, template)
         if not self.is_success(service_result):
+            self.log(self.get_msg(service_result), template=template)
+            self.log(config, template=template)
             return service_result
         save_field = get_safe_data(self.get_save_field_name(), config)
         params[save_field] = self.get_data(service_result)

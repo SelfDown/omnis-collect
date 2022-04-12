@@ -42,7 +42,7 @@ class Hook(ResultHandler):
         def handler_service(target_service, target_template):
             service_result = self.get_service_result(target_service, target_template)
             if self.is_success(service_result):
-                self.log(self.get_msg(service_result), "error")
+                self.log(self.get_msg(service_result), "error",template=template)
 
         # 异步执行线程
         import threading

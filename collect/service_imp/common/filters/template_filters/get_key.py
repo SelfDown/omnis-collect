@@ -10,5 +10,5 @@ from collect.utils.collect_utils import get_key
 
 
 class GetKey(BaseFilter):
-    def filter(self, value):
-        return get_key(value)
+    def filter(self, value,default_value=None):
+        return get_key(value,default_value)
