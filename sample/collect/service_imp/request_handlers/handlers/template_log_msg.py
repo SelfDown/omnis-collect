@@ -47,9 +47,10 @@ class TemplateLogMsg(RequestHandler):
                 data_name = self.get_data_name()
                 if data_name in item:
                     data_item = item[data_name]
-                    if msg_name in data_item and isinstance(data_item[msg_name],dict):
+                    if msg_name in data_item and (
+                            isinstance(data_item[msg_name], dict) or isinstance(data_item[msg_name], list)):
                         import json
-                        data_item[msg_name] = json.dumps(data_item[msg_name], cls=DateEncoder,ensure_ascii=False)
+                        data_item[msg_name] = json.dumps(data_item[msg_name], cls=DateEncoder, ensure_ascii=False)
                     result_list.append(data_item)
         params[save_field] = result_list
         return self.success(params)
