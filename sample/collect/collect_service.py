@@ -245,7 +245,7 @@ class CollectService:
     def get_switch_default_name(self):
         return self.const["switch_default_name"]
 
-    def get_render_data(self, templ, params, tool,nullToTemplateField=True):
+    def get_render_data(self, templ, params, tool, nullToTemplateField=True):
         """
         nullToTemplateField 如果值为空则设置模板的变量，一般用于检查字段是否设置值
         """
@@ -378,7 +378,7 @@ class CollectService:
         from collect.service.template_service import TemplateService
         template_service = TemplateService(op_user=self.op_user)
         template_service.set_session(self.get_session())
-        self.handler_self_register_data(template_service,template)
+        self.handler_self_register_data(template_service, template)
 
         # request_register = self.get_request_register()
         # for register in request_register:
@@ -817,12 +817,12 @@ class CollectService:
         self.session = None
         self.header = None
         # 初始化模板事件
-        from collect.service_imp.template_event_log.template_event_log import TemplateEventLog
-        self.template_event_log = TemplateEventLog()
+
         pass
 
-    def add_template_event_log(self, log_type, data):
-        self.template_event_log.add_template_event(log_type, data)
+    # def add_template_event_log(self, log_type, data):
+    #     self.template_event_log.add_template_event(log_type, data)
+    #     pass
 
     def setIsHttp(self, is_http):
         self.template["is_http"] = is_http
@@ -861,7 +861,8 @@ class CollectService:
 
         event_id = self.get_template_log_event_id(template)
         if event_id:
-            self.add_template_event_log(self.get_template_event_log_name(), {
+            from collect.service_imp.template_event_log.template_event_log import template_log
+            template_log.add_template_event(self.get_template_event_log_name(), {
                 "user_id": self.op_user,
                 "event_id": event_id,
                 "msg": msg,

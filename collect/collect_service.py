@@ -13,7 +13,7 @@ sys.setdefaultencoding('utf-8')
 # with open(sql_factory_config, 'r') as f:
 #     sql_config = yaml.load(f)
 
-from collect.utils.collect_utils import get_safe_data, is_empty, OmnisService, get_key, DateEncoder
+from collect.utils.collect_utils import get_safe_data, is_empty, OmnisService, get_key, DateEncoder, getDateTime
 
 
 class CollectService:
@@ -102,7 +102,9 @@ class CollectService:
         "from_service_name": "from_service",
         "request_register_name": "request_register",
         "session_name": "session",
-        "header_name": "header"
+        "header_name": "header",
+        "template_log_event_id_name": "template_log_event_id",
+        "template_event_log_name": "template_event_log",
 
     }
     router = {
@@ -144,6 +146,9 @@ class CollectService:
     def get_from_service_name(self):
         return self.const["from_service_name"]
 
+    def get_template_event_log_name(self):
+        return self.const["template_event_log_name"]
+
     def get_render_tool(self):
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(op_user=self.op_user)
@@ -154,7 +159,7 @@ class CollectService:
         config_file = config_dir + "/" + config_file_name
         import os
         if not os.path.exists(config_file):
-            self.log(config_file + "不存在", "error")
+            self.log(config_file + "不存在", "error", self.template)
             return self.fail(config_file + "文件不存在")
         with open(config_file, 'r') as f:
             config_file_content = f.read()
@@ -240,7 +245,7 @@ class CollectService:
     def get_switch_default_name(self):
         return self.const["switch_default_name"]
 
-    def get_render_data(self, templ, params, tool,nullToTemplateField=True):
+    def get_render_data(self, templ, params, tool, nullToTemplateField=True):
         """
         nullToTemplateField 如果值为空则设置模板的变量，一般用于检查字段是否设置值
         """
@@ -341,6 +346,28 @@ class CollectService:
                     service[key] = params[key]
         return self.success(service)
 
+    def get_get_template_method_name(self):
+        return "get_template_method"
+
+    def get_set_template_method_name(self):
+        return "set_template_method"
+
+    def handler_self_register_data(self, service_obj, template=None):
+        """
+        将数据从上级往下级传递，优先模板
+        """
+        request_register = self.get_request_register()
+        for register in request_register:
+            path = register[self.get_path_name()]
+            class_name = register[self.get_class_name()]
+            try:
+                get_data_method = getattr(self, register[self.get_get_template_method_name()])
+                register_data = get_data_method(template)
+                set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
+                set_data_method(register_data)
+            except Exception as e:
+                return self.fail(class_name + "找不到，请检查配置" + str(e))
+
     def get_service_result(self, service, template=None):
         """
             调用模板服务
@@ -351,12 +378,27 @@ class CollectService:
         from collect.service.template_service import TemplateService
         template_service = TemplateService(op_user=self.op_user)
         template_service.set_session(self.get_session())
+        self.handler_self_register_data(template_service, template)
+
+        # request_register = self.get_request_register()
+        # for register in request_register:
+        #     path = register[self.get_path_name()]
+        #     class_name = register[self.get_class_name()]
+        #     try:
+        #         get_data_method = getattr(self, register["get_template_method"])
+        #         register_data = get_data_method(template)
+        #         set_data_method = getattr(template_service, register["set_template_method"])
+        #         set_data_method(register_data)
+        #     except Exception as e:
+        #         return self.fail(class_name + "找不到，请检查配置" + str(e))
+
         template_result = template_service.result(service)
 
         end = time.time()
         if template and self.can_log(template):
             service_name = get_safe_data(self.get_service_name(), service)
-            self.log("请求 {service} 服务 耗时 {spend} 秒".format(service=service_name, spend=str(end - start)))
+            msg = "请求 {service} 服务 耗时 {spend} 秒".format(service=service_name, spend=str(end - start))
+            self.log(msg, template=template)
         return template_result
 
     def get_from_field_name(self):
@@ -428,9 +470,10 @@ class CollectService:
     def get_key_name(self):
         return self.const["key_name"]
 
-    def get_template_service_name(self):
-        if self.template:
-            return get_safe_data(self.get_key_name(), self.template)
+    def get_template_service_name(self, template=None):
+        template_data = self.get_template_data(template)
+        if template_data:
+            return get_safe_data(self.get_key_name(), template_data)
         return ""
 
     def get_params_name(self):
@@ -525,15 +568,15 @@ class CollectService:
         if not template:
             template = self.template
         import json
-        node_txt = json.dumps(node, cls=DateEncoder)
-        name = get_safe_data(self.get_name_name(), node, node_txt)
+
+        name = get_safe_data(self.get_name_name(), node)
         switch = get_safe_data(self.get_switch_name(), node)
         switch_default = get_safe_data(self.get_switch_default_name(), node)
         if self.can_log(template):
-            self.log(node_txt)
+            self.log(node, template=template)
         if switch and isinstance(switch, list):
             if self.can_log(template):
-                self.log("获取switch 判断")
+                self.log("获取switch 判断", template=template)
             for item in switch:
                 case = get_safe_data(self.get_case_name(), item)
                 templ = get_safe_data(field, item)
@@ -543,10 +586,10 @@ class CollectService:
                     return self.fail(name + ":" + self.get_template_name() + "字段不存在")
                 case_result = self.get_template_result(case, params, config_params=config_params, template=template)
                 if self.can_log(template):
-                    self.log(case)
-                    self.log(templ)
-                    self.log(json.dumps(case_result))
-                    self.log(json.dumps(case_result))
+                    self.log(case, template=template)
+                    self.log(templ, template=template)
+                    self.log(case_result, template=template)
+                    self.log(case_result, template=template)
 
                 if not self.is_success(case_result):
                     return case_result
@@ -764,14 +807,22 @@ class CollectService:
 
         from collect.utils.log import get_collect_log
         self.logger = get_collect_log()
-        self.load_router()
-        self.template = None
-        self.finish = True
         self.op_user = op_user
+        self.template_log_event_id = None
+        self.template = {}
+        self.load_router()
+
+        self.finish = True
+
         self.session = None
         self.header = None
+        # 初始化模板事件
 
         pass
+
+    # def add_template_event_log(self, log_type, data):
+    #     self.template_event_log.add_template_event(log_type, data)
+    #     pass
 
     def setIsHttp(self, is_http):
         self.template["is_http"] = is_http
@@ -780,21 +831,51 @@ class CollectService:
         self.header = header
         self.template[self.get_header_name()] = header
 
-    def get_header(self):
+    def get_template_log_event_id_name(self):
+        return self.const["template_log_event_id_name"]
 
-        return self.header
+    def set_template_log_event_id(self, template_log_event_id):
+        self.template_log_event_id = template_log_event_id
+        self.template[self.get_template_log_event_id_name()] = template_log_event_id
 
     def set_session(self, session):
         self.template[self.get_session_name()] = session
         self.session = session
 
-    def get_session(self):
+    def get_session(self, template=None):
+        if template:
+            return template[self.get_session_name()]
         return self.session
 
-    def log(self, msg, level=None):
+    def get_header(self, template=None):
+        if template:
+            return template[self.get_header_name()]
+        return self.header
+
+    def get_template_log_event_id(self, template=None):
+        if template:
+            return template[self.get_template_log_event_id_name()]
+        return self.template_log_event_id
+
+    def log(self, msg, level=None, template=None):
+
+        event_id = self.get_template_log_event_id(template)
+        if event_id:
+            from collect.service_imp.template_event_log.template_event_log import template_log
+            template_log.add_template_event(self.get_template_event_log_name(), {
+                "user_id": self.op_user,
+                "event_id": event_id,
+                "msg": msg,
+                "datetime": getDateTime(),
+                "from_service": self.get_template_service_name(template)
+            })
+            write_file_log = get_key("write_file_log", "true")
+            if write_file_log != "true":
+                return
+
         if isinstance(msg, dict):
             import json
-            msg = json.dumps(msg)
+            msg = json.dumps(msg, cls=DateEncoder)
         if not level:
             self.logger.info(msg)
         elif level == "error":
@@ -830,6 +911,9 @@ class CollectService:
 
     def set_template(self, template):
         # 复制模板
+        """
+        这个千万不要乱改，已经验证过，将copy 去掉必报错，因为模板被改了
+        """
         import copy
         self.template = copy.deepcopy(template)
 
@@ -1384,8 +1468,8 @@ class CollectService:
             self.log(self.op_user + "访问" + self.get_template_service_name())
             import json
             try:
-                tmp = json.dumps(params, cls=DateEncoder)
-                self.log(tmp)
+                # tmp = json.dumps(params, cls=DateEncoder)
+                self.log(params)
             except Exception as e:
                 pass
 

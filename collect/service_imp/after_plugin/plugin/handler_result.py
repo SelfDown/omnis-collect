@@ -17,7 +17,7 @@ class HandlerResult(AfterPlugin):
                 h = ResultHandler(op_user=self.op_user)
                 if self.can_log(template):
                     config = get_safe_data(self.get_key_name(), result_handler)
-                    self.log(msg="进入处理器结果" + config)
+                    self.log(msg="进入处理器结果" + config,template=template)
                 result_data = h.handler(result, result_handler, template)
                 if self.is_success(result_data):
                     result = self.get_data(result_data)

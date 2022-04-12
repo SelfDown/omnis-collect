@@ -55,5 +55,5 @@ class UpdateData(RequestHandler):
                 item[field_name] = self.get_render_data(temp, params_copy, template_tool)
 
         if self.can_log(template):
-            self.log(params)
+            self.log(params,template=template)
         return self.success(params)

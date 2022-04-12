@@ -32,5 +32,5 @@ class NewField(RequestHandler):
             value = self.get_render_data(templ, params_result, template_tool)
             params[key] = value
         if self.can_log(template):
-            self.log(params)
+            self.log(params,template=template)
         return self.success(params)

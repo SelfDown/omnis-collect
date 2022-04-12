@@ -9,7 +9,7 @@ from collect.collect_service import CollectService
 from collect.utils.collect_utils import get_safe_data, Singleton
 
 
-@Singleton
+# @Singleton
 class TemplateService(CollectService):
     TSConst = {
         "http_name": "http",
