@@ -67,45 +67,53 @@ class TemplateService(CollectService):
 
         service_obj = collect_service.get_data(result)
         service_obj.setIsHttp(is_http)
+
         # 如果是http 直接请求
         # 数据对象的设置，设置session，header
+        def handler_register(register):
+            path = register[self.get_path_name()]
+            class_name = register[self.get_class_name()]
+            try:
+                import importlib
+                register_factory = importlib.import_module(path)
+                register_obj = getattr(register_factory, class_name)(op_user=self.op_user)
+                # 插件设置请求对象，
+                register_obj.set_request(self.get_request())
+                get_data_method = getattr(register_obj, register[self.get_method_name()])
+                register_data = get_data_method()
+                if not self.is_success(register_data):
+                    return register_data
+                register_data = self.get_data(register_data)
+                set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
+                set_data_method(register_data)
+                return self.success([])
+            except Exception as e:
+                return self.fail(class_name + "找不到，请检查配置" + str(e))
+
         request_register = self.get_request_register()
         if is_http:  # 如果是http 就生成
             http_result = self.http_check(service_obj.get_template())
             # http 检查返回结果
             if not collect_service.is_success(http_result):
                 return http_result
-
-            for register in request_register:
-                path = register[self.get_path_name()]
-                class_name = register[self.get_class_name()]
-                try:
-                    import importlib
-                    register_factory = importlib.import_module(path)
-                    register_obj = getattr(register_factory, class_name)(op_user=self.op_user)
-                    # 插件设置请求对象，
-                    register_obj.set_request(self.get_request())
-                    get_data_method = getattr(register_obj, register[self.get_method_name()])
-                    register_data = get_data_method()
-                    if not self.is_success(register_data):
-                        return register_data
-                    register_data = self.get_data(register_data)
-                    set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
-                    set_data_method(register_data)
-                except Exception as e:
-                    return self.fail(class_name + "找不到，请检查配置" + str(e))
+            for register_item in request_register:
+                register_result = handler_register(register_item)
+                if not self.is_success(register_result):
+                    return register_result
         else:  # 如果非http 就从上级获取
             self.handler_self_register_data(service_obj)
-            # for register in request_register:
-            #     path = register[self.get_path_name()]
-            #     class_name = register[self.get_class_name()]
-            #     try:
-            #         get_data_method = getattr(self, register[self.get_get_template_method_name()])
-            #         register_data = get_data_method()
-            #         set_data_method = getattr(service_obj, register[self.get_set_template_method_name()])
-            #         set_data_method(register_data)
-            #     except Exception as e:
-            #         return self.fail(class_name + "找不到，请检查配置" + str(e))
+        # 主要处理手动调用TemplateService 服务，非http 不能生成event_id
+        always_register = self.get_always_request_register()
+        if always_register:  # 处理template 里面event_id,加上always 标签
+            class_name = always_register[self.get_class_name()]
+            try:
+                # 先获取service_obj 里面的对象，是否有值
+                get_data_method = getattr(service_obj, always_register[self.get_get_template_method_name()])
+                register_data = get_data_method()
+                if not register_data:  # 如果不存在值,则生成
+                    handler_register(always_register)
+            except Exception as e:
+                return self.fail(class_name + "找不到，请检查配置" + str(e))
 
         # 查询数据
         params = data

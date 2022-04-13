@@ -123,7 +123,7 @@ class LdapService(CollectService):
             msg = str(e)
             if "password" in connection_dict:
                 connection_dict["password"] = "*****"
-            self.log(json.dumps(connection_dict))
+            self.log(connection_dict)
             self.log(msg)
 
             return self.fail("登陆失败")
