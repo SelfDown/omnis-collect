@@ -84,6 +84,7 @@ request_register:
     path: collect.service_imp.request_register.register.template_event_id
     class_name: TemplateEventID
     method: get_register_data
+    always: true
     set_template_method: "set_template_log_event_id"
     get_template_method: "get_template_log_event_id"
 

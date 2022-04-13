@@ -38,7 +38,7 @@ class NewCol(ResultHandler):
                 return self.fail("参数" + self.get_to_field_name() + " 节点,没有找到" + self.get_template_name())
 
             def set_value(obj):
-                value = self.get_render_data(templ,obj,t)
+                value = self.get_render_data(templ, obj, t, nullToTemplateField=False)
                 obj[field] = value
 
             if isinstance(result, list):

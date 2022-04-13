@@ -87,7 +87,7 @@ class TemplateTool(CollectService):
                 del params['self']
             result_content = t.render(**params)
         except Exception as e:
-            self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！")
+            self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！",template=template)
             return ""
 
         data = result_content.strip()

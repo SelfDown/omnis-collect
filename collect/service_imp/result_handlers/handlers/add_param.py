@@ -29,7 +29,7 @@ class AddParam(ResultHandler):
         #     t = TemplateTool()
         #     val = t.render(from_field, param_result)
         t = TemplateTool(self.op_user)
-        val = self.get_render_data(from_field,param_result,t)
+        val = self.get_render_data(from_field,param_result,t,nullToTemplateField=False)
         if isinstance(result, dict):
             result[to_field] = val
         elif isinstance(result, list):

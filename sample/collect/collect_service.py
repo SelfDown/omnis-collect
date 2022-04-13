@@ -105,6 +105,7 @@ class CollectService:
         "header_name": "header",
         "template_log_event_id_name": "template_log_event_id",
         "template_event_log_name": "template_event_log",
+        "always_name": "always",
 
     }
     router = {
@@ -136,6 +137,9 @@ class CollectService:
 
     def get_session_name(self):
         return self.const["session_name"]
+
+    def get_always_name(self):
+        return self.const["always_name"]
 
     def get_header_name(self):
         return self.const["header_name"]
@@ -707,6 +711,13 @@ class CollectService:
         from collect.service_imp.config_data.config_cache_data import ConfigCacheData
         return ConfigCacheData.get_request_register()
 
+    def get_always_request_register(self):
+        registers = self.get_request_register()
+        for item in registers:
+            if get_safe_data(self.get_always_name(),item):
+                return item
+        return
+
     def get_before_plugin(self):
         from collect.service_imp.config_data.config_cache_data import ConfigCacheData
         return ConfigCacheData.get_before_plugin()
@@ -875,7 +886,7 @@ class CollectService:
 
         if isinstance(msg, dict):
             import json
-            msg = json.dumps(msg, cls=DateEncoder,ensure_ascii=False)
+            msg = json.dumps(msg, cls=DateEncoder, ensure_ascii=False)
         if not level:
             self.logger.info(msg)
         elif level == "error":
