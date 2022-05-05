@@ -2,14 +2,14 @@
 """
 @Time: 2021/8/16 16:23
 @Author: zzhang zzhang@cenboomh.com
-@File: omnis_flow.py
+@File: collect_flow.py
 @desc:
 """
 from collect.collect_service import CollectService
 from collect.utils.collect_utils import get_safe_data
 
 
-class ServiceOmnisFlowService(CollectService):
+class ServiceCollectFlowService(CollectService):
     flow_const = {
         "services_name": "services",
         "name_name": "name",

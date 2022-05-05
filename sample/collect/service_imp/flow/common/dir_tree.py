@@ -5,11 +5,11 @@
 @File: dir_tree.py
 @desc:
 """
-from collect.service_imp.flow.omnis_ssh import OmnisSSHService
+from collect.service_imp.flow.collect_ssh import CollectSSHService
 from collect.utils.collect_utils import get_safe_data, get_uuid
 
 
-class DirTree(OmnisSSHService):
+class DirTree(CollectSSHService):
     dt_const = {
         "file_name": "file",
         "dir_name": "dir"

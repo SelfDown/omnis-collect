@@ -1,0 +1,28 @@
+service:
+  - key: command_test
+    module: ssh
+    http: true
+    ssh_connect: false
+    log: true
+    shell:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: exec_command
+        - key: exec_command
+          type: node
+          name: 执行本地命令
+          command: "sudo nginx -t  "
+          save_field: result
+          next: end
+          fail: end
+        - key: end
+          type: end
+          name: 结束
+
+    result_handler:
+      - key: param2result
+        params:
+          field: result
+

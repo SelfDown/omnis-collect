@@ -52,12 +52,13 @@ import collect.service_imp.flow.common.gen_template
 import collect.service_imp.request_rules.template
 import collect.service_imp.common.filters.template_filters.json_str
 import collect.service_imp.flow.common.scp_copy
-import collect.service_imp.flow.omnis_ssh
+import collect.service_imp.flow.collect_ssh
 
 import collect.service_imp.ldap.ldap_service
 import collect.service_imp.model.bulk_create
 import collect.service_imp.sql.sql_update
 import collect.service_imp.request_handlers.handlers.update_data
+import collect.service_imp.common.filters.template_filters.date_time
 
 import collect.service_imp.request_handlers.handlers.mul_arr
 import collect.service_imp.request_handlers.handlers.ignore_data
@@ -83,3 +84,17 @@ import collect.service_imp.common.filters.template_filters.ldap_password
 import collect.service_imp.request_handlers.handlers.new_field
 import collect.service_imp.test.test_service
 import collect.service_imp.result_handlers.handlers.add_param
+import collect.service_imp.model.bulk_create
+import collect.service_imp.flow.collect_ssh
+import collect.service_imp.request_register.register.header
+import subprocess
+proc = subprocess.Popen("ls",shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
+proc.wait()
+print proc.stdout.read()
+print proc.stderr.read()
+# stdout=io.TextIOWrapper(proc.stdout,encoding="utf-8")
+# stderr=io.TextIOWrapper(proc.stderr,encoding="utf-8")
+# import os
+# data = os.popen("cd F:/etc/ppp")
+# print data.read()
+import collect.service_imp.flow.common.server_archive

@@ -130,7 +130,7 @@ class DjangoSession(models.Model):
 
 
 class EventLog(models.Model):
-    event_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    event_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     group = models.CharField(max_length=50, blank=True, null=True)
     tag = models.CharField(max_length=50, blank=True, null=True)
     from_service = models.CharField(max_length=200)
@@ -148,8 +148,21 @@ class EventLog(models.Model):
         db_table = 'event_log'
 
 
+class FileData(models.Model):
+    file_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
+    file_type = models.CharField(max_length=50, blank=True, null=True)
+    size = models.BigIntegerField(blank=True, null=True)
+    data = models.BinaryField(blank=True, null=True)
+    name = models.CharField(max_length=200, blank=True, null=True)
+    op_user = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'file_data'
+
+
 class LdapGroup(models.Model):
-    ldap_group_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    ldap_group_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
@@ -158,7 +171,7 @@ class LdapGroup(models.Model):
 
 
 class Project(models.Model):
-    project_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    project_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     code = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=200, blank=True, null=True)
     create_time = models.CharField(max_length=50, blank=True, null=True)
@@ -171,7 +184,7 @@ class Project(models.Model):
 
 
 class Role(models.Model):
-    role_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    role_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     role_name = models.CharField(max_length=255, blank=True, null=True)
     order_index = models.TextField(blank=True, null=True)  # This field type is a guess.
     role_code = models.CharField(max_length=50, blank=True, null=True)
@@ -182,7 +195,7 @@ class Role(models.Model):
 
 
 class RoleLdapGroup(models.Model):
-    role_ldap_group_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    role_ldap_group_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     role_id = models.CharField(max_length=50, blank=True, null=True)
     ldap_group_id = models.CharField(max_length=50, blank=True, null=True)
 
@@ -192,7 +205,7 @@ class RoleLdapGroup(models.Model):
 
 
 class RoleMenu(models.Model):
-    role_menu_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    role_menu_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     role_id = models.CharField(max_length=50, blank=True, null=True)
     menu_id = models.CharField(max_length=50, blank=True, null=True)
 
@@ -202,7 +215,7 @@ class RoleMenu(models.Model):
 
 
 class SysCode(models.Model):
-    sys_code_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    sys_code_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     sys_code_type = models.CharField(max_length=50, blank=True, null=True)
     sys_code_type_name = models.CharField(max_length=100, blank=True, null=True)
     sys_code = models.CharField(max_length=50, blank=True, null=True)
@@ -216,7 +229,7 @@ class SysCode(models.Model):
 
 
 class SysMenu(models.Model):
-    menu_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    menu_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     menu_type = models.CharField(max_length=50, blank=True, null=True)
     menu_url = models.CharField(max_length=50, blank=True, null=True)
@@ -231,7 +244,7 @@ class SysMenu(models.Model):
 
 
 class SysProjects(models.Model):
-    sys_project_id = models.CharField(unique=True, max_length=100, blank=True, null=True)
+    sys_project_id = models.CharField(primary_key=True, max_length=100, blank=True, null=True)
     project_name = models.CharField(max_length=1000, blank=True, null=True)
     project_code = models.CharField(max_length=100, blank=True, null=True)
     create_time = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -248,7 +261,7 @@ class SysProjects(models.Model):
 
 
 class TemplateEventLog(models.Model):
-    template_event_log_id = models.CharField(unique=True, max_length=255, blank=True, null=True)
+    template_event_log_id = models.CharField(primary_key=True, max_length=255, blank=True, null=True)
     user_id = models.CharField(max_length=255, blank=True, null=True)
     event_id = models.CharField(max_length=255, blank=True, null=True)
     msg = models.TextField(blank=True, null=True)
@@ -261,7 +274,7 @@ class TemplateEventLog(models.Model):
 
 
 class UserAccount(models.Model):
-    user_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    user_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     nick = models.CharField(max_length=200, blank=True, null=True)
     username = models.CharField(max_length=50, blank=True, null=True)
     password = models.CharField(max_length=200, blank=True, null=True)
@@ -288,7 +301,7 @@ class UserAccount(models.Model):
 
 
 class UserRole(models.Model):
-    user_role_id = models.CharField(unique=True, max_length=50, blank=True, null=True)
+    user_role_id = models.CharField(primary_key=True, max_length=50, blank=True, null=True)
     role_id = models.CharField(max_length=50, blank=True, null=True)
     user_id = models.CharField(max_length=50, blank=True, null=True)
 

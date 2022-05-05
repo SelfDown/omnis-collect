@@ -13,7 +13,8 @@ sys.setdefaultencoding('utf-8')
 # with open(sql_factory_config, 'r') as f:
 #     sql_config = yaml.load(f)
 
-from collect.utils.collect_utils import get_safe_data, is_empty, OmnisService, get_key, DateEncoder, getDateTime
+from collect.utils.collect_utils import get_safe_data, is_empty, get_key, DateEncoder, getDateTime, \
+    CollectServiceUtils
 
 
 class CollectService:
@@ -102,6 +103,7 @@ class CollectService:
         "from_service_name": "from_service",
         "request_register_name": "request_register",
         "session_name": "session",
+        "request_name": "request",
         "header_name": "header",
         "template_log_event_id_name": "template_log_event_id",
         "template_event_log_name": "template_event_log",
@@ -143,6 +145,9 @@ class CollectService:
 
     def get_header_name(self):
         return self.const["header_name"]
+
+    def get_request_name(self):
+        return self.const["request_name"]
 
     def get_request_register_name(self):
         return self.const["request_register_name"]
@@ -714,7 +719,7 @@ class CollectService:
     def get_always_request_register(self):
         registers = self.get_request_register()
         for item in registers:
-            if get_safe_data(self.get_always_name(),item):
+            if get_safe_data(self.get_always_name(), item):
                 return item
         return
 
@@ -821,6 +826,7 @@ class CollectService:
         self.op_user = op_user
         self.template_log_event_id = None
         self.template = {}
+        self.request = None
         self.load_router()
 
         self.finish = True
@@ -858,6 +864,15 @@ class CollectService:
             return template[self.get_session_name()]
         return self.session
 
+    def get_request(self, template=None):
+        if template:
+            return template[self.get_request_name()]
+        return self.request
+
+    def set_request(self, request):
+        self.request = request
+        self.template[self.get_request_name()] = request
+
     def get_header(self, template=None):
         if template:
             return template[self.get_header_name()]
@@ -886,7 +901,11 @@ class CollectService:
 
         if isinstance(msg, dict):
             import json
-            msg = json.dumps(msg, cls=DateEncoder, ensure_ascii=False)
+            try:
+                msg = json.dumps(msg, cls=DateEncoder)
+            except Exception as e:
+                msg = json.dumps(msg, cls=DateEncoder, encoding="ISO-8859-1")
+
         if not level:
             self.logger.info(msg)
         elif level == "error":
@@ -1272,10 +1291,10 @@ class CollectService:
         ConfigCacheData.set_request_register(request_register)
 
     def fail(self, msg):
-        return OmnisService.fail(msg=msg)
+        return CollectServiceUtils.fail(msg=msg)
 
     def combine_other(self, other, result):
-        now = OmnisService.get_other(result)
+        now = CollectServiceUtils.get_other(result)
         if not now and not other:
             return None
 
@@ -1287,25 +1306,25 @@ class CollectService:
         return other
 
     def success(self, data, count=-1, msg="", finish=False, other=None):
-        return OmnisService.success(data=data, msg=msg, count=count, finish=finish, other=other)
+        return CollectServiceUtils.success(data=data, msg=msg, count=count, finish=finish, other=other)
 
     def get_other(self, result):
-        return OmnisService.get_other(result)
+        return CollectServiceUtils.get_other(result)
 
     def is_success(self, data):
-        return OmnisService.is_success(data)
+        return CollectServiceUtils.is_success(data)
 
     def is_finish(self, data):
-        return OmnisService.is_finish(data)
+        return CollectServiceUtils.is_finish(data)
 
     def get_msg(self, data):
-        return OmnisService.get_msg(data)
+        return CollectServiceUtils.get_msg(data)
 
     def get_data(self, data):
-        return OmnisService.get_data(data)
+        return CollectServiceUtils.get_data(data)
 
     def get_count(self, data):
-        return OmnisService.get_count(data)
+        return CollectServiceUtils.get_count(data)
 
     def make_service(self, service):
         result = self.get_module(service)

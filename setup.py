@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="omnis-collect",
-    version="0.0.81",
+    name="collect",
+    version="0.0.83",
     author="zzhang",
     author_email="zzhang@cenboomh.com",
     description="一个web 接口配置工具",

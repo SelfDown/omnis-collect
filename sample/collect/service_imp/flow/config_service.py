@@ -5,18 +5,18 @@
 @File: ModelUpdate.py
 @desc:
 """
-from collect.service_imp.flow.omnis_flow import ServiceOmnisFlowService
+from collect.service_imp.flow.collect_flow import ServiceCollectFlowService
 from collect.utils.collect_utils import get_safe_data
 
 
-class ConfigService(ServiceOmnisFlowService):
+class ConfigService(ServiceCollectFlowService):
     cf_const = {
         "flow_name": "config"
     }
     config_app_config = None
 
     def __init__(self, op_user):
-        ServiceOmnisFlowService.__init__(self, op_user)
+        ServiceCollectFlowService.__init__(self, op_user)
         if not ConfigService.config_app_config:
             ConfigService.config_app_config = self.get_third_application(self.get_config_flow_name())
 

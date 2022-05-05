@@ -5,11 +5,11 @@
 @File: server_copy.py
 @desc:
 """
-from collect.service_imp.flow.omnis_ssh import OmnisSSHService
+from collect.service_imp.flow.collect_ssh import CollectSSHService
 from collect.utils.collect_utils import get_safe_data
 
 
-class ServerCopyTree(OmnisSSHService):
+class ServerCopyTree(CollectSSHService):
     def handler(self, params, config, template):
         from_path = get_safe_data(self.get_from_path_name(), config)
         if not from_path:

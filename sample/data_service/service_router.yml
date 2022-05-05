@@ -88,6 +88,14 @@ request_register:
     set_template_method: "set_template_log_event_id"
     get_template_method: "get_template_log_event_id"
 
+  - name: get_request
+    path: collect.service_imp.request_register.register.get_request
+    class_name: GetRequest
+    method: get_register_data
+    always: true
+    set_template_method: "set_request"
+    get_template_method: "get_request"
+
 before_plugin:
   # 登录检查
   - name: login_check
@@ -195,6 +203,16 @@ request_handler:
   - key: excel_data
     path: collect.service_imp.request_handlers.handlers.excelData
     class_name: excelData
+    method: handler
+  # 文件转内容
+  - key: file2data
+    path: collect.service_imp.request_handlers.handlers.file2data
+    class_name: File2data
+    method: handler
+  # 内容转文件
+  - key: gen_file
+    path: collect.service_imp.request_handlers.handlers.gen_file
+    class_name: GenFile
     method: handler
   # 数组更新数组
   - key: update_data_from_array
@@ -360,8 +378,8 @@ module_handler:
     class_name: ServiceFlowService
   # ssh
   - key: ssh
-    path: collect.service_imp.flow.omnis_ssh
-    class_name: OmnisSSHService
+    path: collect.service_imp.flow.collect_ssh
+    class_name: CollectSSHService
     method: handler
   # bulk create
   - key: bulk_service
@@ -534,6 +552,10 @@ third_application:
     - key: file_content
       path: "collect.service_imp.flow.common.file_content"
       class_name: "FileContent"
+      method: "handler"
+    - key: command
+      path: "collect.service_imp.flow.common.command"
+      class_name: "Command"
       method: "handler"
   config:
     - key: config_data

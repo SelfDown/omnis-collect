@@ -13,6 +13,7 @@ from collect.collect_service import CollectService
 # 全局变量缓存模板信息
 _cache = {}
 
+
 class TemplateTool(CollectService):
     filter_config = {
         "uuid": {
@@ -79,15 +80,21 @@ class TemplateTool(CollectService):
         #     t = _cache[templ]["temp"]
         #     # env = _cache[templ]["env"]
         # else:
+        from django.http import QueryDict
+        if isinstance(params, QueryDict):
+            try:
+                params = params.dict()
+            except Exception as  e:
+                pass
         env = Environment()
         self.load_filter(env, templ, params, config_params, template)
         t = env.from_string(templ)
         try:
-            if params and isinstance(params,dict) and 'self' in params :
+            if params and isinstance(params, dict) and 'self' in params:
                 del params['self']
             result_content = t.render(**params)
         except Exception as e:
-            self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！",template=template)
+            self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！", template=template)
             return ""
 
         data = result_content.strip()

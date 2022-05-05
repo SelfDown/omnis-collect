@@ -1,4 +1,66 @@
 service:
+  - key: get_file_data
+    http: true
+    must_login: false
+    module: sql
+    sql_file: file_list.sql
+  - key: make_files
+    http: true
+    module: empty
+    must_login: false
+    handler_params:
+      - key: service2field
+        service:
+          service: test.get_file_data
+        save_field: file_list
+      - key: gen_file
+        foreach: file_list
+        item: item
+        dir_path: "{{'template_out_dir'|get_key}}{{'%Y_%m_%d_%H%M%S.%f'|current_date_time}}"
+        file_name: item.name
+        file_content: item.data
+        save_field: target_zip
+    result_handler:
+      - key: file_response
+        params:
+          path: target_zip
+          filename: 'script.zip'
+
+
+
+  - key: file_upload
+    http: true
+    module: bulk_create
+    must_login: false
+    params:
+      file_service_type:
+        default: "script"
+      accept_type:
+        template: ".zip,.sql,.xml,.cls,.xls,.xlsx,.md"
+      forbid_type:
+        template: ".exe,.sh,.bat,.cmd"
+    handler_params:
+      - key: file2data
+        file_field: file
+        accept_type: accept_type
+        forbid_type: forbid_type
+        save_field: file_list
+      - key: update_data
+        foreach: file_list
+        item: item
+        fields:
+          - field: file_id
+            template: "{{''|uuid}}"
+          - field: file_type
+            template: "{{file_service_type}}"
+    model_field: file_list
+    model: FileData
+
+#    result_handler:
+#      - key: param2result
+#        params:
+#          field: file_list
+
   # 项目
   - key: "module_test"
     name: 菜单栏查询

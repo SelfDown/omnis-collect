@@ -83,7 +83,7 @@ class data_value_check:
         return False
 
 
-class OmnisService:
+class CollectServiceUtils:
     """
     服务查询状态结果返回，
     主要包括3个字段
@@ -104,7 +104,7 @@ class OmnisService:
     @staticmethod
     def success(data=[], msg="查询成功", count=-1, finish=False, other=None):
         result = {
-            "code": OmnisService.success_code,
+            "code": CollectServiceUtils.success_code,
             "success": True,
             "data": data,
             "msg": msg
@@ -157,6 +157,8 @@ class DateEncoder(json.JSONEncoder):
             return float(obj)
         elif isinstance(obj, InMemoryUploadedFile):
             return obj.name
+        elif isinstance(obj, buffer):
+            return str(obj)
         else:
             return json.JSONEncoder.default(self, obj)
 
@@ -170,8 +172,11 @@ class Result:
 
     @staticmethod
     def success(data=[], msg="查询成功", count=-1, other=None):
-        result = OmnisService.success(data=data, msg=msg, count=count, other=other)
-        return json.dumps(result, cls=DateEncoder)
+        result = CollectServiceUtils.success(data=data, msg=msg, count=count, other=other)
+        try:
+            return json.dumps(result, cls=DateEncoder)
+        except Exception as e:
+            return json.dumps(result, cls=DateEncoder, encoding="ISO-8859-1")
 
     @staticmethod
     def success_response(data=[], msg="查询成功", count=-1, cookies={}, other=None):
@@ -183,7 +188,7 @@ class Result:
 
     @staticmethod
     def fail(data=[], code="1", msg=""):
-        result = OmnisService.fail(data=data, code=code, msg=msg)
+        result = CollectServiceUtils.fail(data=data, code=code, msg=msg)
         return json.dumps(result, cls=DateEncoder)
         # result = {"code": code, "msg": msg, "success": False, 'data': data}
         # return json.dumps(result, cls=DateEncoder)
@@ -443,3 +448,35 @@ def Singleton(clsObject):
         return ins
 
     return inner
+
+
+# 自己定义一个decorator，用来装饰使用数据库的函数
+def close_old_connections_wrapper(func):
+    # def wrapper(*args, **kwargs):
+    #     logger.error("清理过时连接")
+    #     close_old_connections()
+    #     return func(*args, **kwargs)
+    #
+    # return wrapper
+    # logger.error("清理过时连接")
+
+    def wrapper(*args, **kargs):
+        # 确保数据库连接可用，防止连接被服务端主动关闭情况下的异常
+        # 参考 https://stackoverflow.com/questions/7835272/django-operationalerror-2006-mysql-server-has-gone-away
+        from django.db import connection, connections
+        for conn in connections.all():
+            conn.close_if_unusable_or_obsolete()
+        # mysql is lazily connected to in django.
+        # connection.connection is None means
+        # you have not connected to mysql before
+        for i in range(1, 6):
+            if connection.connection and not connection.is_usable():
+                # destroy the default mysql connection
+                # after this line, when you use ORM methods
+                # django will reconnect to the default mysql
+                del connections._connections.default
+            if connection.connection and connection.is_usable():
+                break
+        return func(*args, **kargs)
+
+    return wrapper

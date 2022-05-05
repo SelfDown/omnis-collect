@@ -22,7 +22,23 @@
             </form>
             <button
                     @click="upload"
-                    size="mini" type="primary">JIRA文件解析</button>
+                    size="mini" type="primary">JIRA文件解析
+            </button>
+
+        </el-row>
+
+        <el-row style="display: flex">
+            <form id="form2">
+                <input name="service" value="test.file_upload"/>
+                <input type="file" name="file">
+                <input type="file" name="file">
+            </form>
+            <button
+                    @click="upload2"
+
+                    type="primary">
+                文件转内容
+            </button>
 
         </el-row>
 
@@ -47,6 +63,13 @@
 
                 <a href="javascript:void (0)" @click="change('result30_search')">
                     登录
+                </a>
+
+            </div>
+            <div>
+
+                <a href="javascript:void (0)" @click="change('result31_search')">
+                    下载数据库blob字段文件
                 </a>
 
             </div>
@@ -345,6 +368,7 @@
                     result28_search: '{"service":"event.event_user_create","id":"zz"}',
                     result29_search: '{"service":"test.module_test"}',
                     result30_search: '{"service":"hrm.user_login","user_id":"zhangzhi"}',
+                    result31_search: '{"service":"test.make_files"}',
                 }
             }
         },
@@ -352,16 +376,36 @@
 
         },
         methods: {
-            upload(){
+            upload() {
                 let formData = new FormData($("#form")[0])
-                 let _this = this
+                let _this = this
                 $.ajax({
                     url: _this.url,
                     type: "post",
-                    data:formData,
-                    cache:false,
-                    contentType:false,
-                    processData:false,
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        // console.log(res)
+                        _this.result = JSON.stringify(res, null, "\t")
+                    },
+                    error: function (res) {
+                        console.log(res)
+
+                    }
+                })
+            },
+            upload2() {
+                let formData = new FormData($("#form2")[0])
+                let _this = this
+                $.ajax({
+                    url: _this.url,
+                    type: "post",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
                     success: function (res) {
                         // console.log(res)
                         _this.result = JSON.stringify(res, null, "\t")
@@ -459,8 +503,8 @@
                 let _this = this
                 $.ajax({
                     url: _this.url,
-                    headers:{
-                      'token':'weigao'
+                    headers: {
+                        'token': 'weigao'
                     },
                     type: "post",
                     data: _this.params,

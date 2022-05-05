@@ -173,7 +173,7 @@ class SqlService(CollectService):
         result = CollectService.result(self, params)
         if self.finish or not self.is_success(result):
             return result
-        # from omnis_common.omnis_utils.utils import connection_sql_to_data
+
         sql_result = self.get_sql()
         if not self.is_success(sql_result):
             return sql_result

@@ -257,9 +257,9 @@ service:
           err_msg: 文件夹不能为空
         default: ""
       win32_path:
-        template: "{{'omnis_tmp'|get_key}}/zabbix_template/windows/zabbix_agent-4.0.24-windows-i386-openssl.zip"
+        template: "{{'collect_tmp'|get_key}}/zabbix_template/windows/zabbix_agent-4.0.24-windows-i386-openssl.zip"
       win64_path:
-        template: "{{'omnis_tmp'|get_key}}/zabbix_template/windows/zabbix_agent-4.0.24-windows-amd64-openssl.zip"
+        template: "{{'collect_tmp'|get_key}}/zabbix_template/windows/zabbix_agent-4.0.24-windows-amd64-openssl.zip"
 
     shell:
       services:
@@ -324,11 +324,11 @@ service:
       folder:
         default: ""
       dir_from:
-        template: "{{'omnis_tmp'|get_key}}/zabbix_template/windows/sqlserver"
+        template: "{{'collect_tmp'|get_key}}/zabbix_template/windows/sqlserver"
       dir_to:
         template: "{{folder}}/{{server_ip}}"
       service_template_file_from:
-        template: "{{'omnis_tmp'|get_key}}/zabbix_template/windows/sqlserver/win64/conf/{{monitor_service_file_name}}"
+        template: "{{'collect_tmp'|get_key}}/zabbix_template/windows/sqlserver/win64/conf/{{monitor_service_file_name}}"
       service_template_file_to:
         template: "{{folder}}/{{server_ip}}/win32/conf/{{monitor_service_file_name}}"
       service_template_file_to2:
@@ -409,7 +409,7 @@ service:
           template: "{{server_id_list|must_list}}"
           err_msg: 服务器列表不能为空
       folder:
-        template: "{{'omnis_tmp'|get_key}}/zabbix_target/{{''|current_day}}/{{''|uuid|substr(end=4)}}"
+        template: "{{'collect_tmp'|get_key}}/zabbix_target/{{''|current_day}}/{{''|uuid|substr(end=4)}}"
     flow:
       services:
         - key: start

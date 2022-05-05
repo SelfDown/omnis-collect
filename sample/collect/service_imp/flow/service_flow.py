@@ -2,14 +2,14 @@
 """
 @Time: 2021/8/2 16:52
 @Author: zzhang zzhang@cenboomh.com
-@File: omnis_monitor.py
+@File:
 @desc:
 """
-from collect.service_imp.flow.omnis_flow import ServiceOmnisFlowService
+from collect.service_imp.flow.collect_flow import ServiceCollectFlowService
 from collect.utils.collect_utils import get_safe_data, get_key
 
 
-class ServiceFlowService(ServiceOmnisFlowService):
+class ServiceFlowService(ServiceCollectFlowService):
     sf_const = {
         "flow_name": "flow",
         "strict_name": "strict",

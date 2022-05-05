@@ -23,5 +23,7 @@ info:
 
   - key: already exists
     template: "【{{server_ip}}】 已经存在。详情：{{error_msg}}。"
+  - key: 不是内部或外部命令
+    template: "程序异常。详情：{{error_msg}}"
 
 

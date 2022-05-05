@@ -13,3 +13,5 @@ service:
 #    path: "link_template/index.yml"
   - name: "svn 模块"
     path: "svn/index.yml"
+  - name: "command 模块"
+    path: "command/index.yml"

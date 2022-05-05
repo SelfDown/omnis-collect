@@ -14,7 +14,7 @@ service:
         params:
           to_field:
             - field: 'password'
-              template: "{{user_pwd|safe|omnis_decrypt}}"
+              template: "{{user_pwd|safe|collect_decrypt}}"
             - field: 'user'
               template: "{{user_name|safe}}"
           remove:
@@ -34,7 +34,7 @@ service:
         params:
           to_field:
             - field: 'password'
-              template: "{{user_pwd|safe|omnis_decrypt}}"
+              template: "{{user_pwd|safe|collect_decrypt}}"
             - field: 'user'
               template: "{{user_name|safe}}"
           remove:

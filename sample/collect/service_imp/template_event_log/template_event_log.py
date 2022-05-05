@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import threading
 
-from collect.utils.collect_utils import Singleton, get_key
+from collect.utils.collect_utils import Singleton, get_key, close_old_connections_wrapper
 
 
 @Singleton
@@ -18,6 +18,25 @@ class TemplateEventLog:
         self.q = Queue.Queue()
         t1 = threading.Thread(target=self.handler_log_data, )
         t1.start()
+
+    @close_old_connections_wrapper
+    def handler_data(self, data_list):
+        from collect.service.template_service import TemplateService
+        t = TemplateService(op_user="sys")
+        save_service = get_key("log_handler_service")
+        if not save_service:
+            return
+        service = {
+            "service": save_service,
+            "data_list": data_list
+        }
+        try:
+            result = t.result(service, is_http=False)
+            if not t.is_success(result):
+                self.log(t.get_msg(result), "error")
+        except Exception as e:
+            self.log("系统运行错误:" + str(e))
+            # raise e
 
     def handler_log_data(self):
         """
@@ -39,22 +58,8 @@ class TemplateEventLog:
                     data = q.get()
                     data_list.append(data)
                 if len(data_list) > 0:
-                    from collect.service.template_service import TemplateService
-                    t = TemplateService(op_user="sys")
-                    save_service = get_key("log_handler_service")
-                    if not save_service:
-                        continue
-                    service = {
-                        "service": save_service,
-                        "data_list": data_list
-                    }
-                    try:
-                        result = t.result(service, is_http=False)
-                        if not t.is_success(result):
-                            self.log(t.get_msg(result), "error")
-                    except Exception as e:
-                        self.log("系统运行错误:" + str(e))
-                        # raise e
+                    self.handler_data(data_list)
+
             time.sleep(5)
         self.log("结束日志消息")
 

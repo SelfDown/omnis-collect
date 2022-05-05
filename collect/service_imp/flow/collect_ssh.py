@@ -2,12 +2,12 @@
 """
 @Time: 2021/8/16 13:50
 @Author: zzhang zzhang@cenboomh.com
-@File: omnis_ssh.py
+@File: collect_ssh.py
 @desc:
 """
 
 # from collect.collect_service import CollectService
-from collect.service_imp.flow.omnis_flow import ServiceOmnisFlowService
+from collect.service_imp.flow.collect_flow import ServiceCollectFlowService
 from collect.utils.collect_utils import get_safe_data
 
 ssh_error_info_path = './conf/ssh_error_info.yml'
@@ -22,7 +22,7 @@ with open(ssh_error_info_path, 'r') as f:
     error_info = yaml.load(f)
 
 
-class OmnisSSHService(ServiceOmnisFlowService):
+class CollectSSHService(ServiceCollectFlowService):
     ssh_app_config = None
     ssh_const = {
         "user_name": "user",
@@ -125,12 +125,12 @@ class OmnisSSHService(ServiceOmnisFlowService):
         return int(port)
 
     def __init__(self, op_user):
-        ServiceOmnisFlowService.__init__(self, op_user=op_user)
-        if not OmnisSSHService.ssh_app_config:
-            OmnisSSHService.ssh_app_config = self.get_third_application(self.get_ssh_name())
+        ServiceCollectFlowService.__init__(self, op_user=op_user)
+        if not CollectSSHService.ssh_app_config:
+            CollectSSHService.ssh_app_config = self.get_third_application(self.get_ssh_name())
 
     def get_app_config(self):
-        return OmnisSSHService.ssh_app_config
+        return CollectSSHService.ssh_app_config
 
     def get_ssh_data(self, template=None):
         return self.get_data(self.get_ssh_client(template))

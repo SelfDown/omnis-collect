@@ -5,11 +5,11 @@
 @File: ssh_copy.py
 @desc:
 """
-from collect.service_imp.flow.omnis_ssh import OmnisSSHService
+from collect.service_imp.flow.collect_ssh import CollectSSHService
 from collect.utils.collect_utils import get_safe_data
 
 
-class SCPCopy(OmnisSSHService):
+class SCPCopy(CollectSSHService):
     def remote_file_exists(self, ssh, dest_path, template):
         result = self.execute_base_shell_with_log("ls " + dest_path, ssh, template=template)
         result_data = self.get_data(result)
