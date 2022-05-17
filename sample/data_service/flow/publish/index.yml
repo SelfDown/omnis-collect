@@ -1,0 +1,13 @@
+service:
+  - key: publish
+    http: true
+    params:
+      req_statu:
+        check:
+          template: "{{req_statu|must}}"
+          err_msg: 状态不能为空
+    must_login: false
+    status_field: req_statu
+    data_json: publish.json
+    module: workflow
+

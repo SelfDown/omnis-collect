@@ -12,7 +12,7 @@ from collect.utils.collect_utils import get_safe_data
 
 class Service2Field(RequestHandler):
     def handler(self, params, config, template):
-        service_data = self.get_node_service(node=config,params=params,template=template,append_param=False)
+        service_data = self.get_node_service(node=config, params=params, template=template, append_param=False)
         if not self.is_success(service_data):
             return service_data
         service = self.get_data(service_data)
@@ -22,7 +22,8 @@ class Service2Field(RequestHandler):
             self.log(config, template=template)
             return service_result
         save_field = get_safe_data(self.get_save_field_name(), config)
-        params[save_field] = self.get_data(service_result)
+        if save_field:
+            params[save_field] = self.get_data(service_result)
 
         # result_template = get_safe_data(self.get_template_name(), config)
         # err_msg = get_safe_data(self.get_err_msg_name(), config)

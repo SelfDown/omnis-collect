@@ -9,17 +9,36 @@ from collect.service_imp.flow.collect_flow import ServiceCollectFlowService
 from collect.utils.collect_utils import get_safe_data, get_key
 
 
-class ServiceFlowService(ServiceCollectFlowService):
-    sf_const = {
+class WorkFlowService(ServiceCollectFlowService):
+    wf_const = {
         "flow_name": "flow",
         "strict_name": "strict",
+        "services_name": "services",
+        "status_field_name": "status_field",
+
     }
 
+    data_json_dict = {}
+
+    @staticmethod
+    def get_json_content(path):
+        return get_safe_data(path, WorkFlowService.data_json_dict)
+
+    @staticmethod
+    def set_json_content(path, data_json_content):
+        WorkFlowService.data_json_dict[path] = data_json_content
+
     def get_flow_name(self):
-        return self.sf_const["flow_name"]
+        return self.wf_const["flow_name"]
+
+    def get_status_field_name(self):
+        return self.wf_const["status_field_name"]
+
+    def get_services_name(self):
+        return self.wf_const["services_name"]
 
     def get_strict_name(self):
-        return self.sf_const["strict_name"]
+        return self.wf_const["strict_name"]
 
     def get_flow(self):
         return get_safe_data(self.get_flow_name(), self.template)
@@ -52,10 +71,28 @@ class ServiceFlowService(ServiceCollectFlowService):
         return flow_result
 
     def result(self, params):
-        flow = self.get_flow()
+
+        params_result = self.get_params_result()
+        data_json_result = self.get_data_json(params_result)
+        if not self.is_success(data_json_result):
+            return data_json_result
+        data_json = self.get_data(data_json_result)
+        import json
+        data_json = json.loads(data_json)
+        flow = get_safe_data(self.get_flow_name(), data_json)
         if not flow:
             return self.fail(msg="没有找到" + self.get_flow_name() + "节点，请检查配置")
-        flow_result = self.execute(self.handler_current_node)
-        if not self.is_success(flow_result):
-            return flow_result
-        return self.success({})
+        services = get_safe_data(self.get_services_name(), flow)
+        service_dict_result = self.get_service_dict(services)
+        if not self.is_success(service_dict_result):
+            return service_dict_result
+        service_dict = self.get_data(service_dict_result)
+        status_name = get_safe_data(self.get_status_field_name(), self.template)
+        if not status_name:
+            return self.fail("没有配置" + self.get_status_field_name())
+        status = get_safe_data(status_name, params_result)
+        node = get_safe_data(status, service_dict)
+        if not node:
+            return self.fail("没有找打节点" + status)
+        next = get_safe_data(self.get_next_name(), node)
+        return self.success(next)

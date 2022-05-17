@@ -95,8 +95,9 @@ class ServiceCollectFlowService(CollectService):
     def get_end_node(self, service_dict):
         return get_safe_data(self.get_end_name(), service_dict)
 
-    def get_service_dict(self):
-        services = self.get_services()
+    def get_service_dict(self,services=None):
+        if not services:
+            services = self.get_services()
         d = {}
         for index, item in enumerate(services):
             key = get_safe_data(self.get_key_name(), item)

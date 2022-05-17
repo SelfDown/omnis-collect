@@ -1,0 +1,3 @@
+service:
+  - name: "发布计划"
+    path: "publish/index.yml"

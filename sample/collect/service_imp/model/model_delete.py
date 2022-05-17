@@ -32,8 +32,8 @@ class ModelDeleteService(ModelSaveService):
             f[key] = params[param_key]
         query_filter = model_class.objects.filter(**f)
         c = query_filter.count()
-        if c > 1000:
-            return self.fail(msg="结果超过1000，不能操作")
+        if c > 10000:
+            return self.fail(msg="结果超过10000，不能操作")
         return self.success(query_filter,count=c)
 
     def result(self, params=None):

@@ -44,7 +44,9 @@ class ModelUpdateService(ModelDeleteService):
             return self.fail(msg="没有找到更新字段")
 
         if c == 0:
-            return self.fail(msg="没有找到更新记录")
+            if self.can_log():
+                self.log(msg="警告！！！没有找到更新记录")
+            return self.success(data=[], msg="修改 【0】条记录成功")
         update_obj = {}
         params_result = self.get_params_result()
         for key in update_fields:

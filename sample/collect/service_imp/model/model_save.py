@@ -101,8 +101,11 @@ class ModelSaveService(CollectService):
                 elif isAttrInstance(attr, int) or isAttrInstance(attr, float) \
                         or isAttrInstance(attr, str):
                     d[attr] = getattr(model_obj, attr)
-                # else:
-                #   d[attr] = getattr(self, attr)
+                else:
+                    try:
+                        d[attr] = getattr(model_obj, attr)
+                    except Exception as e:
+                        pass
 
             return d
 

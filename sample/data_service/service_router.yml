@@ -1,37 +1,32 @@
 # 系统总路由
 services:
-
-
   - key: 'hrm'
     name: '人资服务'
     path: 'hrm/service.yml'
-
   - key: 'system'
     name: '人资服务'
     path: 'system/service.yml'
-
   - key: 'project'
     name: '项目服务'
     path: 'project/service.yml'
-
   - key: 'event'
     name: '事件服务'
     path: 'event/service.yml'
-
   - key: 'server'
     name: '服务器模块'
     path: 'server/service.yml'
-
   - key: 'jira'
     name: 'jira 模块'
     path: 'jira/service.yml'
-
   - key: 'test'
     name: '测试模块'
     path: 'test/service.yml'
   - key: 'config'
     name: '配置模块'
     path: 'config/service.yml'
+  - key: 'flow'
+    name: '配置模块'
+    path: 'flow/service.yml'
 
 
 
@@ -376,6 +371,10 @@ module_handler:
   - key: service_flow
     path: collect.service_imp.flow.service_flow
     class_name: ServiceFlowService
+  # 工作流
+  - key: workflow
+    path: collect.service_imp.flow.work_flow
+    class_name: WorkFlowService
   # ssh
   - key: ssh
     path: collect.service_imp.flow.collect_ssh

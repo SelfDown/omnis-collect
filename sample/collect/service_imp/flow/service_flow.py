@@ -26,13 +26,14 @@ class ServiceFlowService(ServiceCollectFlowService):
 
     def handler_current_node(self, current):
         params_result = self.get_params_result()
-        strict = get_safe_data(self.get_strict_name(), current,False)
+        strict = get_safe_data(self.get_strict_name(), current, False)
         append_param = not strict
         # service = get_safe_data(self.get_service_name(), current)
         from collect.service_imp.common.filters.template_tool import TemplateTool
 
         template_tool = TemplateTool(op_user=self.op_user)
-        service = self.get_node_service(current, params_result, template_tool, append_param=append_param)
+        service = self.get_node_service(current, params_result, template_tool, append_param=append_param,
+                                        nullToTemplateField=False)
         if not self.is_success(service):
             return service
         service = self.get_data(service)

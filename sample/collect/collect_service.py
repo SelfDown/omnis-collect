@@ -108,6 +108,7 @@ class CollectService:
         "template_log_event_id_name": "template_log_event_id",
         "template_event_log_name": "template_event_log",
         "always_name": "always",
+        "data_json_name":"data_json",
 
     }
     router = {
@@ -133,6 +134,33 @@ class CollectService:
             "class_name": "BulkCreateService"
         }
     }
+
+
+    def get_data_json_name(self):
+        return self.const["data_json_name"]
+
+    def get_data_json_config_path(self):
+        data_json = get_safe_data(self.get_data_json_name(), self.template)
+
+        config_dir = self.get_config_dir()
+        config_file = config_dir + "/" + data_json
+        return config_file
+
+    def get_data_json(self, params):
+        """
+        必须实现set_json_content+get_json_content
+        """
+        config_file_path = self.get_data_json_config_path()
+        json_content = self.get_json_content(config_file_path)
+        if json_content:
+            return self.success(json_content)
+        data_json = get_safe_data(self.get_data_json_name(), self.template)
+        data_json_result = self.get_config_file(data_json, params)
+        if self.is_success(data_json_result):
+            data_json_content = self.get_data(data_json_result)
+            self.set_json_content(config_file_path, data_json_content)
+        return data_json_result
+
 
     def setIsHttp(self, is_http):
         self.template["is_http"] = is_http
@@ -326,7 +354,7 @@ class CollectService:
             setattr(model_obj, key, value)
         return self.success(model_obj)
 
-    def get_node_service(self, node, params=None, template=None, append_param=True):
+    def get_node_service(self, node, params=None, template=None, append_param=True, nullToTemplateField=True):
         service = get_safe_data(self.get_service_name(), node)
         if not params:
             params = self.get_params_result()
@@ -341,7 +369,7 @@ class CollectService:
             if key == self.get_service_name():
                 continue
             value_template = service[key]
-            value = self.get_render_data(value_template, params, template_tool)
+            value = self.get_render_data(value_template, params, template_tool, nullToTemplateField)
             service[key] = value
         # 拼接其他参数
 
@@ -570,7 +598,8 @@ class CollectService:
         params_result = self.get_params_result(template)
         if params_result and self.get_params_result_name() not in params:
             params[self.get_params_result_name()] = params_result
-        value = template_tool.render(template_str, params, config_params, template)
+        # value = template_tool.render(template_str, params, config_params, template)
+        value = self.get_render_data(template_str, params, template_tool)
         return self.success(value)
 
     def get_node_template_result(self, node, params, field="template", config_params=None, template=None):
@@ -902,9 +931,9 @@ class CollectService:
         if isinstance(msg, dict):
             import json
             try:
-                msg = json.dumps(msg, cls=DateEncoder)
+                msg = json.dumps(msg, cls=DateEncoder, ensure_ascii=False)
             except Exception as e:
-                msg = json.dumps(msg, cls=DateEncoder, encoding="ISO-8859-1")
+                msg = json.dumps(msg, cls=DateEncoder, encoding="ISO-8859-1", ensure_ascii=False)
 
         if not level:
             self.logger.info(msg)
