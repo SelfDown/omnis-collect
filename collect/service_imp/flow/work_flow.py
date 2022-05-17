@@ -94,5 +94,8 @@ class WorkFlowService(ServiceCollectFlowService):
         node = get_safe_data(status, service_dict)
         if not node:
             return self.fail("没有找打节点" + status)
+        node_type = get_safe_data(self.get_type_name(), node)
+        if self.get_end_name() == node_type:
+            return self.success([], msg="流程已经结束")
         next = get_safe_data(self.get_next_name(), node)
         return self.success(next)
