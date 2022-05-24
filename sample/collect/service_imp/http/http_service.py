@@ -10,7 +10,6 @@ from collect.utils.collect_utils import get_safe_data
 
 
 class HttpService(CollectService):
-
     HConst = {
         "data_json_name": "data_json",
         "success_name": "success",
@@ -33,8 +32,6 @@ class HttpService(CollectService):
 
     def get_success_name(self):
         return self.HConst["success_name"]
-
-
 
     # def get_data_json_name(self):
     #     return self.HConst["data_json_name"]
@@ -87,7 +84,7 @@ class HttpService(CollectService):
             return data_json_result
         data_json = self.get_data(data_json_result)
 
-        result = self.api.send(data_json)
+        result = self.api.send(data_json, template=self.template)
         if not self.is_success(result):
             return result
         result_data = self.get_data(result)
@@ -106,7 +103,7 @@ class HttpService(CollectService):
         count = self.get_count(result_data)
         if not msg:
             msg = "发送成功"
-        return self.success(data=result_data, msg=msg,count=count)
+        return self.success(data=result_data, msg=msg, count=count)
 
 
 class HttpApi(CollectService):
@@ -139,24 +136,25 @@ class HttpApi(CollectService):
                         self.log("JSON格式失败", level="error")
                         self.log(target)
 
-    def send(self, data):
+    def send(self, data, template=None):
         import requests
         import json
         self.handler_param(data)
         try:
             r = requests.request(**data)
         except Exception as e:
-            self.log("监控请求发送失败", level="error")
+            self.log("请求发送失败", level="error", template=template)
+            self.log(str(e), level="error", template=template)
             return self.fail(msg=str(e))
         if r.status_code >= 400:
-            self.log(r.text)
+            self.log(r.text, template=template)
             return self.fail(r.text)
         try:
             result_data = json.loads(r.text)
             r.close()
             del (r)
         except Exception as e:
-            self.log("数据返回错误：" + str(e) + "\n\n" + r.text)
+            self.log("数据返回错误：" + str(e) + "\n\n" + r.text, template=template)
             return self.fail(msg="数据返回格式错误")
 
         return self.success(result_data)

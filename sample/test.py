@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from jinja2 import Environment
+
 import collect.service_imp.before_plugin.plugin.handler_req_param
 import collect.service_imp.before_plugin.plugin.handler_params
 # templ = "{% if is_windows== 'True' %}get_host{% else %}agentd_soft_install{% endif %}"
@@ -87,14 +89,19 @@ import collect.service_imp.result_handlers.handlers.add_param
 import collect.service_imp.model.bulk_create
 import collect.service_imp.flow.collect_ssh
 import collect.service_imp.request_register.register.header
-import subprocess
-proc = subprocess.Popen("ls",shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
-proc.wait()
-print proc.stdout.read()
-print proc.stderr.read()
-# stdout=io.TextIOWrapper(proc.stdout,encoding="utf-8")
-# stderr=io.TextIOWrapper(proc.stderr,encoding="utf-8")
-# import os
-# data = os.popen("cd F:/etc/ppp")
-# print data.read()
-import collect.service_imp.flow.common.server_archive
+# import subprocess
+# proc = subprocess.Popen("ls",shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=-1)
+# proc.wait()
+# print proc.stdout.read()
+# print proc.stderr.read()
+# # stdout=io.TextIOWrapper(proc.stdout,encoding="utf-8")
+# # stderr=io.TextIOWrapper(proc.stderr,encoding="utf-8")
+# # import os
+# # data = os.popen("cd F:/etc/ppp")
+# # print data.read()
+# import collect.service_imp.flow.common.server_archive
+
+env = Environment()
+
+t = env.from_string("{{1==1}}")
+print t.render(**{})

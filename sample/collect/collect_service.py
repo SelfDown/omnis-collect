@@ -108,7 +108,7 @@ class CollectService:
         "template_log_event_id_name": "template_log_event_id",
         "template_event_log_name": "template_event_log",
         "always_name": "always",
-        "data_json_name":"data_json",
+        "data_json_name": "data_json",
 
     }
     router = {
@@ -135,32 +135,32 @@ class CollectService:
         }
     }
 
-
     def get_data_json_name(self):
         return self.const["data_json_name"]
 
-    def get_data_json_config_path(self):
-        data_json = get_safe_data(self.get_data_json_name(), self.template)
-
-        config_dir = self.get_config_dir()
-        config_file = config_dir + "/" + data_json
+    def get_data_json_config_path(self, data_json_path=None, template=None):
+        template = self.get_template_data(template)
+        if not data_json_path:
+            data_json_path = get_safe_data(self.get_data_json_name(), template)
+        config_dir = self.get_config_dir(template)
+        config_file = config_dir + "/" + data_json_path
         return config_file
 
-    def get_data_json(self, params):
+    def get_data_json(self, params, config_file_path=None, template=None):
         """
         必须实现set_json_content+get_json_content
         """
-        config_file_path = self.get_data_json_config_path()
+        template = self.get_template_data(template)
+        config_file_path = self.get_data_json_config_path(config_file_path, template)
         json_content = self.get_json_content(config_file_path)
         if json_content:
             return self.success(json_content)
-        data_json = get_safe_data(self.get_data_json_name(), self.template)
-        data_json_result = self.get_config_file(data_json, params)
+        data_json = get_safe_data(self.get_data_json_name(), template)
+        data_json_result = self.get_config_file(config_file=config_file_path, template=template)
         if self.is_success(data_json_result):
             data_json_content = self.get_data(data_json_result)
             self.set_json_content(config_file_path, data_json_content)
         return data_json_result
-
 
     def setIsHttp(self, is_http):
         self.template["is_http"] = is_http
@@ -191,9 +191,10 @@ class CollectService:
         tool = TemplateTool(op_user=self.op_user)
         return tool
 
-    def get_config_file(self, config_file_name, params):
-        config_dir = self.get_config_dir()
-        config_file = config_dir + "/" + config_file_name
+    def get_config_file(self, config_file_name=None, params=None, config_file=None, template=None):
+        config_dir = self.get_config_dir(template)
+        if not config_file:
+            config_file = config_dir + "/" + config_file_name
         import os
         if not os.path.exists(config_file):
             self.log(config_file + "不存在", "error", self.template)
@@ -282,6 +283,12 @@ class CollectService:
     def get_switch_default_name(self):
         return self.const["switch_default_name"]
 
+    def render_data(self, templ, params,tool=None):
+        if not tool:
+            from collect.service_imp.common.filters.template_tool import TemplateTool
+            tool = TemplateTool(self.op_user)
+        return self.get_render_data(templ, params, tool, False)
+
     def get_render_data(self, templ, params, tool, nullToTemplateField=True):
         """
         nullToTemplateField 如果值为空则设置模板的变量，一般用于检查字段是否设置值
@@ -292,6 +299,9 @@ class CollectService:
         #     return tool.render(str(templ), params)
         # 如果配置的值存在，参数中，就取参数
         # 匹配第一级
+        if not (isinstance(templ, str) or isinstance(templ, unicode)):
+            return templ
+
         field_arr = templ.split(".")
         if templ in params:
             value = params[templ]
@@ -715,8 +725,9 @@ class CollectService:
     def get_count_sql_content(self):
         return get_safe_data(self.get_count_sql_file_content_name(), self.template)
 
-    def get_config_dir(self):
-        config_dir = get_safe_data(self.get_service_dir_name(), self.template)
+    def get_config_dir(self, template=None):
+        template = self.get_template_data(template)
+        config_dir = get_safe_data(self.get_service_dir_name(), template)
         return config_dir
 
     def get_sql_key(self):
