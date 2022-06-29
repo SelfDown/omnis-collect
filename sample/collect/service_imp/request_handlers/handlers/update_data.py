@@ -45,6 +45,8 @@ class UpdateData(RequestHandler):
         import copy
         params_copy = copy.deepcopy(params)
         for item_order_index, item in enumerate(foreach):
+            if not isinstance(item,dict):
+                return self.fail("更新数据时，目标对象不是字典")
             params_copy[item_name] = item
             params_copy[self.get_item_order_index_name()] = str(item_order_index + 1)
             for field in fields:

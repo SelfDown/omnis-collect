@@ -28,7 +28,11 @@ class Array2Obj(ResultHandler):
         result_obj = None
         if not params:
             if not isinstance(result, list):
-                return self.fail("结果对象不是数组，请检查返回结果")
+                msg = "结果对象不是数组，请检查返回结果"
+                if self.can_log(template):
+                    self.log(result)
+                    self.log(msg)
+                return self.fail(msg)
             result_obj = result[0]
         else:
             field = get_safe_data(self.get_field_name(), params)

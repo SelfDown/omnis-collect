@@ -1,4 +1,33 @@
 service:
+  - key: ssh_test
+    http: true
+    must_login: false
+    module: ssh
+    params:
+      server_ip:
+        default: "172.26.0.13"
+      user:
+        default: "root"
+      password:
+        default: "******"
+    shell:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: test
+        - key: test
+          type: node
+          name: 测试
+          shell: "ls"
+          save_field: "content"
+          template: "{% if content %} False {% else %} True {% endif %}"
+          err_msg: "错误测试:{{content}}"
+          next: end
+          fail: end
+        - key: end
+          type: end
+          name: 结束
   - key: get_file_data
     http: true
     must_login: false

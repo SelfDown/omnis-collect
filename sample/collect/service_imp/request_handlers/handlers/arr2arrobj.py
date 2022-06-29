@@ -45,7 +45,7 @@ class Arr2ArrObj(RequestHandler):
         l = []
 
         for item in foreach:
-            t = {self.get_item_name(): item}
+            t = dict(self.get_params_result(template).items()+{self.get_item_name(): item}.items())
             data = {}
             for key in obj:
                 templ = obj[key]

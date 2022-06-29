@@ -3,3 +3,5 @@ service:
     path: "menu/index.yml"
   - name: "码表模块"
     path: "sys_code/index.yml"
+  - name: "登录模块"
+    path: "login/index.yml"

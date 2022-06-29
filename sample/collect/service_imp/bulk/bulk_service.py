@@ -121,7 +121,8 @@ class ServiceBulkService(CollectService):
         max_once = get_safe_data(self.get_max_once_name(), batch, 30)
         foreach = get_safe_data(foreach_name, params_result)
         if not foreach:
-            return self.fail("参数中没有找到【" + foreach_name + "】变量")
+            # return self.fail("参数中没有找到【" + foreach_name + "】变量")
+            return self.success([])
         item_name = get_safe_data(self.get_item_name(), batch)
         if not item_name:
             return self.fail("配置中没有找到【" + self.get_item_name() + "】标签")

@@ -33,9 +33,9 @@ class NewCol(ResultHandler):
             field = get_safe_data(self.get_field_name(), field_item)
             if not field:
                 return self.fail("参数" + self.get_field_name() + " 节点,没有找到" + self.get_field_name())
-            templ = get_safe_data(self.get_template_name(), field_item)
-            if not templ:
-                return self.fail("参数" + self.get_to_field_name() + " 节点,没有找到" + self.get_template_name())
+            templ = get_safe_data(self.get_template_name(), field_item,"")
+            # if not templ:
+            #     return self.fail("参数" + self.get_to_field_name() + " 节点,没有找到" + self.get_template_name())
 
             def set_value(obj):
                 obj_tmp = dict(self.get_params_result(template).items() + obj.items())

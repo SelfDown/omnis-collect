@@ -103,5 +103,6 @@ import collect.service_imp.request_register.register.header
 
 env = Environment()
 
-t = env.from_string("{{1==1}}")
-print t.render(**{})
+t = env.from_string("{{test|join('|')}}")
+print t.render(**{"test":["test","test2"]})
+import collect.service_imp.ldap.ldap_service

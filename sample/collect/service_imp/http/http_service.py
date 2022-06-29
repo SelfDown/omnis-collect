@@ -144,11 +144,13 @@ class HttpApi(CollectService):
             r = requests.request(**data)
         except Exception as e:
             self.log("请求发送失败", level="error", template=template)
+            self.log(data ,level="error", template=template)
             self.log(str(e), level="error", template=template)
+            # self.log(template, level="error", template=template)
             return self.fail(msg=str(e))
         if r.status_code >= 400:
             self.log(r.text, template=template)
-            return self.fail(r.text)
+            return self.fail(r.text[0:3000])
         try:
             result_data = json.loads(r.text)
             r.close()

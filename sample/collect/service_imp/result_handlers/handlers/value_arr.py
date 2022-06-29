@@ -23,8 +23,8 @@ class ValueArr(ResultHandler):
 
         if not result:
             return self.success(result)
-        if not isinstance(result, list):
-            return self.success(result)
+        # if not isinstance(result, list):
+        #     return self.success(result)
 
         tool = TemplateTool(op_user=self.op_user)
         params_result = self.get_params_result(template)
@@ -33,9 +33,10 @@ class ValueArr(ResultHandler):
         def get_temp_value(item):
             # item[self.get_params_result_name()] = params_result
             # value = tool.render(templ, item)
-            value = self.get_render_data(templ, item, tool)
+            value = self.render_data(templ, item, tool)
             return value
-        def add_value(value,data_list):
+
+        def add_value(value, data_list):
             if value != "":
                 if isinstance(value, list):
                     data_list += value
@@ -43,23 +44,41 @@ class ValueArr(ResultHandler):
                     data_list.append(value)
             return data_list
 
-        if not field:
+        def get_data_list(data_arr):
             data_list = []
-            for item in result:
+            for item in data_arr:
                 # item[self.get_params_result_name()] = params_result
                 value = get_temp_value(item)
-                data_list = add_value(value,data_list)
-                # if value != "":
-                #     data_list.append(value)
+                data_list = add_value(value, data_list)
+            return data_list
+
+        def hander_data(item):
+            data_list = []
+            if field in item and isinstance(item[field], list):
+                data_list = get_data_list(item[field])
+                # for child in item[field]:
+                #     # child[self.get_params_result_name()] = params_result
+                #     value = get_temp_value(child)
+                #     data_list = add_value(value, data_list)
+            item[field] = data_list
+
+        if not field:
+            if not isinstance(result, list):
+                return self.success(result)
+            data_list = get_data_list(result)
             return self.success(data_list)
         else:
-            for item in result:
-                data_list = []
-                if field in item and isinstance(item[field], list):
-
-                    for child in item[field]:
-                        # child[self.get_params_result_name()] = params_result
-                        value = get_temp_value(child)
-                        data_list = add_value(value, data_list)
-                item[field] = data_list
+            if isinstance(result, dict):  # 如果是对象
+                hander_data(result)
+            else:
+                for item in result:  # 如果是数组
+                    hander_data(item)
+                    # data_list = []
+                    # if field in item and isinstance(item[field], list):
+                    #
+                    #     for child in item[field]:
+                    #         # child[self.get_params_result_name()] = params_result
+                    #         value = get_temp_value(child)
+                    #         data_list = add_value(value, data_list)
+                    # item[field] = data_list
             return self.success(result)

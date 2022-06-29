@@ -55,6 +55,9 @@ class GenFile(RequestHandler):
             params_result[item_name] = item
             file_name = self.get_render_data(file_name_name, params_result, tool)
             file_path = file_dir + "/" + file_name
+            parent_dir = os.path.dirname(file_path)
+            if not os.path.exists(parent_dir):
+                os.makedirs(parent_dir)
             with open(file_path, "wb") as f:
                 file_content = self.get_render_data(file_content_name, params_result, tool)
                 f.write(file_content)

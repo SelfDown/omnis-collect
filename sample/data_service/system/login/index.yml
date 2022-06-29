@@ -1,0 +1,15 @@
+service:
+  # 项目
+  - key: "login"
+    name: 登录
+    module: 'service_flow'#
+    flow:
+      services:
+        - key: start
+          type: start
+          name: 开始
+          next: "end"
+        - key: end
+          type: end
+          name: 结束
+

@@ -95,7 +95,7 @@ class ServiceCollectFlowService(CollectService):
     def get_end_node(self, service_dict):
         return get_safe_data(self.get_end_name(), service_dict)
 
-    def get_service_dict(self,services=None):
+    def get_service_dict(self, services=None):
         if not services:
             services = self.get_services()
         d = {}
@@ -171,17 +171,17 @@ class ServiceCollectFlowService(CollectService):
         flow_result = self._execute_flow(handler_node)
         finish = self.get_finish()
         if finish:
-            finsih_service = self.get_node_service(finish, self.get_params_result())
-            if not self.is_success(finsih_service):
-                return finsih_service
-            finsih_service = self.get_data(finsih_service)
+            finish_service = self.get_node_service(finish, self.get_params_result())
+            if not self.is_success(finish_service):
+                return finish_service
+            finish_service = self.get_data(finish_service)
             # 设置消息
-            finsih_service[self.get_flow_msg_name()] = self.get_msg(flow_result)
+            finish_service[self.get_flow_msg_name()] = self.get_msg(flow_result)
             # 设置流程状态
-            finsih_service[self.get_flow_sucess_name()] = self.is_success(flow_result)
-            finsih_service_result = self.get_service_result(finsih_service)
-            if not self.is_success(finsih_service_result):
-                return finsih_service_result
+            finish_service[self.get_flow_sucess_name()] = self.is_success(flow_result)
+            finish_service = self.get_service_result(finish_service)
+            if not self.is_success(finish_service):
+                return finish_service
         return flow_result
 
     def _execute_flow(self, handler_node):
@@ -214,8 +214,14 @@ class ServiceCollectFlowService(CollectService):
             if self.can_log():
                 msg = "【" + self.get_template_service_name() + "】开始运行第 " + str(count) + " 节点【" + current_name + "】"
                 self.log(msg)
-
+            import time
+            start_clock = time.time()
             node_result = handler_node(current)
+            end_clock = time.time()
+            if self.can_log():
+                msg = "处理 【{key_name}】 节点 耗时 {spend} 秒".format(key_name=current_name,
+                                                               spend=str(end_clock - start_clock))
+                self.log(msg)
             nodes = self.get_data(node_result)
             if self.can_log() and nodes and isinstance(nodes, list):
                 for n_item in nodes:
@@ -245,6 +251,20 @@ class ServiceCollectFlowService(CollectService):
             save_field = get_safe_data(self.get_save_field_name(), current)
             if save_field:
                 params_result[save_field] = self.get_data(node_result)
+            # todo  判断数据是否正常
+            templ = get_safe_data(self.get_template_name(), current)
+            if templ:
+                templ_result = self.render_data(templ=templ, params=params_result)
+                if templ_result == self.get_false_value():
+
+                    err_msg_templ = get_safe_data(self.get_err_msg_name(), current)
+                    if not err_msg_templ:
+                        return self.fail(current_name + "没有配置" + self.get_err_msg_name())
+                    from collect.service_imp.common.filters.template_tool import TemplateTool
+                    tool = TemplateTool(self.op_user)
+                    msg = self.get_render_data(err_msg_templ, params_result,tool)
+                    return self.fail(msg)
+
             # 流转到下个节点
             current = self.get_next_node(current, service_dict, node_result)
             count += 1
