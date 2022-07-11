@@ -279,7 +279,8 @@ class CollectSSHService(ServiceCollectFlowService):
         #             return result
         #         result = self.get_data(result)
         #         break
-        if self.has_error(result):
+        ignore_error = get_safe_data(self.get_ignore_error_name(), current, False)
+        if not ignore_error and self.has_error(result):
             return self.fail(self.get_error_msg(result))
         return self.success(result)
 

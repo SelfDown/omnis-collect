@@ -283,7 +283,7 @@ class CollectService:
     def get_switch_default_name(self):
         return self.const["switch_default_name"]
 
-    def render_data(self, templ, params,tool=None):
+    def render_data(self, templ, params, tool=None):
         if not tool:
             from collect.service_imp.common.filters.template_tool import TemplateTool
             tool = TemplateTool(self.op_user)
@@ -306,7 +306,8 @@ class CollectService:
         if templ in params:
             value = params[templ]
         # 匹配第二级
-        elif len(field_arr) == 2 and field_arr[0] in params and field_arr[1] in params[field_arr[0]]:
+        elif len(field_arr) == 2 and field_arr[0] in params and params[field_arr[0]] and field_arr[1] in params[
+            field_arr[0]]:
             value = params[field_arr[0]][field_arr[1]]
         elif self.is_template_text(templ):
             value = tool.render(templ, params)
@@ -335,6 +336,13 @@ class CollectService:
             has_attr = hasattr(model_obj, field)
             return has_attr
 
+        model_class = self.get_model_class()
+        model_fields = model_class._meta.get_fields()
+        field_dict = {}
+        for field in model_fields:
+            field_name = getattr(field, self.get_name_name())
+            field_type = type(field)
+            field_dict[field_name] = field_type
         has = False
         for key in param_result:
             if not can_save_field(key):
@@ -344,6 +352,13 @@ class CollectService:
                 continue
             if update_fields and key not in update_fields:
                 continue
+
+            value = param_result[key]
+            if key in field_dict:
+                model_field = field_dict[key]
+                from django.db.models import DateTimeField, DateField
+                if (model_field in (DateField, DateTimeField)) and not value:
+                    continue
             has = True
             fields_list.append(key)
         if self.can_log() and not has:
@@ -359,8 +374,20 @@ class CollectService:
         update_fields = self.get_update_fields(model_obj, param_result)
         if len(update_fields) == 0:
             return self.fail(self.get_template_service_name() + " 没有找到任何更新属性")
+        model_class = self.get_model_class()
+        model_fields = model_class._meta.get_fields()
+        field_dict = {}
+        for field in model_fields:
+            field_name = getattr(field, self.get_name_name())
+            field_type = type(field)
+            field_dict[field_name] = field_type
         for key in update_fields:
             value = param_result[key]
+            if key in field_dict:
+                model_field = field_dict[key]
+                from django.db.models import DateTimeField, DateField
+                if (model_field in (DateField, DateTimeField)) and not value:
+                    continue
             setattr(model_obj, key, value)
         return self.success(model_obj)
 
@@ -723,7 +750,9 @@ class CollectService:
         # return get_safe_data(self.get_sql_file_content_name(), self.template)
 
     def get_count_sql_content(self):
-        return get_safe_data(self.get_count_sql_file_content_name(), self.template)
+        from collect.service_imp.config_data.config_cache_data import ConfigCacheData
+        return ConfigCacheData.get_sql(self.get_count_sql_key())
+        # return get_safe_data(self.get_count_sql_file_content_name(), self.template)
 
     def get_config_dir(self, template=None):
         template = self.get_template_data(template)
@@ -744,7 +773,7 @@ class CollectService:
         :return:
         """
         return str(get_safe_data(self.get_service_dir_name(), self.template)) + "#" + str(
-            get_safe_data(self.get_count_sql_file(), self.template))
+            get_safe_data(self.get_count_sql_name(), self.template))
 
     def set_sql_content(self, sql_content):
         # sql_file_content_name = self.get_sql_file_content_name()
@@ -1283,7 +1312,7 @@ class CollectService:
             return
 
         collect_file_path = get_key("collect_file_path")
-        self.log("加载配置文件：" + collect_file_path)
+        # self.log("加载配置文件：" + collect_file_path)
         with open(collect_file_path, 'r') as f:
             import yaml
             router_all = yaml.load(f)
@@ -1303,30 +1332,30 @@ class CollectService:
         django_model = self.handler_django_model(router_all)
         ConfigCacheData.set_django_model_config(django_model)
         # 处理请求处理器
-        self.log("加载请求处理")
+        # self.log("加载请求处理")
         request_handler = self.handler_request_handler(router_all)
         ConfigCacheData.set_request_handler(request_handler)
-        self.log("加载结果处理器")
+        # self.log("加载结果处理器")
         result_handler = self.handler_result_handler(router_all)
         ConfigCacheData.set_result_handler(result_handler)
-        self.log("加载模块处理器")
+        # self.log("加载模块处理器")
         module_handler = self.handler_module_handler(router_all)
         ConfigCacheData.set_module_handler(module_handler)
-        self.log("加载jinja2模板自定义函数")
+        # self.log("加载jinja2模板自定义函数")
         filter_handler = self.handler_filter_handler(router_all)
         ConfigCacheData.set_filter_handler(filter_handler)
-        self.log("加载请求插件")
+        # self.log("加载请求插件")
         before_plugin = self.handler_before_plugin_handler(router_all)
         ConfigCacheData.set_before_plugin(before_plugin)
 
-        self.log("加载结果插件")
+        # self.log("加载结果插件")
         after_plugin = self.handler_after_plugin_handler(router_all)
         ConfigCacheData.set_after_plugin(after_plugin)
 
-        self.log("加载第三方应用")
+        # self.log("加载第三方应用")
         third_application = self.handler_third_application_handler(router_all)
         ConfigCacheData.set_third_application(third_application)
-        self.log("加载请求注册器")
+        # self.log("加载请求注册器")
         request_register = self.handler_request_register(router_all)
         ConfigCacheData.set_request_register(request_register)
 
@@ -1419,7 +1448,7 @@ class CollectService:
                     except Exception as e:
                         self.logger.error("字段{key} 值{value}。转int 类型错误" + str(e))
                         pass
-            if self.get_default_name() in config_param and str(value) == "":
+            if self.get_default_name() in config_param and (value is None or str(value) == ""):
                 params[key] = config_param[self.get_default_name()]
         params[self.get_session_user_id_name()] = self.op_user
         # 编写默认值

@@ -241,6 +241,7 @@ def connection_sql_to_data(sql, args=(), datasource=None):
     logger = get_collect_log()
     if datasource:
         if datasource not in connections:
+            logger.error(datasource + "数据源不存在！！！请检查配置")
             return []
         data_connection = connections[datasource]
     else:

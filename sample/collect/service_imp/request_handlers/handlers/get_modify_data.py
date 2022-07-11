@@ -67,7 +67,7 @@ class GetModifyData(RequestHandler):
     def get_modify_name(self):
         return self.gmd_const["modify_name"]
 
-    data_json_dict = {}
+
 
     def get_add_operation(self):
         return self.gmd_const["add_name"]
@@ -75,6 +75,7 @@ class GetModifyData(RequestHandler):
     def get_remove_operation(self):
         return self.gmd_const["remove_name"]
 
+    data_json_dict = {}
     @staticmethod
     def get_json_content(path):
         return get_safe_data(path, GetModifyData.data_json_dict)

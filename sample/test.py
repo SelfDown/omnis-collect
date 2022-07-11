@@ -103,6 +103,258 @@ import collect.service_imp.request_register.register.header
 
 env = Environment()
 
-t = env.from_string("{{test|join('|')}}")
-print t.render(**{"test":["test","test2"]})
-import collect.service_imp.ldap.ldap_service
+#192.168.10.133: | 操作失败 —— JAVA_HOME:  /usr/local/jdk1.8.0_301\nAPP_HOME:   /data/wghis/apps/cse-server\n开始启动进程 cse-server-bootstrap.jar\n进程启动成功，进程号 21175 —— cse-server-bootstrap.jar 的进程 20661 已关闭"
+
+#err_msg: "{{server_ip}}:{{war_artifactid}} | {{bcs}}操作失败 —— {{startStatus}} —— {{stopStatus}}"
+# t = env.from_string("{% if  deal_type=='stop' and  endProcess %} False {% elif deal_type!='stop'  and  (endProcess==startProcess  or not endProcess )  %} False {% else %} True {% endif %}")
+# print t.render(**{"deal_type":"restart","endProcess":"","startProcess":"1111"})
+# import collect.service_imp.ldap.ldap_service
+params={
+	"service": "online_sql.create_sql",
+	"data_base_type": "oracle",
+	"op_type": "insert",
+	"cols": [
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 1,
+			"id": "user_id",
+			"name": "user_id",
+			"field": "user_id",
+			"width": 66.9140625,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 2,
+			"id": "nick",
+			"name": "nick",
+			"field": "nick",
+			"width": 60,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 3,
+			"id": "user_name",
+			"name": "user_name",
+			"field": "user_name",
+			"width": 94.4921875,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 4,
+			"id": "password",
+			"name": "password",
+			"field": "password",
+			"width": 84.6875,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 5,
+			"id": "user_status",
+			"name": "user_status",
+			"field": "user_status",
+			"width": 99.8203125,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 6,
+			"id": "entry_date",
+			"name": "entry_date",
+			"field": "entry_date",
+			"width": 120,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 7,
+			"id": "email",
+			"name": "email",
+			"field": "email",
+			"width": 60,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 8,
+			"id": "phone",
+			"name": "phone",
+			"field": "phone",
+			"width": 60,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 9,
+			"id": "leave_date",
+			"name": "leave_date",
+			"field": "leave_date",
+			"width": 120,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 10,
+			"id": "is_delete",
+			"name": "is_delete",
+			"field": "is_delete",
+			"width": 78.484375,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 11,
+			"id": "create_time",
+			"name": "create_time",
+			"field": "create_time",
+			"width": 120,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 12,
+			"id": "create_user",
+			"name": "create_user",
+			"field": "create_user",
+			"width": 99.84375,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 13,
+			"id": "modify_user",
+			"name": "modify_user",
+			"field": "modify_user",
+			"width": 105.140625,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 14,
+			"id": "modify_time",
+			"name": "modify_time",
+			"field": "modify_time",
+			"width": 120,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 15,
+			"id": "work_code",
+			"name": "work_code",
+			"field": "work_code",
+			"width": 93.5859375,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 16,
+			"id": "create_ldap",
+			"name": "create_ldap",
+			"field": "create_ldap",
+			"width": 98.9375,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 17,
+			"id": "ladp_user_login_id",
+			"name": "ladp_user_login_id",
+			"field": "ladp_user_login_id",
+			"width": 155.8125,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 18,
+			"id": "leave_reason",
+			"name": "leave_reason",
+			"field": "leave_reason",
+			"width": 111.40625,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 19,
+			"id": "wechat_id",
+			"name": "wechat_id",
+			"field": "wechat_id",
+			"width": 87.359375,
+			"sortable": True
+		},
+		{
+			"comment": "",
+			"dbColType": "VARCHAR",
+			"colIndex": 20,
+			"id": "attendance_id",
+			"name": "attendance_id",
+			"field": "attendance_id",
+			"width": 117.5859375,
+			"sortable": True
+		}
+	],
+	"rowDatas": [
+		{
+			"wechat_id": "[NULL]",
+			"user_status": "regular",
+			"modify_user": "49ce12c3-b343-43ba-8478-335508726966",
+			"user_id": "0997c859-46cd-46db-9679-f532176204e2",
+			"attendance_id": "[NULL]",
+			"phone": "13142130770",
+			"is_delete": "0",
+			"create_user": "739ade44-7e83-48a2-8c60-9a7c1e9f3d0a",
+			"create_ldap": "1",
+			"ladp_user_login_id": "ouyanghang",
+			"work_code": "00112343",
+			"nick": "欧阳航",
+			"create_time": "2021-10-25 08:46:47",
+			"entry_date": "2021-10-22",
+			"leave_date": "",
+			"leave_reason": "",
+			"password": "a73609b15935a5c1ad32ae6ce684e518",
+			"user_name": "ouyanghang",
+			"email": "ouyanghang@weigaogroup.com",
+			"modify_time": "2022-04-06 16:46:56",
+			"index": 3,
+			"id": 2
+		}
+	],
+	"primary_key": "user_id",
+	"tablename": "username",
+	"schdema": "eoms_formal"
+}
+sql_templ="""{% for item in rowDatas %}
+insert into `{{schdema}}`.`{{tablename}}`(
+{% for field in item %}`{{field}}`{% if not loop.last %},{% endif %}{% endfor %}
+)
+values(
+({% for field in item %}{{item[field]}}{% if not loop.last %},{% endif %}{% endfor %})
+);
+{% endfor %}
+"""
+
+t = env.from_string(sql_templ)
+print "============================="
+print t.render(**params)

@@ -11,7 +11,15 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 class JsonStr(BaseFilter):
     def filter(self, value):
         if not value:
-            return ""
+            if value is None:
+                return '""'
+            if isinstance(value,str):
+                return '""'
+            if isinstance(value,list):
+                return '[]'
+            if isinstance(value,dict):
+                return '{}'
+            return  '""'
         try:
             import json
             return json.dumps(value)

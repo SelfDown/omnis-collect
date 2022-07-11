@@ -114,7 +114,7 @@ class SqlService(CollectService):
         if not self.is_success(sql_result):
             return sql_result
         sql_result = self.get_data(sql_result)
-        if not self.is_empty_count_sql():
+        if not self.is_empty_count_sql() and not count_sql_content:
             count_sql_file = get_safe_data(self.get_count_sql_name(), self.template)
             sql_count_file_content = self.sql_file2sqlContent(count_sql_file, self.get_count_params_result())
             self.set_count_sql_content(sql_count_file_content)
@@ -199,11 +199,13 @@ class SqlService(CollectService):
         try:
             result = connection_sql_to_data(sql, param_data, datasource=data_source)
         except Exception as e:
+            self.log("=======================================", "error")
             self.log(str(e), "error")
+            self.log("=======================================", "error")
             self.log(sql, "error")
             self.log(param_data,"error")
 
-            return self.fail("sql 执行异常:" + sql)
+            return  self.fail("sql 执行异常:【" + sql+"】"+str(e))
         count = 0
         if not self.is_empty_count_sql():
             count_sql = self.result_count_sql(sql_result)

@@ -53,6 +53,8 @@ class ModelUpdateService(ModelDeleteService):
             update_obj[key] = params_result[key]
 
         update_sum = query_filter.update(**update_obj)
+        if self.can_log():
+            self.log("影响行数："+str(update_sum))
         if update_sum != c:
             return self.success(data=[], msg="总共修改【{c}】 条。修改 【{update_sum}】条记录成功".format(c=str(c),
                                                                                          update_sum=str(update_sum)))

@@ -12,8 +12,12 @@ from collect.utils.collect_utils import get_safe_data
 
 class CombineService(ResultHandler):
     cs_const = {
-        "multiple_name": "multiple"
+        "multiple_name": "multiple",
+        "result_name": "result_name",
     }
+
+    def get_result_name(self):
+        return self.cs_const["result_name"]
 
     def get_multiple_name(self):
         return self.cs_const["multiple_name"]
@@ -51,21 +55,14 @@ class CombineService(ResultHandler):
                                                              field=self.get_save_field_name()))
 
         multiple = get_safe_data(self.get_multiple_name(), params)
-        # template_tool = TemplateTool(op_user=self.op_user)
-        # params_result = self.get_params_result(template)
-        # for key in service:
-        #     value_template = service[key]
-        #     # 如果配置的值存在，参数中，就取参数
-        #     if value_template in params_result:
-        #         value = params_result[value_template]
-        #     else:
-        #         value = template_tool.render(value_template, params_result)
-        #     service[key] = value
-        # for key in params_result:
-        #     if key not in service:
-        #         service[key] = params_result[key]
+
         params_result = self.get_params_result(template)
-        s_result = self.get_node_service(params, params=params_result,template=template, append_param=True)
+        # 如果有设置结果参数，则设置结果
+        result_name = get_safe_data(self.get_result_name(), params)
+        if result_name:
+            params_result[result_name] = result
+
+        s_result = self.get_node_service(params, params=params_result, template=template, append_param=True)
         if not self.is_success(s_result):
             return s_result
         service = self.get_data(s_result)
@@ -87,13 +84,22 @@ class CombineService(ResultHandler):
             else:
                 service_result_dict[val_key] = item
 
-        for item in result:
+        def handler_data(item):
             if to_field not in item:
-                continue
+                return
             val_key = item[to_field]
             if val_key not in service_result_dict:
-                item[save_field] = {}
-                continue
+                if not multiple:
+                    item[save_field] = {}
+                else:
+                    item[save_field] = []
+                return
             item[save_field] = service_result_dict[val_key]
+
+        if isinstance(result, dict):
+            handler_data(result)
+        else:
+            for item in result:
+                handler_data(item)
 
         return self.success(result)
