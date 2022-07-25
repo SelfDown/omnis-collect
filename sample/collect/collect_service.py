@@ -227,7 +227,7 @@ class CollectService:
         enable = get_safe_data(self.get_enable_name(), node)
         if enable:
             enable_value = template_tool.render(enable, params)
-            if enable_value == self.get_false_value():
+            if enable_value == self.get_false_value() or enable_value == "":
                 return False
         return True
 

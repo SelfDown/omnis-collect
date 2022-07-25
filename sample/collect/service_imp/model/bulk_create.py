@@ -23,7 +23,8 @@ class BulkCreateService(CollectService):
         models = get_safe_data(self.get_model_field_name(), self.template)
         models_result = get_safe_data(models, params_result)
         if not models_result:
-            return self.fail("没有新增数据对象")
+            service = get_safe_data(self.get_service_name(), params)
+            return self.fail(service + "没有新增数据对象:【" + str(models) + "】为空")
         model_obj_result = self.get_model_obj()
         if not self.is_success(model_obj_result):
             return model_obj_result

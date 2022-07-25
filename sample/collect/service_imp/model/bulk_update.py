@@ -179,7 +179,7 @@ class BulkUpdateService(CollectService):
 
             result = connection.cursor().execute(sql, parameters)
 
-        return lenpks, result.rowcount
+        return lenpks, result
 
 
 import itertools

@@ -25,10 +25,14 @@ class Result2Excel(ResultHandler):
         "name_style_name": "name_style",
         "frozen_col_name": "frozen_col",
         "width_name": "width",
+        "fields_from_param_name": "fields_from_param",
     }
 
     def get_width_name(self):
         return self.re_const["width_name"]
+
+    def get_fields_from_param_name(self):
+        return self.re_const["fields_from_param_name"]
 
     def get_frozen_col_name(self):
         return self.re_const["frozen_col_name"]
@@ -91,7 +95,7 @@ class Result2Excel(ResultHandler):
         workbook = xlwt.Workbook(encoding='utf-8')  # 新建工作簿
         # 单元格式纯文本
         style = xlwt.XFStyle()
-        style.alignment.wrap = 1
+        style.alignment.wrap = 0
         style.num_format_str = '@'
         from xlwt import Font
         fnt = Font()  # 创建一个文本格式，包括字体、字号和颜色样式特性
@@ -101,20 +105,28 @@ class Result2Excel(ResultHandler):
         tool = TemplateTool(op_user=self.op_user)
         params_result = self.get_params_result(template)
 
-        def get_render_data(name):
-            if name in params_result:
-                return params_result[name]
-            else:
-                return tool.render(name, params_result)
+        # def get_render_data(name):
+        #     if name in params_result:
+        #         return params_result[name]
+        #     else:
+        #         return tool.render(name, params_result)
 
+        from collect.service_imp.common.filters.template_tool import TemplateTool
+        tool = TemplateTool(self.op_user)
         for sheet_index in excel:
             excel_template = excel[sheet_index]
             sheet = workbook.add_sheet(self.get_sheet_name() + str(sheet_index))
             start_row = get_safe_data(self.get_start_row_name(), excel_template, 2)
             title_row = get_safe_data(self.get_title_row_name(), excel_template, 0)
-            title = get_safe_data(self.get_title_name(), excel_template, "盛博汇")
+            title = get_safe_data(self.get_title_name(), excel_template, "Title")
             name_row = get_safe_data(self.get_name_name(), excel_template, 1)
-            fields = excel_template[self.get_fields_name()]
+            # 首先从参数中或者
+            fields_from_param = get_safe_data(self.get_fields_from_param_name(), excel_template)
+            fields = get_safe_data(fields_from_param, params_result)
+            if not fields:  # 如果没有找到，则从配置文件获取字段信息
+                fields = excel_template[self.get_fields_name()]
+            if not fields:
+                return self.fail("没有找到字段信息列")
             fields = [field_node for field_node in fields if self.is_enable(params_result, field_node)]
             title_style = get_safe_data(self.get_title_style_name(), excel_template,
                                         'font:color white ,height 240;pattern: pattern solid, fore_colour light_blue;')
@@ -125,6 +137,7 @@ class Result2Excel(ResultHandler):
             # 设置标题
             if not isinstance(title, unicode):
                 title = unicode(str(title))
+            title = self.get_render_data(title, params_result, tool)
             sheet.write_merge(title_row, title_row, 0, len(fields) - 1, title, tall_style)
             sheet.row(0).height_mismatch = True
             sheet.row(0).height = 20 * 25  # 20为基准数，40意为40磅
@@ -135,6 +148,8 @@ class Result2Excel(ResultHandler):
 
             for col, field in enumerate(fields):
                 field_name = get_safe_data(self.get_value_name(), field)
+                if not field_name:
+                    return self.fail(" 第" + str(col + 1) + "个字段 没有找到【" + self.get_value_name() + "】字段信息")
                 name = field[self.get_name_name()]
                 col_info = sheet.col(col)
                 width = get_safe_data(self.get_width_name(), field, 80)
@@ -148,6 +163,8 @@ class Result2Excel(ResultHandler):
                     name = unicode(str(name))
                 sheet.write(name_row, col, name, name_style)
                 for row, data in enumerate(result):
+                    if field_name not in data:
+                        return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
                     value = data[field_name]
                     if value is None:
                         value = ""
@@ -159,7 +176,8 @@ class Result2Excel(ResultHandler):
                 for col, field in enumerate(fields):
                     sheet.write(row_plus + start_row + len(result), col, "", style)
 
-        excel_path = get_render_data(excel_path_name)
+        # excel_path = get_render_data(excel_path_name)
+        excel_path = self.get_render_data(excel_path_name, params_result, tool)
         import os
         excel_dir = os.path.dirname(excel_path)
         if not os.path.exists(excel_dir):

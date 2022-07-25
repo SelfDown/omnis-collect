@@ -44,6 +44,8 @@ class PropArr(RequestHandler):
         tool = TemplateTool(op_user=self.op_user)
         for item in from_list:
             val = self.get_render_data(templ, item, tool)
+            if not val:
+                continue
             if unique and val in result_list:
                 continue
             result_list.append(val)

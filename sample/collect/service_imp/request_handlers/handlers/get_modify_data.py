@@ -67,8 +67,6 @@ class GetModifyData(RequestHandler):
     def get_modify_name(self):
         return self.gmd_const["modify_name"]
 
-
-
     def get_add_operation(self):
         return self.gmd_const["add_name"]
 
@@ -76,6 +74,7 @@ class GetModifyData(RequestHandler):
         return self.gmd_const["remove_name"]
 
     data_json_dict = {}
+
     @staticmethod
     def get_json_content(path):
         return get_safe_data(path, GetModifyData.data_json_dict)
@@ -110,11 +109,15 @@ class GetModifyData(RequestHandler):
         result_list = []
         # 获取结果
         for index, rule in enumerate(fields):
+
             rule_name = get_safe_data(self.get_rule_name(), rule)
             if not rule_name:
                 return self.fail(data_json_path + "配置文件中第" + str(index + 1) + "条规则没有配置" + self.get_rule_name())
             result = None
             name = get_safe_data(self.get_name_name(), rule)
+            if self.can_log(template):
+                self.log("处理第【{index}】规则：{name}".format(index=(index + 1), name=name))
+                self.log(rule)
             field = get_safe_data(self.get_field_name(), rule)
             if not field:
                 msg = self.get_error_msg(field, name, index, self.get_field_name() + "字段不存在")
@@ -162,6 +165,9 @@ class GetModifyData(RequestHandler):
             if result_data:
                 result_list += result_data
 
+        if self.can_log(template):
+            self.log("规则处理完毕")
+            self.log(result_list)
         # 处理保存字段
         save_field = get_safe_data(self.get_save_field_name(), config)
         if save_field:
@@ -411,14 +417,21 @@ class GetModifyData(RequestHandler):
                 value = self.render_data(value_temp, p2)
                 return self.success(value)
 
-            left_result = transferValue(left)
-            if not self.is_success(left_result):
-                return left_result
-            left = self.get_data(left_result)
-            right_result = transferValue(right)
-            if not self.is_success(right_result):
-                return right_result
-            right = self.get_data(right_result)
+            # 处理如果是删除，则左边没有值，不必从数据库查询，直接滞空
+            if operation != self.get_remove_operation():
+                left_result = transferValue(left)
+                if not self.is_success(left_result):
+                    return left_result
+                left = self.get_data(left_result)
+            else:
+                left = ""
+            if operation != self.get_add_operation():
+                right_result = transferValue(right)
+                if not self.is_success(right_result):
+                    return right_result
+                right = self.get_data(right_result)
+            else:
+                right = ""
         if not name:
             name = get_safe_data(self.get_name_name(), rule)
         obj = {
