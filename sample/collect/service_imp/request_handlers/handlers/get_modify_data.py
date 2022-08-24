@@ -25,8 +25,12 @@ class GetModifyData(RequestHandler):
         "item_field_name": "item_field",
         "left_array_item_name": "left_array_item",
         "right_array_item_name": "right_array_item",
+        "append_original_item_name": "append_original_item",
 
     }
+
+    def get_append_original_item_name(self):
+        return self.gmd_const["append_original_item_name"]
 
     def get_left_array_item_name(self):
         return self.gmd_const["left_array_item_name"]
@@ -209,9 +213,9 @@ class GetModifyData(RequestHandler):
                 return self.fail(msg)
 
             templ = get_safe_data(self.get_template_name(), field)
-            if not templ:
-                msg = "第 " + str(index + 1) + "字段规则【" + self.get_template_name() + "】字段不存在"
-                return self.fail(msg)
+            # if not templ:
+            #     msg = "第 " + str(index + 1) + "字段规则【" + self.get_template_name() + "】字段不存在"
+            #     return self.fail(msg)
             name = get_safe_data(self.get_name_name(), field)
             if not name:
                 msg = "第 " + str(index + 1) + "字段规则【" + self.get_name_name() + "】字段不存在"
@@ -253,25 +257,37 @@ class GetModifyData(RequestHandler):
         right_common_list.sort(key=lambda item: self.render_data(key_templ, {item_field_name: item}))
         left_common_list.sort(key=lambda item: self.render_data(key_templ, {item_field_name: item}))
         result_list = []
+
         for left_item, right_item in zip(left_common_list, right_common_list):
             for field in fields:
-                p = {
-                    left_array_item_name: left_item,
-                    right_array_item_name: right_item
-                }
                 templ = get_safe_data(self.get_template_name(), field)
+                field_name = get_safe_data(self.get_field_name(), field)
                 value_templ = get_safe_data(self.get_value_name(), field)
                 name = get_safe_data(self.get_name_name(), field)
-                field_name = get_safe_data(self.get_field_name(), field)
-                result = self.render_data(templ, p)
+                if templ:
+                    p = {
+                        left_array_item_name: left_item,
+                        right_array_item_name: right_item
+                    }
+                    # if not templ:
+                    #     templ = field
+                    result = self.render_data(templ, p)
+                else:
+                    if get_safe_data(field_name, left_item) == get_safe_data(field_name, right_item):
+                        result = self.get_true_value()
+                    else:
+                        result = self.get_false_value()
                 if result != self.get_true_value():
                     left_value = self.render_data(value_templ, left_item)
                     right_value = self.render_data(value_templ, right_item)
+                    append_original_item = get_safe_data(self.get_append_original_item_name(), field, False)
                     obj_result = self.get_obj(left_save_field, right_save_field, left_value, right_value, rule,
-                                              template, operation=self.get_modify_name(), name=name, field=field_name)
+                                              template, operation=self.get_modify_name(), name=name, field=field_name,
+                                              append_original_item=append_original_item, orignal_data=left_item
+                                              )
                     if not self.is_success(obj_result):
                         return obj_result
-                    result_list = [self.get_data(obj_result)]
+                    result_list += [self.get_data(obj_result)]
 
         return self.success(result_list)
 
@@ -299,43 +315,47 @@ class GetModifyData(RequestHandler):
 
         for item in right:
             p = {item_field_name: item}
-            key = self.render_data(templ, p)
+            key = self.render_data(templ, p, tool)
             right_dict[key] = item
         # 获取新增的
         add_list = []
         for item in left:
             p = {item_field_name: item}
-            key = self.render_data(templ, p)
+            key = self.render_data(templ, p, tool)
             if key not in right_dict:
                 add_list.append(item)
         # 获取删除的
         left_dict = {}
         remove_list = []
+
         for item in left:
             p = {item_field_name: item}
-            key = self.render_data(templ, p)
+            key = self.render_data(templ, p, tool)
             left_dict[key] = item
         for item in right:
             p = {item_field_name: item}
-            key = self.render_data(templ, p)
+            key = self.render_data(templ, p, tool)
             if key not in left_dict:
                 remove_list.append(item)
 
+        append_original_item = get_safe_data(self.get_append_original_item_name(), rule, False)
         result_list = []
         for item in add_list:
             p = {item_field_name: item}
-            left = self.render_data(value_templ, p)
+            left = self.render_data(value_templ, p, tool)
             obj_result = self.get_obj(left_save_field, right_save_field, left, "", rule, template,
-                                      self.get_add_operation())
+                                      self.get_add_operation(), append_original_item=append_original_item,
+                                      orignal_data=item)
             if not obj_result:
                 return self.fail(obj_result)
             result_list.append(self.get_data(obj_result))
 
         for item in remove_list:
             p = {item_field_name: item}
-            right = self.render_data(value_templ, p)
+            right = self.render_data(value_templ, p, tool)
             obj_result = self.get_obj(left_save_field, right_save_field, "", right, rule, template,
-                                      self.get_remove_operation())
+                                      self.get_remove_operation(), append_original_item=append_original_item,
+                                      orignal_data=item)
             if not obj_result:
                 return self.fail(obj_result)
             result_list.append(self.get_data(obj_result))
@@ -371,7 +391,7 @@ class GetModifyData(RequestHandler):
         return self.success(result_list)
 
     def get_obj(self, left_save_field, right_save_field, left, right, rule, template, operation=None, name=None,
-                field=None):
+                field=None, append_original_item=False, orignal_data=None):
         # 保存处理转换
 
         transfer = get_safe_data(self.get_transfer_name(), rule)
@@ -441,6 +461,7 @@ class GetModifyData(RequestHandler):
             self.get_field_name(): field,
             self.get_name_name(): name
         }
-
+        if append_original_item and orignal_data:
+            obj = dict(orignal_data.items() + obj.items())
         # obj[self.get_transfer_name()] = transfer
         return self.success(obj)

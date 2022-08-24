@@ -12,10 +12,14 @@ class File2data(RequestHandler):
         "file_field_name": "file_field",
         "accept_type_name": "accept_type",
         "forbid_type_name": "forbid_type",
+        "to_list_name": "to_list",
     }
 
     def get_accept_type_name(self):
         return self.fc_const["accept_type_name"]
+
+    def get_to_list_name(self):
+        return self.fc_const["to_list_name"]
 
     def get_forbid_type_name(self):
         return self.fc_const["forbid_type_name"]
@@ -47,15 +51,26 @@ class File2data(RequestHandler):
             if file.size > 1024 * 1024 * 1024 * 100:
                 return self.fail(msg="上传【{0}】文件,不能大于100M！！！".format(file_name))
         # 读取文件内容
-        data_list = []
-        for file in file_list:
-            item = {
-                "data": file.read(),
-                "name": file.name,
-                "size": file.size,
+        to_list = True
 
-            }
-            data_list.append(item)
+        if self.get_to_list_name() in config:
+            to_list = config[self.get_to_list_name()]
+
+        data_list = []
+        if to_list:
+            for file in file_list:
+                item = {
+                    "data": file.read(),
+                    "name": file.name,
+                    "size": file.size,
+
+                }
+                data_list.append(item)
+        else:
+            if len(file_list)>0:
+                data_list = file_list[0].read()
+                data_list= bytes(data_list)
+
 
         save_field = get_safe_data(self.get_save_field_name(), config)
         if save_field:

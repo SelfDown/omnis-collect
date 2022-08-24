@@ -28,11 +28,16 @@ class Field2Array(RequestHandler):
         to_field = get_safe_data(self.get_to_field_name(), config)
         save_field = get_safe_data(self.get_save_field_name(), config)
         l = []
-        for obj_id in from_field:
-            import copy
-            p_tmp = copy.copy(params)
-            p_tmp[to_field] = obj_id
-            del p_tmp[from_field_name]
-            l.append(p_tmp)
+
+        if isinstance(from_field, list):
+            for obj_id in from_field:
+                import copy
+                p_tmp = copy.copy(params)
+                p_tmp[to_field] = obj_id
+                del p_tmp[from_field_name]
+                l.append(p_tmp)
+        else:
+            if from_field:
+                l = from_field.split(",")
         params[save_field] = l
         return self.success(params)

@@ -20,6 +20,8 @@ class MustFilter(BaseFilter):
             return False
         if isinstance(value, str) and not value.strip():
             return False
+        if isinstance(value, int):
+            return True
         if len(value) == 0:
             return False
         return True

@@ -109,6 +109,7 @@ class CollectService:
         "template_event_log_name": "template_event_log",
         "always_name": "always",
         "data_json_name": "data_json",
+        "service_module_name": "service_module"
 
     }
     router = {
@@ -137,6 +138,17 @@ class CollectService:
 
     def get_data_json_name(self):
         return self.const["data_json_name"]
+
+    def get_service_module_name(self):
+        return self.const["service_module_name"]
+
+    def get_service_module(self, template):
+        return get_safe_data(self.get_service_module_name(), template)
+
+    def get_current_service(self,template=None):
+        if not template:
+            template = self.template
+        return self.get_service_module(template)+"."+self.get_template_service_name(template)
 
     def get_data_json_config_path(self, data_json_path=None, template=None):
         template = self.get_template_data(template)
@@ -637,6 +649,9 @@ class CollectService:
             params[self.get_params_result_name()] = params_result
         # value = template_tool.render(template_str, params, config_params, template)
         value = self.get_render_data(template_str, params, template_tool)
+        # todo 此处一个模板渲染，返回状态+结果，但是用的地方太多了，改不动
+        if "请检查配置！！！" in value and "运行报错：" in value:
+            return self.fail(value)
         return self.success(value)
 
     def get_node_template_result(self, node, params, field="template", config_params=None, template=None):
@@ -968,12 +983,15 @@ class CollectService:
             if write_file_log != "true":
                 return
 
-        if isinstance(msg, dict):
+        if isinstance(msg, dict) or isinstance(msg, list):
             import json
             try:
                 msg = json.dumps(msg, cls=DateEncoder, ensure_ascii=False)
             except Exception as e:
-                msg = json.dumps(msg, cls=DateEncoder, encoding="ISO-8859-1", ensure_ascii=False)
+                try:
+                    msg = json.dumps(msg, cls=DateEncoder, encoding="ISO-8859-1", ensure_ascii=False)
+                except Exception as e:
+                    msg = ""
 
         if not level:
             self.logger.info(msg)
@@ -1459,6 +1477,9 @@ class CollectService:
 
             if self.get_default_name() in config_param and key not in params:
                 params[key] = config_param[self.get_default_name()]
+            else:
+                if key not in params:
+                    params[key] = None
         # import copy
         # params[self.get_params_all_name()] = copy.deepcopy(params)
         return self.success(params)
@@ -1658,4 +1679,6 @@ class CollectService:
         collect_project_config = item_router[collect_project]
         if collect_item not in collect_project_config:
             return self.fail(collect_item + "服务不存在")
-        return self.success(collect_project_config[collect_item])
+        service_item = collect_project_config[collect_item]
+        service_item[self.get_service_module_name()] = collect_project
+        return self.success(service_item)

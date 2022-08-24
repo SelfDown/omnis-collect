@@ -14,8 +14,11 @@ class CombineService(ResultHandler):
     cs_const = {
         "multiple_name": "multiple",
         "result_name": "result_name",
+        "append_param_name":"append_param"
     }
 
+    def get_append_param_name(self):
+        return self.cs_const["append_param_name"]
     def get_result_name(self):
         return self.cs_const["result_name"]
 
@@ -61,8 +64,11 @@ class CombineService(ResultHandler):
         result_name = get_safe_data(self.get_result_name(), params)
         if result_name:
             params_result[result_name] = result
-
-        s_result = self.get_node_service(params, params=params_result, template=template, append_param=True)
+        # 处理是否拼接其他参数，默认拼接所有参数
+        append_param = True
+        if self.get_append_param_name() in params:
+            append_param = params[self.get_append_param_name()]
+        s_result = self.get_node_service(params, params=params_result, template=template, append_param=append_param)
         if not self.is_success(s_result):
             return s_result
         service = self.get_data(s_result)

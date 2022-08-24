@@ -1,12 +1,11 @@
-
-select *
+select count(*) as count
 from sys_projects a
 where 1=1
 {% if project_code %}
     and a.project_code = {{project_code}}
 {% endif  %}
 
-{% if sys_project_id_list   %}
+{% if sys_project_id_list %}
     and a.sys_project_id in ({{sys_project_id_list}})
 {% endif %}
 
@@ -19,4 +18,6 @@ where 1=1
       {% endfor %}
    )
 {% endif %}
-
+{% if pagination %}
+  limit 10
+{% endif %}

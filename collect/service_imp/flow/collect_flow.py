@@ -158,12 +158,18 @@ class ServiceCollectFlowService(CollectService):
         else:  # 运行错误
             fail = get_safe_data(self.get_fail_name(), node)
             if not fail:
-                self.log("流程结果返回错误，但是" + current_name + "没有配置" + self.get_fail_name())
+                self.log("流程结果返回错误，但是【" + current_name + "】没有配置" + self.get_fail_name())
             node_result = self.get_template_result(fail, params, template=self.get_template())
         next = self.get_data(node_result)
         next_node = get_safe_data(next, service_dict)
-        if not next_node:
-            self.log("流程结果返回错误，但是" + current_name + "没有找到" + next + "节点")
+        if not next_node or (next_node and not get_safe_data(next, service_dict)):
+            self.log("当前节点")
+            self.log(node)
+            self.log("下个节点结果")
+            self.log(node_result)
+            self.log("节点流程")
+            self.log(service_dict)
+            self.log("流程结果返回错误，但是【" + current_name + "】没有找到【" + next + "】节点")
             return
         return get_safe_data(next, service_dict)
 
@@ -207,7 +213,7 @@ class ServiceCollectFlowService(CollectService):
         first_err = False
         while True:
             if not current:
-                return self.fail(msg=self.get_template_service_name() + "运行到第【" + str(count) + "】 个节点，找不到下个节点了")
+                return self.fail(msg=self.get_template_service_name() + "运行到第【" + str(count) + "】 个节点，找不到下个节点")
             if current == end:
                 break
             current_name = get_safe_data(self.get_name_name(), current)
@@ -262,7 +268,7 @@ class ServiceCollectFlowService(CollectService):
                         return self.fail(current_name + "没有配置" + self.get_err_msg_name())
                     from collect.service_imp.common.filters.template_tool import TemplateTool
                     tool = TemplateTool(self.op_user)
-                    msg = self.get_render_data(err_msg_templ, params_result,tool)
+                    msg = self.get_render_data(err_msg_templ, params_result, tool)
                     return self.fail(msg)
 
             # 流转到下个节点

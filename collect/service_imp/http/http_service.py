@@ -13,6 +13,12 @@ class HttpService(CollectService):
     HConst = {
         "data_json_name": "data_json",
         "success_name": "success",
+        "append_param_name":"append_param",
+        "data_name":"data",
+        "params_name":"params",
+        "method_name":"method",
+        "get_name":"get",
+        "post_name":"post",
     }
 
     data_json_dict = {}
@@ -30,8 +36,20 @@ class HttpService(CollectService):
         self.api = HttpApi(op_user)
         pass
 
+    def get_method_get_name(self):
+        return self.HConst["get_name"]
+    def get_method_post_name(self):
+        return self.HConst["post_name"]
+    def get_method_name(self):
+        return self.HConst["method_name"]
     def get_success_name(self):
         return self.HConst["success_name"]
+    def get_data_name(self):
+        return self.HConst["data_name"]
+    def get_params_name(self):
+        return self.HConst["params_name"]
+    def get_append_param_name(self):
+        return self.HConst["append_param_name"]
 
     # def get_data_json_name(self):
     #     return self.HConst["data_json_name"]
@@ -55,19 +73,39 @@ class HttpService(CollectService):
     #         self.set_json_content(config_file_path, data_json_content)
     #     return data_json_result
 
-    def get_http_param(self, data_json_templ, params_result):
+    def get_http_param(self, data_json_templ, params_result,append_param=False):
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(op_user=self.op_user)
         data_json = tool.render(data_json_templ, params_result)
-        if self.can_log():
-            self.log(data_json)
+
         try:
             import json
             data_json = json.loads(data_json)
+            # 拼接剩下的参数
+            if append_param:
+                # 查询是否配置data
+                data = get_safe_data(self.get_data_name(),data_json)
+                # 如果配置配置data 取params
+                if not data:
+                    data = get_safe_data(self.get_data_name(),data_json)
+                if not data:
+                    method = get_safe_data(self.get_method_name(),data_json,self.get_method_get_name())
+                    data={}
+                    if method.lower()==self.get_method_get_name():
+                        data_json[self.get_params_name()]=data
+                    else:
+                        data_json[self.get_data_name()] = data
+                for attr_key in params_result:
+                    if attr_key not in data:
+                        data[attr_key] = params_result[attr_key]
+
+            if self.can_log():
+                self.log(data_json)
             return self.success(data_json)
         except Exception as e:
             self.log(data_json, "error")
             return self.fail(str(e) + " JSON格式有误，请检查配置")
+
 
     def result(self, params=None):
         params_result = self.get_params_result()
@@ -79,7 +117,8 @@ class HttpService(CollectService):
         if not self.is_success(data_json_result):
             return data_json_result
         data_json_templ = self.get_data(data_json_result)
-        data_json_result = self.get_http_param(data_json_templ, params_result)
+        append_param = get_safe_data(self.get_append_param_name(),self.template,False)
+        data_json_result = self.get_http_param(data_json_templ, params_result,append_param)
         if not self.is_success(data_json_result):
             return data_json_result
         data_json = self.get_data(data_json_result)

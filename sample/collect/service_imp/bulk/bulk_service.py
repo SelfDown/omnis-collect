@@ -15,15 +15,16 @@ class BulkThread(threading.Thread):
         super(BulkThread, self).__init__()
         self.func = func
         self.args = args
+        self.result = {}
 
     def run(self):
         self.result = self.func(*self.args)
 
     def get_result(self):
         try:
-            return self.result  # 如果子线程不使用join方法，此处可能会报没有self.result的错误
-        except Exception:
-            return None
+            return self.result, None  # 如果子线程不使用join方法，此处可能会报没有self.result的错误
+        except Exception as e:
+            return {}, str(e)
 
 
 class BulkThreadList():
@@ -54,6 +55,7 @@ class BulkThreadList():
         """
         results = []
         start = 0
+        err_msg_list = []
         for th_item in range(0, len(self.li), self.max_once):
             uli = self.li[start:th_item + self.max_once]
             start = th_item + self.max_once
@@ -61,11 +63,14 @@ class BulkThreadList():
                 item.start()
             for item in uli:
                 item.join()
-                result = item.get_result()
-                results.append(result)
+                result, err_msg = item.get_result()
+                if not err_msg:
+                    results.append(result)
+                else:
+                    err_msg_list.append(err_msg)
 
         self.li = []
-        return results
+        return results, err_msg_list
 
 
 class ServiceBulkService(CollectService):
@@ -98,9 +103,9 @@ class ServiceBulkService(CollectService):
         from django.http import QueryDict
         if isinstance(params, QueryDict):
             params = params.dict()
-        append_param= True
+        append_param = True
         if self.get_append_param_name() in node:
-            append_param =  node[self.get_append_param_name()]
+            append_param = node[self.get_append_param_name()]
         service_data = self.get_node_service(node=node, params=params, template=template,
                                              append_param=append_param)
         if not service_data:
@@ -143,7 +148,10 @@ class ServiceBulkService(CollectService):
             params_tmp[item_name] = item
             reqList.append(item)
             btl.add_data(args=(batch_tmp, params_tmp, self.template))
-        results = btl.get_results()
+        results, err_msg_list = btl.get_results()
+        if err_msg_list:
+            self.log("批量执行报错")
+            self.log(err_msg_list)
         for service_result, req in zip(results, reqList):
             service_result[self.get_item_name()] = req
             result_list.append(service_result)

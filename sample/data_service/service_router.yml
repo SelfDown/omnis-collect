@@ -99,6 +99,19 @@ before_plugin:
     method: handler
     template: "{% if http and is_http %} True {% endif %}"
 
+  # 继承代理
+  - name: extend_proxy
+    path: collect.service_imp.before_plugin.plugin.extend_proxy
+    class_name: ExtendProxy
+    method: handler
+    template: "{% if extend_proxy %}True{% endif %}"
+  # 服务代理
+  - name: service_proxy
+    path: collect.service_imp.before_plugin.plugin.service_proxy
+    class_name: ServiceProxy
+    method: handler
+    template: "{% if proxy %} True {% endif %}"
+
   # 继承参数
   - name: extend_param
     path: collect.service_imp.before_plugin.plugin.extend_param
@@ -182,6 +195,11 @@ request_handler:
   - key: prop_arr
     path: collect.service_imp.request_handlers.handlers.prop_arr
     class_name: PropArr
+    method: handler
+  # 过滤数组
+  - key: filter_arr
+    path: collect.service_imp.request_handlers.handlers.filter_arr
+    class_name: FilterArr
     method: handler
   # 数组乘以数组
   - key: mul_arr

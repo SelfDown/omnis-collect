@@ -94,23 +94,24 @@ WSGI_APPLICATION = 'sample.wsgi.application'
 # }
 
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': get_key("database.host"),
+        'NAME': get_key("database.name"),
+        'USER': get_key("database.user"),
+        'PASSWORD': base64.b64decode(get_key("database.password")).decode(),
+        'PORT': get_key("database.port", data_type="int"),
+        'CONN_MAX_AGE': 60 * 30,
+    },
     # 'default': {
     #     'ENGINE': get_key("database.engine"),
     #     'NAME': get_key("database.name"),
-    #     'USER': get_key("database.user"),
-    #     'PASSWORD': get_key("database.password"),
-    #     'HOST': get_key("database.host"),
-    #     'PORT': get_key("database.port", data_type="int"),
+    #     'POOL_OPTIONS': {
+    #         'POOL_SIZE': 100,
+    #         'MAX_OVERFLOW': 50
+    #     }
+    #
     # }
-    'default': {
-        'ENGINE': get_key("database.engine"),
-        'NAME': get_key("database.name"),
-        'POOL_OPTIONS': {
-            'POOL_SIZE': 100,
-            'MAX_OVERFLOW': 50
-        }
-
-    }
 }
 # DATABASE_APPS_MAPPING = {
 #     'zabbix': 'zabbix',

@@ -30,7 +30,7 @@ class arrayValue(RequestHandler):
     def handler(self, params, config, template):
         foreach_name = get_safe_data(self.get_foreach_name(), config)
         if not foreach_name:
-            return self.fail("arrayValue 转换器"+self.get_from_array_name() + "字段配置不存在")
+            return self.fail("arrayValue 转换器"+self.get_foreach_name() + "字段配置不存在")
         arr = foreach_name.split(".")
         foreach = params
         for name in arr:
