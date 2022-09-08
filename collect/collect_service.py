@@ -145,10 +145,10 @@ class CollectService:
     def get_service_module(self, template):
         return get_safe_data(self.get_service_module_name(), template)
 
-    def get_current_service(self,template=None):
+    def get_current_service(self, template=None):
         if not template:
             template = self.template
-        return self.get_service_module(template)+"."+self.get_template_service_name(template)
+        return self.get_service_module(template) + "." + self.get_template_service_name(template)
 
     def get_data_json_config_path(self, data_json_path=None, template=None):
         template = self.get_template_data(template)
@@ -238,8 +238,8 @@ class CollectService:
         template_tool = TemplateTool(op_user=self.op_user)
         enable = get_safe_data(self.get_enable_name(), node)
         if enable:
-            enable_value = template_tool.render(enable, params)
-            if enable_value == self.get_false_value() or enable_value == "":
+            enable_value = self.render_data(enable,params)
+            if enable_value == self.get_false_value() or enable_value == "" or enable_value ==False :
                 return False
         return True
 
@@ -1404,6 +1404,11 @@ class CollectService:
     def is_finish(self, data):
         return CollectServiceUtils.is_finish(data)
 
+    def is_false(self, value):
+        if value is False or value == self.get_false_value():
+            return True
+        return False
+
     def get_msg(self, data):
         return CollectServiceUtils.get_msg(data)
 
@@ -1602,7 +1607,7 @@ class CollectService:
 
         return self.success(params)
 
-    def after_result(self, result):
+    def after_result(self, result,always=None):
         """
          处理结果
         :param result:
@@ -1613,7 +1618,7 @@ class CollectService:
         if self.get_after_plugin():
             from collect.service_imp.after_plugin.after_plugin import AfterPlugin
             after_plugin = AfterPlugin(op_user=self.op_user)
-            plugin_result = after_plugin.handler(result, self.template)
+            plugin_result = after_plugin.handler(result, self.template,always)
             if not self.is_success(plugin_result) or self.is_finish(plugin_result):
                 return plugin_result
             # 设置消息

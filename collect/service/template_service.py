@@ -122,12 +122,17 @@ class TemplateService(CollectService):
         # if not collect_service.is_success(login_check):
         #     return login_check
         # 执行前处理
+        def handler_err_other(service_obj,resultMap):
+            after_result = service_obj.after_result(None,True)
+            resultMap["other"] = self.get_other(after_result)
         before_result = service_obj.before_result(params)
         if not service_obj.is_success(before_result) or self.is_finish(before_result):
+            handler_err_other(service_obj,before_result)
             return before_result
         # 执行结果
         return_result = service_obj.result(params)
         if not service_obj.is_success(return_result):
+            handler_err_other(service_obj,return_result)
             return return_result
         data = service_obj.get_data(return_result)
         count = service_obj.get_count(return_result)

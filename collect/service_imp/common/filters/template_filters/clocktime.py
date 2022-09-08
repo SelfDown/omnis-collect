@@ -11,10 +11,13 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 class ClockTime(BaseFilter):
 
     # @staticmethod
-    def filter(self, value, fmt="%Y-%m-%d %H:%M:%S"):
+    def filter(self, value, fmt="%Y-%m-%d %H:%M:%S",divide=None):
         try:
             import time
-            return time.strftime(fmt, time.localtime(int(value)))
+            value = int(value)
+            if divide:
+                value /=divide
+            return time.strftime(fmt, time.localtime(value))
         except Exception as e:
             pass
 

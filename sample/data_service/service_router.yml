@@ -247,6 +247,10 @@ request_handler:
     path: collect.service_imp.request_handlers.handlers.template_log_msg
     class_name: TemplateLogMsg
     method: handler
+  - key: render_template
+    path: collect.service_imp.request_handlers.handlers.render_template
+    class_name: RenderTemplate
+    method: handler
 
 # 结果处理器
 result_handler:

@@ -147,9 +147,9 @@ class Result2Excel(ResultHandler):
             sheet.set_vert_split_pos(get_safe_data(self.get_frozen_col_name(), excel_template, 1))
 
             for col, field in enumerate(fields):
-                field_name = get_safe_data(self.get_value_name(), field)
-                if not field_name:
-                    return self.fail(" 第" + str(col + 1) + "个字段 没有找到【" + self.get_value_name() + "】字段信息")
+
+                # if not field_name:
+                #     return self.fail(" 第" + str(col + 1) + "个字段 没有找到【" + self.get_value_name() + "】字段信息")
                 name = field[self.get_name_name()]
                 col_info = sheet.col(col)
                 width = get_safe_data(self.get_width_name(), field, 80)
@@ -162,16 +162,18 @@ class Result2Excel(ResultHandler):
                 if not isinstance(name, unicode):
                     name = unicode(str(name))
                 sheet.write(name_row, col, name, name_style)
-                for row, data in enumerate(result):
-                    if field_name not in data:
-                        return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
-                    value = data[field_name]
-                    if value is None:
-                        value = ""
-                    # 写内容
-                    if not isinstance(value, unicode):
-                        value = unicode(str(value))
-                    sheet.write(row + start_row, col, value, style)
+                field_name = get_safe_data(self.get_value_name(), field)
+                if field_name:
+                    for row, data in enumerate(result):
+                        if field_name not in data:
+                            return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
+                        value = data[field_name]
+                        if value is None:
+                            value = ""
+                        # 写内容
+                        if not isinstance(value, unicode):
+                            value = unicode(str(value))
+                        sheet.write(row + start_row, col, value, style)
             for row_plus in range(400):
                 for col, field in enumerate(fields):
                     sheet.write(row_plus + start_row + len(result), col, "", style)

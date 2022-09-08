@@ -10,7 +10,7 @@ from collect.service_imp.before_plugin.before_plugin import BeforePlugin
 
 class AfterPlugin(BeforePlugin):
 
-    def handler(self, result, template):
+    def handler(self, result, template,always=None):
 
         after_plugin = self.get_after_plugin()
         if not after_plugin:
@@ -20,7 +20,10 @@ class AfterPlugin(BeforePlugin):
         msg = ""
         other = None
         for plugin in after_plugin:
+
             from collect.utils.collect_utils import get_safe_data
+            if always==True and get_safe_data(self.get_always_name(), plugin)!=True:
+                continue
             templ = get_safe_data(self.get_template_name(), plugin)
             v = tool.render(templ, template)
             if v != self.get_true_value():

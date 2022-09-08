@@ -49,4 +49,5 @@ class Hook(ResultHandler):
         t = threading.Thread(target=handler_service, args=(service, template))
         t.start()
 
+
         return self.success(result)

@@ -46,7 +46,7 @@ class CheckArray(RequestHandler):
         params_copy = copy.deepcopy(params)
         for item_order_index, item in enumerate(foreach):
             params_copy[item_name] = item
-            params_copy[self.get_item_order_index_name()] = str(item_order_index+1)
+            params_copy[self.get_item_order_index_name()] = item_order_index+1
             for field_index, field in enumerate(fields):
                 temp = get_safe_data(self.get_template_name(), field)
                 if not temp:

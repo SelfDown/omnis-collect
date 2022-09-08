@@ -15,44 +15,6 @@ _cache = {}
 
 
 class TemplateTool(CollectService):
-    filter_config = {
-        "uuid": {
-            "path": "collect.service_imp.common.filters.template_filters.uuid",
-            "class_name": "UUIDFilter",
-            "method": "filter"
-        },
-        "current_date_time": {
-            "path": "collect.service_imp.common.filters.template_filters.date_time",
-            "class_name": "CurrentDateTime",
-            "method": "filter"
-        },
-        "exist": {
-            "path": "collect.service_imp.common.filters.template_filters.exist",
-            "class_name": "ExistFilter",
-            "method": "filter"
-        },
-        "must_list": {
-            "path": "collect.service_imp.common.filters.template_filters.must_list",
-            "class_name": "MustListFilter",
-            "method": "filter"
-        },
-        "must": {
-            "path": "collect.service_imp.common.filters.template_filters.must",
-            "class_name": "MustFilter",
-            "method": "filter"
-        },
-        "foreach": {
-            "path": "collect.service_imp.common.filters.template_filters.foreach",
-            "class_name": "ForeachFilter",
-            "method": "filter"
-        },
-        "in_array": {
-            "path": "collect.service_imp.common.filters.template_filters.in_array",
-            "class_name": "InArrayFilter",
-            "method": "filter"
-        }
-    }
-
     def load_filter(self, env, templ, params, config_params, template):
         filter_config = self.get_filter_handler()
         for key in filter_config:
@@ -88,8 +50,9 @@ class TemplateTool(CollectService):
                 pass
         env = Environment()
         self.load_filter(env, templ, params, config_params, template)
-        t = env.from_string(templ)
+
         try:
+            t = env.from_string(templ)
             if params and isinstance(params, dict) and 'self' in params:
                 del params['self']
             result_content = t.render(**params)

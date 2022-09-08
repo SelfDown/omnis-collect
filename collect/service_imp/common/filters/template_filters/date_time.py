@@ -11,6 +11,6 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 class CurrentDateTime(BaseFilter):
 
     # @staticmethod
-    def filter(self, value):
+    def filter(self, fmt, *args, **kwargs):
         from collect.utils.collect_utils import getDateTime
-        return getDateTime(value)
+        return getDateTime(fmt, *args, **kwargs)

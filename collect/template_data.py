@@ -27,7 +27,7 @@ class TemplateData(APIView):
         # 获取结果
         data_result = template.result(data, is_http=True)
         if not template.is_success(data_result):
-            return Result.fail_response(msg=template.get_msg(data_result))
+            return Result.fail_response(msg=template.get_msg(data_result),other=template.get_other(data_result))
         data = template.get_data(data_result)
         from django.http import FileResponse
         # 如果是个文件类型

@@ -21,11 +21,17 @@ if not os.path.exists(fact_item_config):
 props = Properties(fact_item_config)  # 读取文件
 
 
-def getDateTime(fmt=None):
+def getDateTime(fmt="%Y-%m-%d %H:%M:%S", *args, **kwargs):
+    # 判断字符串为空的情况
     if not fmt:
         fmt = "%Y-%m-%d %H:%M:%S"
-    from datetime import datetime
-    return datetime.now().strftime(fmt)
+    import datetime
+    d = datetime.datetime.now()
+    if kwargs:
+        for k in kwargs:
+            kwargs[k]= int(kwargs[k])
+        d += datetime.timedelta(**kwargs)
+    return d.strftime(fmt)
 
 
 class data_value_check:
@@ -121,8 +127,10 @@ class CollectServiceUtils:
         return result
 
     @staticmethod
-    def fail(data=None, code="1", msg=""):
+    def fail(data=None, code="1", msg="",other=None):
         result = {"code": code, "msg": msg, "success": False, 'data': data}
+        if other:
+            result["other"]=other
         return result
 
     @staticmethod
@@ -187,15 +195,16 @@ class Result:
         return response
 
     @staticmethod
-    def fail(data=[], code="1", msg=""):
-        result = CollectServiceUtils.fail(data=data, code=code, msg=msg)
+    def fail(data=[], code="1", msg="",other=None):
+        result = CollectServiceUtils.fail(data=data, code=code, msg=msg,other=other)
+
         return json.dumps(result, cls=DateEncoder)
         # result = {"code": code, "msg": msg, "success": False, 'data': data}
         # return json.dumps(result, cls=DateEncoder)
 
     @staticmethod
-    def fail_response(data=[], code="1", msg="", status=200):
-        result = Result.fail(data, code, msg)
+    def fail_response(data=[], code="1", msg="", status=200,other=None):
+        result = Result.fail(data, code, msg,other=other)
         r = HttpResponse(result, content_type="application/json;charset=utf-8", status=status)
         # 为文件下载，提供数据，文件下载无法获取到内容，内容前端已经设置blob类型，所以只能靠header信息
         r.__setitem__("success", False)
