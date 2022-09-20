@@ -157,6 +157,7 @@ class CollectServiceUtils:
 class DateEncoder(json.JSONEncoder):
     def default(self, obj):
         from decimal import Decimal
+        from requests.auth import HTTPBasicAuth
         if isinstance(obj, datetime.datetime):
             return obj.strftime('%Y-%m-%d %H:%M:%S')
         elif isinstance(obj, datetime.date):
@@ -167,6 +168,8 @@ class DateEncoder(json.JSONEncoder):
             return obj.name
         elif isinstance(obj, buffer):
             return str(obj)
+        elif isinstance(obj,HTTPBasicAuth):
+            return ""
         else:
             return json.JSONEncoder.default(self, obj)
 

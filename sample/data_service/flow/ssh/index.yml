@@ -1,0 +1,37 @@
+service:
+  - key: install_agent_s
+    module: service_flow
+    http: true
+    must_login: false
+    data_json: install_s.json
+    result_handler:
+      - key: param2result
+        params:
+          field: ll
+
+  - key: install_agent
+    module: ssh
+    http: true
+    must_login: false
+    params:
+      server_ip:
+        check:
+          template: "{{server_ip|must}}"
+          err_msg: 服务ip不能为空
+      user:
+        check:
+          template: "{{user|must}}"
+          err_msg: "用户不能为空"
+      password:
+        check:
+          template: "{{password|must}}"
+          err_msg: "【{{server_ip}}】 root 密码不能为空"
+      port:
+        default: 22
+      timeout:
+        default: 1
+    data_json: install.json
+    result_handler:
+      - key: param2result
+        params:
+          field: ll

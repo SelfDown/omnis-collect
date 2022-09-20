@@ -36,15 +36,15 @@ class RenderTemplate(RequestHandler):
         templ = self.get_data(templ)
         params_result = self.get_params_result(template)
         if self.can_log(template):
-            self.log(templ)
-            self.log(params_result)
+            self.log(templ, template)
+            self.log(params_result, template)
 
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(self.op_user)
-        value = self.get_render_data(templ=templ, tool=tool,params=params_result)
+        value = self.get_render_data(templ=templ, tool=tool, params=params_result)
         if self.can_log(template):
-            self.log("渲染结果")
-            self.log(value)
+            self.log("渲染结果", template)
+            self.log(value, template)
         save_field = get_safe_data(self.get_save_field_name(), config)
         if save_field:
             params[save_field] = value

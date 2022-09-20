@@ -141,13 +141,16 @@ class HttpService(CollectService):
                 if not err_msg:
                     return self.fail("HTTP 模块没有配置" + self.get_err_msg_name())
                 message = self.get_render_data(err_msg, result_data, tool)
-                return self.fail(message)
+                fail = self.fail(message)
+                fail["other"] = self.get_other(result_data)
+                return fail
         params_result["http_send"] = data_json
         msg = self.get_msg(result_data)
         count = self.get_count(result_data)
         if not msg:
             msg = "发送成功"
-        return self.success(data=result_data, msg=msg, count=count)
+        other = self.get_other(result_data)
+        return self.success(data=result_data, msg=msg, count=count,other=other)
 
 
 class HttpApi(CollectService):

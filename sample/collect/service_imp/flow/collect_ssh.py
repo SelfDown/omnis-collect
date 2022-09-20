@@ -42,6 +42,16 @@ class CollectSSHService(ServiceCollectFlowService):
         "ssh_connect_name": "ssh_connect",
 
     }
+    data_json_dict = {}
+
+    @staticmethod
+    def get_json_content(path):
+        return get_safe_data(path, CollectSSHService.data_json_dict)
+
+    @staticmethod
+    def set_json_content(path, data_json_content):
+        CollectSSHService.data_json_dict[path] = data_json_content
+
 
     def get_ssh_connect_name(self):
         return self.ssh_const["ssh_connect_name"]
@@ -191,6 +201,14 @@ class CollectSSHService(ServiceCollectFlowService):
         return self.success("检查完毕")
 
     def get_shell(self):
+        if get_safe_data(self.get_data_json_name(),self.template):
+            data_json_result = self.get_data_json(self.get_params_result())
+            if not self.is_success(data_json_result):
+                return data_json_result
+            data_json = self.get_data(data_json_result)
+            import json
+            data_json = json.loads(data_json)
+            return data_json
         return get_safe_data(self.get_shell_name(), self.template)
 
     def get_services_name(self):
@@ -203,6 +221,7 @@ class CollectSSHService(ServiceCollectFlowService):
         return get_safe_data(self.get_services_name(), shell)
 
     def execute(self, handler_node):
+        # 设置流程节点
         self.set_flow(self.get_shell())
         self.set_flow_name(self.get_shell_flow_name())
         flow_result = self.flow(handler_node)

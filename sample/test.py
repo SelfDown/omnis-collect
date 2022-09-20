@@ -102,6 +102,7 @@ import collect.service_imp.request_register.register.header
 # import collect.service_imp.flow.common.server_archive
 
 env = Environment()
+import collect.service_imp.before_plugin.plugin.extend_proxy
 
 #192.168.10.133: | 操作失败 —— JAVA_HOME:  /usr/local/jdk1.8.0_301\nAPP_HOME:   /data/wghis/apps/cse-server\n开始启动进程 cse-server-bootstrap.jar\n进程启动成功，进程号 21175 —— cse-server-bootstrap.jar 的进程 20661 已关闭"
 

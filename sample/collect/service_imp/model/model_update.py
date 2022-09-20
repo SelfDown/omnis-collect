@@ -55,7 +55,7 @@ class ModelUpdateService(ModelDeleteService):
                 if self.can_log():
                     self.log("没有找到任何更新属性，直接返回")
                     self.log(req_fields)
-                return self.success(data=[], msg="修改 【0】条记录成功", count=0)
+                return self.success(data={}, msg="修改 【0】条记录成功", count=0)
 
 
         es_fields = get_safe_data(self.get_exclude_save_field_name(), self.get_template())
@@ -67,7 +67,7 @@ class ModelUpdateService(ModelDeleteService):
         if c == 0:
             if self.can_log():
                 self.log(msg="警告！！！没有找到更新记录")
-            return self.success(data=[], msg="修改 【0】条记录成功")
+            return self.success(data={}, msg="修改 【0】条记录成功")
         update_obj = {}
         # params_result = self.get_params_result()
         if self.can_log():
@@ -80,6 +80,6 @@ class ModelUpdateService(ModelDeleteService):
         if self.can_log():
             self.log("影响行数：" + str(update_sum))
         if update_sum != c:
-            return self.success(data=[], msg="总共修改【{c}】 条。修改 【{update_sum}】条记录成功".format(c=str(c),
+            return self.success(data={}, msg="总共修改【{c}】 条。修改 【{update_sum}】条记录成功".format(c=str(c),
                                                                                          update_sum=str(update_sum)))
-        return self.success(data=[], msg="修改 【{c}】条记录成功".format(c=str(update_sum)), count=c)
+        return self.success(data={}, msg="修改 【{c}】条记录成功".format(c=str(update_sum)), count=c)

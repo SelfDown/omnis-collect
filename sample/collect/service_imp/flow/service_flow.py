@@ -21,7 +21,25 @@ class ServiceFlowService(ServiceCollectFlowService):
     def get_strict_name(self):
         return self.sf_const["strict_name"]
 
+    data_json_dict = {}
+
+    @staticmethod
+    def get_json_content(path):
+        return get_safe_data(path, ServiceFlowService.data_json_dict)
+
+    @staticmethod
+    def set_json_content(path, data_json_content):
+        ServiceFlowService.data_json_dict[path] = data_json_content
+
     def get_flow(self):
+        if get_safe_data(self.get_data_json_name(), self.template):
+            data_json_result = self.get_data_json(self.get_params_result())
+            if not self.is_success(data_json_result):
+                return data_json_result
+            data_json = self.get_data(data_json_result)
+            import json
+            data_json = json.loads(data_json)
+            return data_json
         return get_safe_data(self.get_flow_name(), self.template)
 
     def handler_current_node(self, current):

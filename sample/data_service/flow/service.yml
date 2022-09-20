@@ -1,3 +1,5 @@
 service:
   - name: "发布计划"
     path: "publish/index.yml"
+  - name: "ssh"
+    path: "ssh/index.yml"
