@@ -165,9 +165,12 @@ class Result2Excel(ResultHandler):
                 field_name = get_safe_data(self.get_value_name(), field)
                 if field_name:
                     for row, data in enumerate(result):
-                        if field_name not in data:
-                            return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
-                        value = data[field_name]
+                        if self.is_template_text(field_name):
+                            value = self.render_data(field_name,data,)
+                        else:
+                            if field_name not in data:
+                                return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
+                            value = data[field_name]
                         if value is None:
                             value = ""
                         # 写内容

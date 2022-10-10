@@ -53,6 +53,8 @@ class UpdateData(RequestHandler):
                 temp = get_safe_data(self.get_template_name(), field)
                 if not temp:
                     return self.fail(self.get_fields_name() + "没有配置" + self.get_template_name())
+                if not self.is_enable(params_copy,field):
+                    continue
                 field_name = get_safe_data(self.get_field_name(), field)
                 item[field_name] = self.get_render_data(temp, params_copy, template_tool)
 

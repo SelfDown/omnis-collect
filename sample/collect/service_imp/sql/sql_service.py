@@ -113,8 +113,11 @@ class SqlService(CollectService):
         # 渲染已经配置的模板变量
         for p in vars:
             param_key = p.get_param_key()
-            # 如果变量没有值，则不进行渲染
-            if is_empty(param_key, params):
+            # 如果第一遍渲染变量没有值，则不进行渲染，
+            # 如果第二遍为空，可以。主要处理数组传空字符串，而空字符又不进行渲染，导致执行SQL报错
+            # to_param_key 第一遍是True,第二遍是False
+            # 第一遍已经将原始变量，改成替换变量了，第二遍主要对替换变量进行处理
+            if to_param_key and is_empty(param_key, params):
                 continue
             pkv = params[param_key]
             # 必须先设置值，然后进行值判断
@@ -133,10 +136,14 @@ class SqlService(CollectService):
                 # 设置变量值
                 template_params[p.get_attr_name_value(arr_key_param)] = p.get_attr_value_name_value(arr_key_param)
         real_values = []
+        # 根据参数处理值，运行参数保存在一个数组中
         for p in vars:
             param_key = p.get_param_key()
-            # 如果变量没有值，则不进行渲染
-            if is_empty(param_key, params):
+            # 如果第一遍渲染变量没有值，则不进行渲染，
+            # 如果第二遍没有值则，可以,主要处理数组总传空字符串
+            # to_param_key 第一遍是True,第二遍是False
+            # 和上面同理
+            if to_param_key and is_empty(param_key, params):
                 continue
             real_values += p.get_real_value()
         # 其他字段直接copy

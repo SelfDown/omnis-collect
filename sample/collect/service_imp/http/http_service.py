@@ -6,7 +6,7 @@
 @desc:
 """
 from collect.collect_service import CollectService
-from collect.utils.collect_utils import get_safe_data
+from collect.utils.collect_utils import get_safe_data, DateEncoder
 
 
 class HttpService(CollectService):
@@ -178,7 +178,7 @@ class HttpApi(CollectService):
                 if key.lower() == 'content-type' and content == 'application/json':
                     try:
                         import json
-                        data["data"] = json.dumps(target)
+                        data["data"] = json.dumps(target,cls=DateEncoder)
                     except Exception as e:
                         self.log("JSON格式失败", level="error")
                         self.log(target)
@@ -197,7 +197,9 @@ class HttpApi(CollectService):
             return self.fail(msg=str(e))
         if r.status_code >= 400:
             self.log(r.text, template=template)
-            return self.fail(r.text[0:3000])
+            r.close()
+            del (r)
+            return self.fail(r.text[0:10000])
         try:
             result_data = json.loads(r.text)
             r.close()

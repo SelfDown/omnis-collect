@@ -34,6 +34,7 @@ class CollectSSHService(ServiceCollectFlowService):
         "scp_client_name": "scp_client",
         "error_msg_name": "error_msg",
         "shell_name": "shell",
+        "shell_list_name": "shell_list",
         "services_name": "services",
         "shell_flow_name": "shell_flow",
         "ssh_name": "ssh",
@@ -51,7 +52,6 @@ class CollectSSHService(ServiceCollectFlowService):
     @staticmethod
     def set_json_content(path, data_json_content):
         CollectSSHService.data_json_dict[path] = data_json_content
-
 
     def get_ssh_connect_name(self):
         return self.ssh_const["ssh_connect_name"]
@@ -95,6 +95,9 @@ class CollectSSHService(ServiceCollectFlowService):
 
     def get_shell_name(self):
         return self.ssh_const["shell_name"]
+
+    def get_shell_list_name(self):
+        return self.ssh_const["shell_list_name"]
 
     def get_user_name(self):
         return self.ssh_const["user_name"]
@@ -201,7 +204,7 @@ class CollectSSHService(ServiceCollectFlowService):
         return self.success("检查完毕")
 
     def get_shell(self):
-        if get_safe_data(self.get_data_json_name(),self.template):
+        if get_safe_data(self.get_data_json_name(), self.template):
             data_json_result = self.get_data_json(self.get_params_result())
             if not self.is_success(data_json_result):
                 return data_json_result
@@ -242,7 +245,25 @@ class CollectSSHService(ServiceCollectFlowService):
         return self.success("执行结束")
 
     def get_node_shell(self, node):
-        return get_safe_data(self.get_shell_name(), node)
+        shell_script = self.get_node_shell_list_script(node)
+        if shell_script:
+            return shell_script
+        shell = get_safe_data(self.get_shell_name(), node)
+        return shell
+
+    def get_node_shell_list_script(self, node):
+        shell_list = get_safe_data(self.get_shell_list_name(), node)
+        if not shell_list:
+            return
+        s = [get_safe_data(self.get_shell_name(), item) for item in shell_list]
+        return "\n".join(s)
+
+    def get_node_shell_list_save_fields(self, node):
+        shell_list = get_safe_data(self.get_shell_list_name(), node)
+        if not shell_list:
+            return
+        s = [get_safe_data(self.get_save_field_name(), item) for item in shell_list]
+        return s
 
     def log_shell(self, shell, password=None, template=None):
         if password:
@@ -268,36 +289,31 @@ class CollectSSHService(ServiceCollectFlowService):
     def handler_current_node(self, current):
         shell = self.get_node_shell(current)
         result = None
+        # 如果shell 命令存在，先处理shell
         if shell:
             if self.is_template_text(shell):
                 from collect.service_imp.common.filters.template_tool import TemplateTool
                 tool = TemplateTool(op_user=self.op_user)
                 shell = tool.render(shell, self.get_params_result())
             shell_result = self.execute_base_shell_with_log(shell)
-
             result = self.get_data(shell_result)
-            if self.has_error(shell):
-                return self.fail(self.get_error_msg(shell_result))
+            if self.has_error(result):
+                return self.fail(self.get_error_msg(result))
+            # 处理批量shell 的保存字段
+            save_fields = self.get_node_shell_list_save_fields(current)
+            if save_fields and result:
+                result_list = result.split("\n")
+                params_result = self.get_params_result()
+                # 依次处理save_field和结果的关系，结果中有换行就会有问题
+                for result_item, save_field in zip(result_list, save_fields):
+                    params_result[save_field] = result_item
+
+        # 处理第三方模块，比如文件上传，服务器拷贝文件
         config = self.get_app_config()
         result = self.handler_app(current, config, result)
         if not self.is_success(result):
             return result
         result = self.get_data(result)
-        # for key in config:
-        #     if key in current:
-        #         rule = config[key]
-        #         config_params = current[key]
-        #         params = self.get_params_result()
-        #         import importlib
-        #         path = rule[self.get_path_name()]
-        #         class_name = rule[self.get_class_name()]
-        #         collect_factory = importlib.import_module(path)
-        #         rule_obj = getattr(collect_factory, class_name)(op_user=self.op_user)
-        #         result = rule_obj.handler(params, config_params, template=self.template)
-        #         if not self.is_success(result):
-        #             return result
-        #         result = self.get_data(result)
-        #         break
         ignore_error = get_safe_data(self.get_ignore_error_name(), current, False)
         if not ignore_error and self.has_error(result):
             return self.fail(self.get_error_msg(result))

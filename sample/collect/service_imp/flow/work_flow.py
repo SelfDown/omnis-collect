@@ -15,6 +15,7 @@ class WorkFlowService(ServiceCollectFlowService):
         "strict_name": "strict",
         "services_name": "services",
         "status_field_name": "status_field",
+        "only_flow_name": "only_flow",
 
     }
 
@@ -39,6 +40,9 @@ class WorkFlowService(ServiceCollectFlowService):
 
     def get_strict_name(self):
         return self.wf_const["strict_name"]
+
+    def get_only_flow_name(self):
+        return self.wf_const["only_flow_name"]
 
     def get_flow(self):
         return get_safe_data(self.get_flow_name(), self.template)
@@ -83,6 +87,10 @@ class WorkFlowService(ServiceCollectFlowService):
         if not flow:
             return self.fail(msg="没有找到" + self.get_flow_name() + "节点，请检查配置")
         services = get_safe_data(self.get_services_name(), flow)
+        only_flow_templ = get_safe_data(self.get_only_flow_name(), self.template)
+        only_flow = self.render_data(only_flow_templ, params_result)
+        if only_flow == self.get_true_value() or only_flow == True:
+            return self.success(services)
         service_dict_result = self.get_service_dict(services)
         if not self.is_success(service_dict_result):
             return service_dict_result
@@ -93,9 +101,12 @@ class WorkFlowService(ServiceCollectFlowService):
         status = get_safe_data(status_name, params_result)
         node = get_safe_data(status, service_dict)
         if not node:
-            return self.fail("工作流没有找打节点【" + status+"】")
+            return self.fail("工作流没有找打节点【" + status + "】")
         node_type = get_safe_data(self.get_type_name(), node)
         if self.get_end_name() == node_type:
             return self.success([], msg="流程已经结束")
         next = get_safe_data(self.get_next_name(), node)
-        return self.success(next)
+        node_list = []
+        for node_item in next:
+            node_list.append(get_safe_data(node_item, service_dict))
+        return self.success(node_list)

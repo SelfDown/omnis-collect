@@ -72,7 +72,7 @@ class BaseModifyRule:
         else:
             obj = self.render(templ, self.params)
         # 如果是数组变量则，取字段
-        return self.handler_field_obj(rule,obj)
+        return self.handler_field_obj(rule, obj)
 
     def is_array_rule(self, rule):
         rule_name = get_safe_data(self.get_rule_name(), rule)
@@ -80,7 +80,8 @@ class BaseModifyRule:
             return True
         else:
             return False
-    def handler_field_obj(self,rule,obj):
+
+    def handler_field_obj(self, rule, obj):
         field = self.get_field(rule)
         if self.is_array_rule(rule) and field in obj:
             return obj[field]
@@ -92,7 +93,7 @@ class BaseModifyRule:
         templ = get_safe_data(self.get_right_name(), rule)
         obj = self.render(templ, self.params)
         # 如果是数组变量则，取字段
-        return self.handler_field_obj(rule,obj)
+        return self.handler_field_obj(rule, obj)
 
     def get_operation_name(self):
         return "operation"
@@ -121,10 +122,21 @@ class BaseModifyRule:
     def get_save_field_name(self):
         return "save_field"
 
+    def get_enable_name(self):
+        return "enable"
+
     def get_operation(self, rule=None):
         if rule:
             return get_safe_data(self.get_operation_name(), rule)
         return get_safe_data(self.get_operation_name(), self.rule)
+
+    def is_enable_rule(self, rule=None):
+        if not rule:
+            rule = self.rule
+        enable = get_safe_data(self.get_enable_name(), rule)
+        if not enable:
+            return True
+        return self.render(enable, self.params) == self.get_true_value()
 
     def get_field_value(self, data=None, rule=None):
         if not data:
@@ -132,7 +144,11 @@ class BaseModifyRule:
         value_templ = self.get_value_templ(rule)
         if not value_templ:
             value_templ = self.get_field(rule)
-        return self.render(value_templ, data)
+        value = self.render(value_templ, data)
+        if value is None:
+            return ""
+        else:
+            return value
 
     def get_left_value(self):
         return get_safe_data(self.get_field(), self.get_obj_left())
@@ -160,7 +176,7 @@ class BaseModifyRule:
     def get_remove_operation(self):
         return "remove"
 
-    def _get_obj(self, left, right, rule, operation=None):
+    def _get_obj(self, left, right, rule, operation=None, transfer_dict=None):
         if not operation:
             operation = self.get_operation(rule)
         left_value = self.get_field_value(left, rule)
@@ -172,6 +188,9 @@ class BaseModifyRule:
 
             # service_node = get_safe_data(self.get_service_name(), transfer)
             def transferValue(value):
+                if transfer_dict is not None:
+                    transfer_value = get_safe_data(value, transfer_dict, "")
+                    return transfer_value, True
                 compare_field_value = get_safe_data("compare_field_value", transfer,
                                                     "compare_field_value")
                 p = {
@@ -193,7 +212,7 @@ class BaseModifyRule:
 
                 save_field = get_safe_data(self.get_save_field_name(), transfer)
                 if not save_field:
-                    return "【" + field + "】" + self.get_transfer_name() + "中没有配置" + self.get_save_field_name(), False
+                    return "【" + self.get_field() + "】" + self.get_transfer_name() + "中没有配置" + self.get_save_field_name(), False
                 # 取变量值
                 value_temp = get_safe_data(self.get_value_name(), transfer)
                 if not save_field:
@@ -313,10 +332,10 @@ class FieldValueModifyRule(BaseModifyRule):
     def hanlder_rule(self):
         left = self.get_obj_left()
         if not isinstance(left, dict):
-            return self.get_field() + "左边对象不是字段对象:" + str(left),False
+            return self.get_field() + "左边对象不是字段对象:" + str(left), False
         right = self.get_obj_right()
         if not isinstance(right, dict):
-            return self.get_field() + "右边对象不是字段对象:" + str(right),False
+            return self.get_field() + "右边对象不是字段对象:" + str(right), False
 
         if self.is_not_equal():  # 如果不相等，则直接返回计算的比较对象
             obj, success = self.get_obj()
@@ -343,7 +362,7 @@ class ArrayAddDeleteModifyRule(BaseModifyRule):
         key_templ = get_safe_data(self.get_key_name(), self.rule)
         return key_templ
 
-    def get_obj(self, left, right, rule=None, operation=None):
+    def get_obj(self, left, right, rule=None, operation=None, transfer_dict=None):
         """
         operation 操作 默认取rule 里面的，如果是新增和和删除，是可以传操作
         """
@@ -358,7 +377,7 @@ class ArrayAddDeleteModifyRule(BaseModifyRule):
             left = {}
         if not rule:
             rule = self.rule
-        obj = self._get_obj(left, right, rule, operation=operation)
+        obj = self._get_obj(left, right, rule, operation=operation, transfer_dict=transfer_dict)
         return obj, True
 
     def hanlder_rule(self):
@@ -409,14 +428,14 @@ class ArrayAddDeleteModifyRule(BaseModifyRule):
             if success:
                 result_list.append(obj)
             else:
-                return obj,success
+                return obj, success
 
         for item in remove_list:
             obj, success = self.get_obj(None, item, operation=self.get_remove_operation())
             if success:
                 result_list.append(obj)
             else:
-                return obj,success
+                return obj, success
 
         return result_list, True
 
@@ -438,6 +457,26 @@ class ArrayFieldModifyRule(ArrayAddDeleteModifyRule):
 
     def get_fields_name(self):
         return "fields"
+
+    def get_transfer_result(self, transfer, current_value_list):
+        current_value_list_field = get_safe_data("current_value_list_field", transfer,
+                                                 "current_value_list_field")
+        p = {
+            current_value_list_field: current_value_list
+        }
+        # 构造一个服务
+        import copy
+        service = self.get_node_service(copy.deepcopy(transfer), p, self.template)
+        if not self.is_success(service):
+            return service
+        service = self.get_data(service)
+        # 运行服务的结果
+
+        service_result = self.get_service_result(service, self.template)
+        return service_result
+        # if not self.is_success(service_result):
+        #     return service_result
+        # data = self.get_data(service_result)
 
     def hanlder_rule(self):
         key_templ = key_templ = self.get_key()
@@ -505,9 +544,13 @@ class ArrayFieldModifyRule(ArrayAddDeleteModifyRule):
         right_common_list.sort(key=lambda item: self.render(key_templ, {item_field: item}))
         left_common_list.sort(key=lambda item: self.render(key_templ, {item_field: item}))
         result_list = []
-
-        for left_item, right_item in zip(left_common_list, right_common_list):
-            for field in fields:
+        common_list = zip(left_common_list, right_common_list)
+        for field in fields:
+            field_change_list = []
+            if not self.is_enable_rule(field):
+                continue
+            # 先获取要改变的值列表
+            for left_item, right_item in common_list:
                 templ = get_safe_data(self.get_template_name(), field)
                 field_name = get_safe_data(self.get_field_name(), field)
                 value_templ = get_safe_data(self.get_value_name(), field)
@@ -517,8 +560,6 @@ class ArrayFieldModifyRule(ArrayAddDeleteModifyRule):
                         left_array_item_name: left_item,
                         right_array_item_name: right_item
                     }
-                    # if not templ:
-                    #     templ = field
                     result = self.render(templ, p)
                 else:
                     if get_safe_data(field_name, left_item) == get_safe_data(field_name, right_item):
@@ -526,14 +567,46 @@ class ArrayFieldModifyRule(ArrayAddDeleteModifyRule):
                     else:
                         result = self.get_false_value()
                 if result != self.get_true_value():
-                    obj, success = self.get_obj(left_item, right_item, rule=field, operation=self.get_modify_name())
-                    if success:
-                        result_list.append(obj)
-                    # if append_right_fields:
-                    #     for right_field_name in append_right_fields:
-                    #         if right_field_name in right_item:
-                    #             result_data[right_field_name] = right_item[right_field_name]
-                    # result_list += [result_data]
+                    field_change_list.append({
+                        self.get_left_name(): left_item,
+                        self.get_right_name(): right_item,
+                        self.get_rule_name(): field,
+                        self.get_operation_name(): self.get_modify_name()
+                    })
+                # 获取规则值列表
+            current_value_list = []
+            # 计算值属性
+            for change_item in field_change_list:
+                right_value = self.get_field_value(get_safe_data(self.get_right_name(), change_item), field)
+                left_value = self.get_field_value(get_safe_data(self.get_left_name(), change_item), field)
+                if right_value is not None or right_value != "":
+                    current_value_list.append(right_value)
+                if left_value is not None or left_value != "":
+                    current_value_list.append(left_value)
+
+            transfer = self.get_transfer(field)
+            transfer_dict = None
+            # 为数组生成转换字典
+            if transfer and current_value_list:
+                current_value_list = list(set(current_value_list))
+                service_result = self.get_transfer_result(transfer, current_value_list)
+                if not self.is_success(service_result):
+                    continue
+
+                data_dict = {}
+                data = self.get_data(service_result)
+                if data:
+                    for data_item in data:
+                        transfer_key = get_safe_data(self.get_key_name(), transfer)
+                        transfer_value_templ = get_safe_data(self.get_value_name(), transfer)
+                        data_dict[self.render(transfer_key, data_item)] = self.render(transfer_value_templ, data_item)
+                transfer_dict = data_dict
+            # 转换数据
+            for change_item in field_change_list:
+                change_item["transfer_dict"] = transfer_dict
+                result_item, success = self.get_obj(**change_item)
+                if success:
+                    result_list.append(result_item)
 
         return result_list, True
 
@@ -668,6 +741,9 @@ class GetModifyData(RequestHandler):
             if not name:
                 msg = self.get_error_msg(field, name, index, self.get_name_name() + "字段不存在")
                 return self.fail(msg)
+            # 如果规则不可用则，跳过
+            if not self.is_enable(params_result, rule):
+                continue
 
             left_name = get_safe_data(self.get_left_name(), rule)
             # # 必须传left
@@ -684,7 +760,7 @@ class GetModifyData(RequestHandler):
                 """
                  处理简单值比较
                 """
-                fieldRule = FieldValueModifyRule(params=self.get_params_result(template),
+                fieldRule = FieldValueModifyRule(params=params_result,
                                                  rule=rule,
                                                  left_save_field=left_save_field,
                                                  right_save_field=right_save_field,
@@ -702,7 +778,7 @@ class GetModifyData(RequestHandler):
                 处理数组的新增和删除
                 """
 
-                fieldRule = ArrayAddDeleteModifyRule(params=self.get_params_result(template),
+                fieldRule = ArrayAddDeleteModifyRule(params=params_result,
                                                      rule=rule,
                                                      left_save_field=left_save_field,
                                                      right_save_field=right_save_field,
@@ -722,7 +798,7 @@ class GetModifyData(RequestHandler):
                 # result = self.handler_compare_array_modify(params_result, rule, left_save_field, right_save_field,
                 #                                            template)
 
-                fieldRule = ArrayFieldModifyRule(params=self.get_params_result(template),
+                fieldRule = ArrayFieldModifyRule(params=params_result,
                                                  rule=rule,
                                                  left_save_field=left_save_field,
                                                  right_save_field=right_save_field,
@@ -858,7 +934,7 @@ class GetModifyData(RequestHandler):
                     # 处理左边的数据
                     obj_result = self.get_obj(left_save_field, right_save_field, left_value, right_value, rule,
                                               template, operation=self.get_modify_name(), name=name, field=field_name,
-                                              append_original_item=append_original_item, orignal_data=left_item
+                                              append_original_item=append_original_item, original_data=left_item
                                               )
                     # 处理右边的数据
 
@@ -928,7 +1004,7 @@ class GetModifyData(RequestHandler):
             left = self.render_data(value_templ, p, tool)
             obj_result = self.get_obj(left_save_field, right_save_field, left, "", rule, template,
                                       self.get_add_operation(), append_original_item=append_original_item,
-                                      orignal_data=item)
+                                      original_data=item)
             if not obj_result:
                 return self.fail(obj_result)
             result_list.append(self.get_data(obj_result))
@@ -938,7 +1014,7 @@ class GetModifyData(RequestHandler):
             right = self.render_data(value_templ, p, tool)
             obj_result = self.get_obj(left_save_field, right_save_field, "", right, rule, template,
                                       self.get_remove_operation(), append_original_item=append_original_item,
-                                      orignal_data=item)
+                                      original_data=item)
             if not obj_result:
                 return self.fail(obj_result)
             result_list.append(self.get_data(obj_result))
@@ -977,7 +1053,7 @@ class GetModifyData(RequestHandler):
             append_original_item = get_safe_data(self.get_append_original_item_name(), rule, False)
             obj_result = self.get_obj(left_save_field, right_save_field, left, right, rule, template,
                                       append_original_item=append_original_item,
-                                      orignal_data=params)
+                                      original_data=params)
             if not self.is_success(obj_result):
                 return obj_result
             append_right_fields = get_safe_data(self.get_append_right_fields_name(), rule, [])
@@ -989,7 +1065,7 @@ class GetModifyData(RequestHandler):
         return self.success(result_list)
 
     def get_obj(self, left_save_field, right_save_field, left, right, rule, template, operation=None, name=None,
-                field=None, append_original_item=False, orignal_data=None):
+                field=None, append_original_item=False, original_data=None):
         # 保存处理转换
 
         transfer = get_safe_data(self.get_transfer_name(), rule)
@@ -1059,7 +1135,7 @@ class GetModifyData(RequestHandler):
             self.get_field_name(): field,
             self.get_name_name(): name
         }
-        if append_original_item and orignal_data:
-            obj = dict(orignal_data.items() + obj.items())
+        if append_original_item and original_data:
+            obj = dict(original_data.items() + obj.items())
         # obj[self.get_transfer_name()] = transfer
         return self.success(obj)

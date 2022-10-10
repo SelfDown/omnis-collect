@@ -51,7 +51,7 @@ class ModelUpdateService(ModelDeleteService):
                 # 如果传请求字段，则取请求里面的字段，如果有* 则取所有
                 if "*" not in req_fields:
                     u_fields = [item for item in u_fields if item in req_fields]
-            else:# 如果没有传请求字段，这不进行调整
+            if not req_fields or not u_fields:
                 if self.can_log():
                     self.log("没有找到任何更新属性，直接返回")
                     self.log(req_fields)
