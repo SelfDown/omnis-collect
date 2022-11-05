@@ -57,4 +57,10 @@ class ResultHandler(CollectService):
             method = getattr(result_obj, config_data[self.get_method_name()])
         except Exception as e:
             return self.fail(class_name + "找不到，请检查配置" + str(e))
-        return method(result, handler_config, template)
+        try:
+            return method(result, handler_config, template)
+        except Exception as e:
+            self.log(str(method)+"执行报错")
+            self.log(handler_config)
+            self.log(str(e))
+            raise e

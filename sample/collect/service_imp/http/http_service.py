@@ -150,7 +150,7 @@ class HttpService(CollectService):
         if not msg:
             msg = "发送成功"
         other = self.get_other(result_data)
-        return self.success(data=result_data, msg=msg, count=count,other=other)
+        return self.success(data=result_data, msg=msg, count=count, other=other)
 
 
 class HttpApi(CollectService):
@@ -178,7 +178,7 @@ class HttpApi(CollectService):
                 if key.lower() == 'content-type' and content == 'application/json':
                     try:
                         import json
-                        data["data"] = json.dumps(target,cls=DateEncoder)
+                        data["data"] = json.dumps(target, cls=DateEncoder)
                     except Exception as e:
                         self.log("JSON格式失败", level="error")
                         self.log(target)
@@ -196,12 +196,17 @@ class HttpApi(CollectService):
             # self.log(template, level="error", template=template)
             return self.fail(msg=str(e))
         if r.status_code >= 400:
+            result_data = r.text[0:10000]
             self.log(r.text, template=template)
+            self.log(r.status_code, template=template)
             r.close()
             del (r)
-            return self.fail(r.text[0:10000])
+            return self.fail(result_data)
         try:
-            result_data = json.loads(r.text)
+            if r.text:
+                result_data = json.loads(r.text)
+            else:
+                result_data = ""
             r.close()
             del (r)
         except Exception as e:

@@ -256,7 +256,7 @@ class CollectSSHService(ServiceCollectFlowService):
         if not shell_list:
             return
         s = [get_safe_data(self.get_shell_name(), item) for item in shell_list]
-        return "\n".join(s)
+        return ";".join(s)
 
     def get_node_shell_list_save_fields(self, node):
         shell_list = get_safe_data(self.get_shell_list_name(), node)
@@ -290,6 +290,7 @@ class CollectSSHService(ServiceCollectFlowService):
         shell = self.get_node_shell(current)
         result = None
         # 如果shell 命令存在，先处理shell
+        ignore_error = get_safe_data(self.get_ignore_error_name(), current, False)
         if shell:
             if self.is_template_text(shell):
                 from collect.service_imp.common.filters.template_tool import TemplateTool
@@ -297,7 +298,7 @@ class CollectSSHService(ServiceCollectFlowService):
                 shell = tool.render(shell, self.get_params_result())
             shell_result = self.execute_base_shell_with_log(shell)
             result = self.get_data(shell_result)
-            if self.has_error(result):
+            if not ignore_error and self.has_error(result):
                 return self.fail(self.get_error_msg(result))
             # 处理批量shell 的保存字段
             save_fields = self.get_node_shell_list_save_fields(current)
@@ -314,7 +315,7 @@ class CollectSSHService(ServiceCollectFlowService):
         if not self.is_success(result):
             return result
         result = self.get_data(result)
-        ignore_error = get_safe_data(self.get_ignore_error_name(), current, False)
+
         if not ignore_error and self.has_error(result):
             return self.fail(self.get_error_msg(result))
         return self.success(result)

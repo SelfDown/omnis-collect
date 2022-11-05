@@ -72,8 +72,8 @@ class UpdateDataFromArray(RequestHandler):
         else:
             secondArrName = None
 
-        if not fromList:
-            return self.fail("数组更新数据数组" + fromListName + "中" + t + "不存在")
+        if  fromList==None:
+            return self.fail("数组更新数据数组" + fromListName + "不存在")
         if not isinstance(fromList, list):
             return self.fail(fromListName + "不是数组对象")
 

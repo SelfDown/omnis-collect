@@ -25,6 +25,9 @@ class ForeachFilter(BaseFilter):
         msg_list = []
         for item in value:
             t = TemplateTool(op_user=self.op_user)
-            msg = t.render(templ, item, self.config_params, self.template)
+            data = {"item":item}
+            if isinstance(item,dict):
+                data =dict(data.items()+item.items())
+            msg = t.render(templ, data, self.config_params, self.template)
             msg_list.append(msg)
         return join.join(msg_list)

@@ -179,8 +179,14 @@ class BaseModifyRule:
     def _get_obj(self, left, right, rule, operation=None, transfer_dict=None):
         if not operation:
             operation = self.get_operation(rule)
-        left_value = self.get_field_value(left, rule)
-        right_value = self.get_field_value(right, rule)
+        if operation != self.get_remove_operation(): # 如果是删除，则左边的值取空
+            left_value = self.get_field_value(left, rule)
+        else:
+            left_value = ""
+        if operation !=self.get_add_operation():# 如果是新增则右边的值取空
+            right_value = self.get_field_value(right, rule)
+        else:
+            right_value = ""
         transfer = self.get_transfer(rule)
         if transfer:
             if not get_safe_data(self.get_service_name(), transfer):

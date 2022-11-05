@@ -238,8 +238,8 @@ class CollectService:
         template_tool = TemplateTool(op_user=self.op_user)
         enable = get_safe_data(self.get_enable_name(), node)
         if enable:
-            enable_value = self.render_data(enable,params)
-            if enable_value == self.get_false_value() or enable_value == "" or enable_value ==False :
+            enable_value = self.render_data(enable, params)
+            if enable_value == self.get_false_value() or enable_value == "" or enable_value == False:
                 return False
         return True
 
@@ -397,8 +397,11 @@ class CollectService:
             value = param_result[key]
             if key in field_dict:
                 model_field = field_dict[key]
-                from django.db.models import DateTimeField, DateField
+                from django.db.models import DateTimeField, DateField, IntegerField, BigIntegerField, FloatField,AutoField
                 if (model_field in (DateField, DateTimeField)) and not value:
+                    continue
+
+                if model_field in (IntegerField, BigIntegerField, FloatField, AutoField) and value == '':
                     continue
             setattr(model_obj, key, value)
         return self.success(model_obj)
@@ -465,25 +468,16 @@ class CollectService:
         template_service = TemplateService(op_user=self.op_user)
         template_service.set_session(self.get_session())
         self.handler_self_register_data(template_service, template)
-
-        # request_register = self.get_request_register()
-        # for register in request_register:
-        #     path = register[self.get_path_name()]
-        #     class_name = register[self.get_class_name()]
-        #     try:
-        #         get_data_method = getattr(self, register["get_template_method"])
-        #         register_data = get_data_method(template)
-        #         set_data_method = getattr(template_service, register["set_template_method"])
-        #         set_data_method(register_data)
-        #     except Exception as e:
-        #         return self.fail(class_name + "找不到，请检查配置" + str(e))
-
+        if template and self.can_log(template):
+            service_name = get_safe_data(self.get_service_name(), service)
+            msg = "开始请求 {service} 服务".format(service=service_name)
+            self.log(msg, template=template)
+            self.log(service, template=template)
         template_result = template_service.result(service)
-
         end = time.time()
         if template and self.can_log(template):
             service_name = get_safe_data(self.get_service_name(), service)
-            msg = "请求 {service} 服务 耗时 {spend} 秒".format(service=service_name, spend=str(end - start))
+            msg = "结束请求 {service} 服务 耗时 {spend} 秒".format(service=service_name, spend=str(end - start))
             self.log(msg, template=template)
         return template_result
 
@@ -1607,7 +1601,7 @@ class CollectService:
 
         return self.success(params)
 
-    def after_result(self, result,always=None):
+    def after_result(self, result, always=None):
         """
          处理结果
         :param result:
@@ -1618,7 +1612,7 @@ class CollectService:
         if self.get_after_plugin():
             from collect.service_imp.after_plugin.after_plugin import AfterPlugin
             after_plugin = AfterPlugin(op_user=self.op_user)
-            plugin_result = after_plugin.handler(result, self.template,always)
+            plugin_result = after_plugin.handler(result, self.template, always)
             if not self.is_success(plugin_result) or self.is_finish(plugin_result):
                 return plugin_result
             # 设置消息

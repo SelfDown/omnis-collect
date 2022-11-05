@@ -79,6 +79,7 @@ class ServiceBulkService(CollectService):
         "item_name": "item",
         "max_once_name": "max_once",
         "append_param_name": "append_param",
+        "append_item_param_name": "append_item_param",
     }
 
     def get_item_name(self):
@@ -86,6 +87,8 @@ class ServiceBulkService(CollectService):
 
     def get_append_param_name(self):
         return self.bs_const["append_param_name"]
+    def get_append_item_param_name(self):
+        return self.bs_const["append_item_param_name"]
 
     def get_max_once_name(self):
         return self.bs_const["max_once_name"]
@@ -104,8 +107,15 @@ class ServiceBulkService(CollectService):
         if isinstance(params, QueryDict):
             params = params.dict()
         append_param = True
+
         if self.get_append_param_name() in node:
             append_param = node[self.get_append_param_name()]
+
+        append_item = get_safe_data(self.get_append_item_param_name(),node,False)
+        if append_item :
+            append_param = True
+            item = get_safe_data(self.get_item_name(),params)
+            params = dict(params.items()+item.items())
         service_data = self.get_node_service(node=node, params=params, template=template,
                                              append_param=append_param)
         if not service_data:

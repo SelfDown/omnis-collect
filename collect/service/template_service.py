@@ -131,6 +131,9 @@ class TemplateService(CollectService):
         before_result = service_obj.before_result(params)
         # 如果结束执行，则是直接返回
         if self.is_finish(before_result):
+            # 由于直接返回，没有运行参数，所以这里设下下参数，否则tag 取不到
+            service_obj.set_params_result(params)
+            handler_err_other(service_obj, before_result)
             return before_result
         # 如果执行失败，则处理下结果加上，tag
         if not service_obj.is_success(before_result):

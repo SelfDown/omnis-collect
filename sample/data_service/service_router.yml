@@ -98,6 +98,12 @@ before_plugin:
     class_name: LoginCheck
     method: handler
     template: "{% if http and is_http %} True {% endif %}"
+  # 继承缓存
+  - name: extend_cache
+    path: collect.service_imp.before_plugin.plugin.extend_cache
+    class_name: ExtendCache
+    method: handler
+    template: "{% if  extend_cache %}True{% endif %}"
 
   # 继承代理
   - name: extend_proxy
@@ -124,6 +130,12 @@ before_plugin:
     class_name: HandlerReqParam
     method: handler
     template: "True"
+  # 处理缓存
+  - name: service_cache
+    path: collect.service_imp.before_plugin.plugin.service_cache
+    class_name: ServiceCache
+    method: handler
+    template: "{% if cache %}True{%endif%}"
   # 处理count 参数
   - name: handler_req_count_param
     path: collect.service_imp.before_plugin.plugin.handler_req_count_param
@@ -146,6 +158,12 @@ after_plugin:
     class_name: HandlerResult
     method: handler
     template: "{% if result_handler %}True{% endif %}"
+  # 设置缓存
+  - key: handler_cache
+    path: collect.service_imp.after_plugin.plugin.handler_service_cache
+    class_name: HandlerServiceCache
+    method: handler
+    template: "{% if cache %}True{% endif %}"
   # 处理返回标志
   - key: result_tag
     path: collect.service_imp.after_plugin.plugin.handler_tag
@@ -155,6 +173,12 @@ after_plugin:
 
 # 请求处理器
 request_handler:
+
+  # 字段转数组
+  - key: arr2fieldobj
+    path: collect.service_imp.request_handlers.handlers.arr2fieldobj
+    class_name: Arr2FieldObj
+    method: handler
   # 字段转数组
   - key: field2array
     path: collect.service_imp.request_handlers.handlers.field2array
@@ -174,6 +198,11 @@ request_handler:
   - key: update_data
     path: collect.service_imp.request_handlers.handlers.update_data
     class_name: UpdateData
+    method: handler
+
+  - key: update_field
+    path: collect.service_imp.request_handlers.handlers.update_field
+    class_name: UpdateField
     method: handler
   # 检查列表
   - key: check_array
@@ -577,6 +606,10 @@ third_application:
     - key: command
       path: "collect.service_imp.flow.common.command"
       class_name: "Command"
+      method: "handler"
+    - key: download
+      path: "collect.service_imp.flow.common.scp_download"
+      class_name: "SCPDownload"
       method: "handler"
   config:
     - key: config_data
