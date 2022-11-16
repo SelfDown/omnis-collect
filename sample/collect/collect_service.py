@@ -368,8 +368,11 @@ class CollectService:
             value = param_result[key]
             if key in field_dict:
                 model_field = field_dict[key]
-                from django.db.models import DateTimeField, DateField
+                from django.db.models import DateTimeField, DateField, IntegerField, BigIntegerField, FloatField, \
+                    AutoField
                 if (model_field in (DateField, DateTimeField)) and not value:
+                    continue
+                if model_field in (IntegerField, BigIntegerField, FloatField, AutoField) and value == '':
                     continue
             has = True
             fields_list.append(key)

@@ -67,8 +67,40 @@ class Result2Excel(ResultHandler):
     def get_excel_path_name(self):
         return self.re_const["excel_path_name"]
 
+    def get_from_array_name(self):
+        return "from_array"
+    def get_item_name(self):
+        return "item"
+    def get_ifTemplate_name(self):
+        return "ifTemplate"
+
     # def get_file_name_name(self):
     #     return self.re_const["file_name_name"]
+    def get_row_value(self,field_name,data,rule,row):
+        value =""
+        if self.is_template_text(field_name):# 如果是模板变量
+            value = self.render_data(field_name, data, )
+            return self.success(value)
+        else:
+            from_array_name = get_safe_data(self.get_from_array_name(),rule)
+            if from_array_name:# 处理二级数组
+                item_name =str(get_safe_data(self.get_item_name(),rule))
+                from_array = get_safe_data(from_array_name,data)
+                ifTemplate = str(get_safe_data(self.get_ifTemplate_name(),rule))
+                valueTemplate = str(get_safe_data(self.get_value_name(),rule))
+                if not from_array:
+                    return self.success(value)
+                for item_data in from_array:
+                    p={item_name:item_data}
+                    ifValue = self.render_data(ifTemplate,p)
+                    if ifValue!=self.get_true_value():
+                        continue
+                    value = self.render_data(valueTemplate,p)
+                    return self.success(value)
+            elif field_name not in data:# 处理简单字段
+                return self.fail(" 第 " + str(row + 1) + "行数据【" + field_name + "】字段不存在")
+            value = self.render_data(field_name, data)
+            return self.success(value)
 
     def handler(self, result, config, template):
         """
@@ -165,12 +197,16 @@ class Result2Excel(ResultHandler):
                 field_name = get_safe_data(self.get_value_name(), field)
                 if field_name:
                     for row, data in enumerate(result):
-                        if self.is_template_text(field_name):
-                            value = self.render_data(field_name,data,)
-                        else:
-                            if field_name not in data:
-                                return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
-                            value = data[field_name]
+                        value_result=self.get_row_value(field_name,data,field,row)
+                        if not self.is_success(value_result):
+                            return value_result
+                        value = self.get_data(value_result)
+                        # if self.is_template_text(field_name):
+                        #     value = self.render_data(field_name,data,)
+                        # else:
+                        #     if field_name not in data:
+                        #         return self.fail(" 第 "+str(row+1)+"行数据【"+field_name+"】字段不存在")
+                        #     value = data[field_name]
                         if value is None:
                             value = ""
                         # 写内容

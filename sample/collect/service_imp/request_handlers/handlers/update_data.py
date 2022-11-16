@@ -34,8 +34,8 @@ class UpdateData(RequestHandler):
         if not foreach_name:
             return self.fail(self.get_foreach_name() + "字段配置没有找到")
         item_name = get_safe_data(self.get_item_name(), config)
-        if not item_name:
-            return self.fail(self.get_item_name() + "字段配置没有找到")
+        # if not item_name:
+
         foreach = get_safe_data(foreach_name, params)
         if not foreach:
             return self.fail(foreach_name + "字段参数没有找到")
@@ -47,8 +47,12 @@ class UpdateData(RequestHandler):
         for item_order_index, item in enumerate(foreach):
             if not isinstance(item,dict):
                 return self.fail("更新数据时，目标对象不是字典")
-            params_copy[item_name] = item
-            params_copy[self.get_item_order_index_name()] = str(item_order_index + 1)
+            # 如果存在item 则去params
+            if item_name:
+                params_copy[item_name] = item
+                params_copy[self.get_item_order_index_name()] = str(item_order_index + 1)
+            else:# 如果不存在item 则参数就是自己
+                params_copy = item
             for field in fields:
                 temp = get_safe_data(self.get_template_name(), field)
                 if not temp:

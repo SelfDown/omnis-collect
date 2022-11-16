@@ -203,10 +203,14 @@ class HttpApi(CollectService):
             del (r)
             return self.fail(result_data)
         try:
-            if r.text:
-                result_data = json.loads(r.text)
-            else:
-                result_data = ""
+            # print len(r.text)
+            # if len(r.text)!=0:
+            result_data = r.json()
+            if result_data == None:
+                result_data=""
+            # result_data = json.loads(r.text)
+            # else:
+            #     result_data = ""
             r.close()
             del (r)
         except Exception as e:

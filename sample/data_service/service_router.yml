@@ -204,6 +204,11 @@ request_handler:
     path: collect.service_imp.request_handlers.handlers.update_field
     class_name: UpdateField
     method: handler
+
+  - key: reg_field
+    path: collect.service_imp.request_handlers.handlers.reg_field
+    class_name: RegField
+    method: handler
   # 检查列表
   - key: check_array
     path: collect.service_imp.request_handlers.handlers.check_array
@@ -472,6 +477,12 @@ module_handler:
   - key: event
     path: collect.service_imp.event.event_service
     class_name: EventService
+    method: handler
+
+  # jenkins
+  - key: jenkins
+    path: collect.service_imp.jenkins.jenkins_service
+    class_name: JenkinsService
     method: handler
 
 

@@ -280,10 +280,13 @@ class CollectSSHService(ServiceCollectFlowService):
             ssh = self.get_ssh_data()
 
         env = 'source .bash_profile;source /etc/profile;export LANG=en_US.UTF-8;'
-        stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell))
-        stdin.write("n")
-        result = ''.join(str(stdout.read()) + str(stderr.read()))
-        result = str(result).strip()
+        try:
+            stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell),timeout=15*60)
+            stdin.write("n")
+            result = ''.join(str(stdout.read()) + str(stderr.read()))
+            result = str(result).strip()
+        except Exception as e:
+            result = "exec error。执行命令："+shell+"，执行超时"
         return self.success(result)
 
     def handler_current_node(self, current):

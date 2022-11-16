@@ -18,7 +18,6 @@ class SCPDownload(CollectSSHService):
         else:
             return True
 
-
     def handler(self, params, config, template):
         from_path = get_safe_data(self.get_from_path_name(), config)
         if not from_path:
@@ -31,7 +30,6 @@ class SCPDownload(CollectSSHService):
         # if self.is_template_text(from_path):
         #     from_path = tool.render(from_path, params)
         from_path = self.get_render_data(from_path, params, tool=tool)
-
 
         # if self.is_template_text(to_path):
         #     to_path = tool.render(to_path, params)
@@ -55,10 +53,11 @@ class SCPDownload(CollectSSHService):
                 dest_path += "/"
             dest = dest_path + dest_file
             scp.get(from_path, dest)
+            size = os.path.getsize(dest)
         except Exception as e:
             msg = str(e)
-            p = {"path": dest_path}
+            p = {"path": dest}
             msg = self.get_error_msg(msg, template, p)
             return self.fail(msg)
-
-        return self.success(dest)
+        d = {"path": dest, "size": size}
+        return self.success(d)

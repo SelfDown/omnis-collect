@@ -41,7 +41,7 @@ class FilterArr(RequestHandler):
         item_name = get_safe_data(self.get_item_name(), config, "item")
 
         for item in foreach:
-            val = self.get_render_data(ifTemplate, {item_name: item}, tool)
+            val = self.get_render_data(ifTemplate, dict({item_name: item}.items()+params.items()), tool)
             if val != self.get_true_value():
                 continue
             result_list.append(item)

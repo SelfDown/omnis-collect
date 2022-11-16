@@ -65,7 +65,7 @@ class GenFile(RequestHandler):
         # 处理压缩
         import shutil
         try:
-            dest = shutil.make_archive(file_dir, "zip", file_dir)
+            dest = shutil.make_archive(file_dir, "tar", file_dir,base_dir="./")
         except Exception as e:
             return self.fail(str(e))
         save_field = get_safe_data(self.get_save_field_name(), config)

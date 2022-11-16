@@ -40,16 +40,16 @@ class CombineService(ResultHandler):
                                                              field=self.get_service_name()))
 
         from_field = get_safe_data(self.get_from_field_name(), params)
-        if not from_field:
-            return self.fail(
-                "结合服务处理器没有找到 {params} 节点 没有找到{field}".format(params=self.get_params_name(),
-                                                             field=self.get_from_field_name()))
-
+        # if not from_field:
+        #     return self.fail(
+        #         "结合服务处理器没有找到 {params} 节点 没有找到{field}".format(params=self.get_params_name(),
+        #                                                      field=self.get_from_field_name()))
+        #
         to_field = get_safe_data(self.get_to_field_name(), params)
-        if not to_field:
-            return self.fail(
-                "结合服务处理器没有找到 {params} 节点 没有找到{field}".format(params=self.get_params_name(),
-                                                             field=self.get_to_field_name()))
+        # if not to_field:
+        #     return self.fail(
+        #         "结合服务处理器没有找到 {params} 节点 没有找到{field}".format(params=self.get_params_name(),
+        #                                                      field=self.get_to_field_name()))
 
         save_field = get_safe_data(self.get_save_field_name(), params)
         if not save_field:
@@ -78,19 +78,26 @@ class CombineService(ResultHandler):
         service_result = self.get_data(service_result)
         if not service_result:
             service_result = []
+
         service_result_dict = {}
-        for item in service_result:
-            if from_field not in item:
-                continue
-            val_key = item[from_field]
-            if multiple:
-                if val_key not in service_result_dict:
-                    service_result_dict[val_key] = []
-                service_result_dict[val_key].append(item)
-            else:
-                service_result_dict[val_key] = item
+        if from_field : # 来源字段存在，则来源字段，作为key,将结果保存为一个字典
+            for item in service_result:
+                if from_field not in item:
+                    continue
+                val_key = item[from_field]
+                if multiple:
+                    if val_key not in service_result_dict:
+                        service_result_dict[val_key] = []
+                    service_result_dict[val_key].append(item)
+                else:
+                    service_result_dict[val_key] = item
 
         def handler_data(item):
+            #
+            if not from_field and not to_field:
+                item[save_field] =service_result
+                return
+            # 如果没有配置匹配，字段则直接提过
             if to_field not in item:
                 return
             val_key = item[to_field]
