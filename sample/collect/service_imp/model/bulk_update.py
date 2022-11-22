@@ -54,6 +54,12 @@ class BulkUpdateService(CollectService):
         # model_class.
         update_fields = get_safe_data(self.get_update_fields_name(), self.template)
         exclude_fields = get_safe_data(self.get_exclude_fields_name(), self.template)
+        # 如果没有配置update_fields 则取第一个数据的字段
+        if update_fields is None:
+            model_obj_result = self.get_model_obj()
+            model_obj = self.get_data(model_obj_result)
+            fKeys = models_result[0].keys()
+            update_fields = [item.name for item in model_obj._meta.fields if item.name in fKeys and not item.primary_key]
         try:
             send_count, update_count = self.bulk_update(model_list, update_fields=update_fields,
                                                         exclude_fields=exclude_fields)
