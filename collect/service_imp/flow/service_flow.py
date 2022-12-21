@@ -50,8 +50,12 @@ class ServiceFlowService(ServiceCollectFlowService):
         from collect.service_imp.common.filters.template_tool import TemplateTool
 
         template_tool = TemplateTool(op_user=self.op_user)
-        service = self.get_node_service(current, params_result, template_tool, append_param=append_param,
+        import copy
+        node = copy.deepcopy(current)
+        service = self.get_node_service(node, params_result, template_tool, append_param=append_param,
                                         nullToTemplateField=False)
+        # service = self.get_node_service(current, params_result, template_tool, append_param=append_param,
+        #                                 nullToTemplateField=False)
         if not self.is_success(service):
             return service
         service = self.get_data(service)

@@ -28,7 +28,7 @@ class ServiceCacheHandler:
         value_list = []
         for field in fields:
             field_name = get_safe_data(self.get_field_name(), field)
-            value_list.append(get_safe_data(field_name, self.params,""))
+            value_list.append(str(get_safe_data(field_name, self.params,"")))
         return "_service_cache"+"#".join(value_list)
 
     def set_cache(self, data):

@@ -207,14 +207,17 @@ class HttpApi(CollectService):
             # if len(r.text)!=0:
             result_data = r.json()
             if result_data == None:
-                result_data=""
+                result_data={}
+            elif isinstance(result_data,int) or isinstance(result_data,long):
+                result_data={"data":result_data}
             # result_data = json.loads(r.text)
             # else:
             #     result_data = ""
             r.close()
             del (r)
         except Exception as e:
-            self.log("数据返回错误：" + str(e) + "\n\n" + r.text, template=template)
-            return self.fail(msg="数据返回格式错误")
+            # self.log("数据返回错误：" + str(e) + "\n\n" + r.text, template=template)
+            # return self.fail(msg="数据返回格式错误")
+            result_data = {"data":r.text}
 
         return self.success(result_data)

@@ -55,6 +55,8 @@ class TemplateTool(CollectService):
             t = env.from_string(templ)
             if params and isinstance(params, dict) and 'self' in params:
                 del params['self']
+            if None in params:
+                del params[None]
             result_content = t.render(**params)
         except Exception as e:
             self.log(templ + "运行报错：" + str(e) + " 请检查配置！！！", template=template)

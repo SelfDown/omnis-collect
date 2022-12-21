@@ -67,7 +67,7 @@ class FilterArr(RequestHandler):
             if itemSaveName:
                 item[itemSaveName] = item_result
 
-            val = self.get_render_data(ifTemplate, dict({item_name: item}.items() + params.items()), tool)
+            val = self.get_render_data(ifTemplate, dict(params.items()+{item_name: item}.items()), tool)
             if val != self.get_true_value():
                 continue
             result_list.append(item)
@@ -76,7 +76,7 @@ class FilterArr(RequestHandler):
                 continue
             if isinstance(field,list):
                 for subItem in field:
-                    itemIfVal = self.get_render_data(itemIfTemplate,dict(subItem.items()+params.items()),tool)
+                    itemIfVal = self.get_render_data(itemIfTemplate,dict(params.items()+subItem.items()),tool)
                     if itemIfVal!= self.get_true_value():
                         continue
                     if not saveConfigFields:

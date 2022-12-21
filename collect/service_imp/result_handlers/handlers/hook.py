@@ -24,9 +24,9 @@ class Hook(ResultHandler):
         if not params:
             return self.fail("Hook处理器没有找到 {params} 节点".format(params=self.get_params_name()))
 
-        result_name = get_safe_data(self.get_result_name(), params)
-        if not result_name:
-            return self.fail("Hook 处理器没有找到" + self.get_result_name() + "参数")
+        result_name = get_safe_data(self.get_result_name(), params,"_")
+        # if not result_name:
+        #     return self.fail("Hook 处理器没有找到" + self.get_result_name() + "参数")
 
         service_node = get_safe_data(self.get_service_name(), params)
         if not service_node:
@@ -41,7 +41,7 @@ class Hook(ResultHandler):
 
         def handler_service(target_service, target_template):
             service_result = self.get_service_result(target_service, target_template)
-            if self.is_success(service_result):
+            if not  self.is_success(service_result):
                 self.log(self.get_msg(service_result), "error",template=template)
 
         # 异步执行线程

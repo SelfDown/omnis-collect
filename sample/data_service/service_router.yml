@@ -209,6 +209,14 @@ request_handler:
     path: collect.service_imp.request_handlers.handlers.reg_field
     class_name: RegField
     method: handler
+  - key: max
+    path: collect.service_imp.request_handlers.handlers.max
+    class_name: Max
+    method: handler
+  - key: group_by
+    path: collect.service_imp.request_handlers.handlers.group_by
+    class_name: GroupBy
+    method: handler
   # 检查列表
   - key: check_array
     path: collect.service_imp.request_handlers.handlers.check_array
@@ -487,6 +495,11 @@ module_handler:
 
 
 filter_handler:
+  # 正则表达式
+  - key: reg
+    path: collect.service_imp.common.filters.template_filters.reg
+    class_name: RegFilter
+    method: filter
   # uuid
   - key: uuid
     path: collect.service_imp.common.filters.template_filters.uuid

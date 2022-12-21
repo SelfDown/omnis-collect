@@ -207,7 +207,9 @@ class HttpApi(CollectService):
             # if len(r.text)!=0:
             result_data = r.json()
             if result_data == None:
-                result_data=""
+                result_data={}
+            elif isinstance(result_data,int) or isinstance(result_data,long):
+                result_data={"data":result_data}
             # result_data = json.loads(r.text)
             # else:
             #     result_data = ""

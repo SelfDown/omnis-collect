@@ -14,6 +14,8 @@ class PropArr(RequestHandler):
     paConst = {
         "unique_name": "unique"
     }
+    def get_sub_field_name(self):
+        return "sub_field"
 
     def get_unique_name(self):
         return self.paConst["unique_name"]
@@ -40,15 +42,29 @@ class PropArr(RequestHandler):
         if not isinstance(from_list, list):
             return self.fail("值列表处理器 请求参数" + from_field + " 不是数组")
         unique = get_safe_data(self.get_unique_name(), config_params)
+        sub_field_name = get_safe_data(self.get_sub_field_name(),config_params)
         result_list = []
         tool = TemplateTool(op_user=self.op_user)
-        for item in from_list:
-            val = self.get_render_data(templ, item, tool)
+
+        def add_val(param):
+            if not param:
+                return
+            val = self.get_render_data(templ, param, tool)
             if not val:
-                continue
+                return
             if unique and val in result_list:
-                continue
+                return
             result_list.append(val)
+
+        for item in from_list:
+            # 如是简单数组
+            if not sub_field_name:
+                add_val(item)
+                continue
+            # 处理二级数组
+            sub_list = get_safe_data(sub_field_name,item,[])
+            for sub_item in sub_list:
+                add_val(sub_item)
 
         params[to_field] = result_list
 
