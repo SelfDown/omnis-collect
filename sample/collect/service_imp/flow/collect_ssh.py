@@ -222,11 +222,12 @@ class CollectSSHService(ServiceCollectFlowService):
         if not shell:
             return
         return get_safe_data(self.get_services_name(), shell)
-
-    def execute(self, handler_node):
+    def init_flow(self):
         # 设置流程节点
         self.set_flow(self.get_shell())
         self.set_flow_name(self.get_shell_flow_name())
+    def execute(self, handler_node):
+
         flow_result = self.flow(handler_node)
         return flow_result
 
@@ -278,8 +279,7 @@ class CollectSSHService(ServiceCollectFlowService):
             self.log_shell(shell, password, template=template)
         if not ssh:
             ssh = self.get_ssh_data()
-
-        env = 'source .bash_profile;source /etc/profile;export LANG=en_US.UTF-8;'
+        env = 'source /etc/profile;source .bash_profile;export LANG=en_US.UTF-8;'
         try:
             stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell),timeout=15*60)
             stdin.write("n")
@@ -325,8 +325,13 @@ class CollectSSHService(ServiceCollectFlowService):
 
     def result(self, params):
         params_result = self.get_params_result()
+        #初始化流程
+        self.init_flow()
         prepare_result = self.prepare()
         if not self.is_success(prepare_result):
+            finish_result = self.finish_flow(prepare_result)
+            if not self.is_success(finish_result):
+                return finish_result
             return prepare_result
         execute_result = self.execute(handler_node=self.handler_current_node)
         err_msg = None

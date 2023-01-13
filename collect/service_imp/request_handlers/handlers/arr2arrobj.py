@@ -23,6 +23,8 @@ class Arr2ArrObj(RequestHandler):
 
     def get_item_name(self):
         return self.aao_const["item_name"]
+    def get_sub_item_name(self):
+        return "sub_item"
 
     def handler(self, params, config, template):
         foreach_name = get_safe_data(self.get_foreach_name(), config)
@@ -36,6 +38,8 @@ class Arr2ArrObj(RequestHandler):
         save_field_name = get_safe_data(self.get_save_field_name(), config)
         if not save_field_name:
             return self.fail(self.get_save_field_name() + "字段配置不存在")
+        sub_field_name = get_safe_data(self.get_sub_item_name(), config)
+
 
         obj = get_safe_data(self.get_obj_name(), config)
         if not obj:
@@ -43,15 +47,20 @@ class Arr2ArrObj(RequestHandler):
         from collect.service_imp.common.filters.template_tool import TemplateTool
         tool = TemplateTool(op_user=self.op_user)
         l = []
-
-        for item in foreach:
-            t = dict(self.get_params_result(template).items()+{self.get_item_name(): item}.items())
+        def get_obj(obj,p):
             data = {}
             for key in obj:
                 templ = obj[key]
-                v = self.get_render_data(templ, t, tool)
+                v = self.get_render_data(templ, p, tool)
                 data[key] = v
-            if data:
-                l.append(data)
+            return data
+        for item in foreach:
+            p = dict(self.get_params_result(template).items()+{self.get_item_name(): item}.items())
+            if not sub_field_name:# 如果是个一级数组
+                l.append(get_obj(obj,p))
+            else:# 如果是个二级数组
+                for sub_item in foreach[item]:
+                    p[sub_field_name]=sub_item
+                    l.append(get_obj(obj, p))
         params[save_field_name] = l
         return self.success(params)

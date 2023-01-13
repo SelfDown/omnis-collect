@@ -10,21 +10,39 @@ from collect.utils.collect_utils import get_safe_data
 
 
 class SCPCopy(CollectSSHService):
-    def remote_file_exists(self, ssh, dest_path, template):
-        result = self.execute_base_shell_with_log("ls " + dest_path, ssh, template=template)
-        result_data = self.get_data(result)
-        if self.has_error(result_data):
-            return False
-        else:
+    def remote_file_exists(self, scp, dest_path, template):
+        try:
+            scp.lstat(dest_path)
             return True
+        except Exception as e:
+            return False
+        # result = self.execute_base_shell_with_log("ls " + dest_path, ssh, template=template)
+        # result_data = self.get_data(result)
+        # if self.has_error(result_data):
+        #     return False
+        # else:
+        #     return True
 
-    def mkdirs(self, ssh, dest_path, template):
-        result = self.execute_base_shell_with_log("mkdir -p  " + dest_path, ssh, template=template)
-        result_data = self.get_data(result)
-        if self.has_error(result_data):
-            return False, result_data
-        else:
-            return True, ""
+    def mkdirs(self, scp, dest_path, template):
+        try:
+            import os
+            dest = dest_path.replace("\\","/")
+            dest_arr = dest.split("/")
+            dest_arr = [item for item in dest_arr if item]
+            for index,dir in enumerate(dest_arr):
+                dir_all="/"+"/".join(dest_arr[0:index+1])
+                if not self.remote_file_exists(scp,dir_all,template):
+                    scp.mkdir(dir_all)
+
+            return True, "创建成功"
+        except Exception as e:
+            return False, "文件夹创建失败【"+dest_path+"】详情："+str(e)
+        # result = self.execute_base_shell_with_log("mkdir -p  " + dest_path, ssh, template=template)
+        # result_data = self.get_data(result)
+        # if self.has_error(result_data):
+        #     return False, result_data
+        # else:
+        #     return True, ""
 
     def handler(self, params, config, template):
         from_path = get_safe_data(self.get_from_path_name(), config)
@@ -52,6 +70,7 @@ class SCPCopy(CollectSSHService):
         if not self.is_success(scp_result):
             return scp_result
         scp = self.get_data(scp_result)
+
         # dest_path = None
         # 如果目标文件“.”有后缀，表示是文件
         if "." in os.path.basename(to_path):
@@ -63,9 +82,9 @@ class SCPCopy(CollectSSHService):
 
         if not dest_file:
             return self.fail("源文件不存在")
-        ssh = self.get_ssh_data(template)
-        if not self.remote_file_exists(ssh, dest_path, template):
-            status, result_data = self.mkdirs(ssh, dest_path, template)
+        # ssh = self.get_ssh_data(template)
+        if not self.remote_file_exists(scp, dest_path, template):
+            status, result_data = self.mkdirs(scp, dest_path, template)
             if not status:
                 return self.fail(result_data)
         try:

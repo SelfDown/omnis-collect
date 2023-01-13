@@ -13,13 +13,22 @@ from collect.utils.collect_utils import get_safe_data
 class Service2Field(RequestHandler):
     def get_append_param_name(self):
         return "append_param"
+    def get_append_item_param_name(self):
+        return "append_item_param"
 
     def handler(self, params, config, template):
-        append_param = get_safe_data(self.get_append_param_name(),config,False)
+        append_param = get_safe_data(self.get_append_param_name(),config)
+        append_item_param_name = get_safe_data(self.get_append_item_param_name(),config)
         service_data = self.get_node_service(node=config, params=params, template=template, append_param=append_param)
         if not self.is_success(service_data):
             return service_data
         service = self.get_data(service_data)
+        if append_item_param_name:
+            append_item_param = get_safe_data(append_item_param_name,params)
+            if not append_item_param:
+                return self.fail("service2field没有找到参数"+append_item_param_name)
+            for key in append_item_param:
+                service[key]= append_item_param[key]
         service_result = self.get_service_result(service, template)
         if not self.is_success(service_result):
             self.log(self.get_msg(service_result), template=template)

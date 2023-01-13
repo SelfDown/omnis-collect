@@ -481,6 +481,11 @@ module_handler:
     path: collect.service_imp.ldap.ldap_service
     class_name: LdapService
     method: handler
+  # ftp
+  - key: ftp
+    path: collect.service_imp.ftp.ftp_service
+    class_name: FtpService
+    method: handler
   # event
   - key: event
     path: collect.service_imp.event.event_service

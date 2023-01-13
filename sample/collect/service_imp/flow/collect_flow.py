@@ -173,21 +173,46 @@ class ServiceCollectFlowService(CollectService):
             return
         return get_safe_data(next, service_dict)
 
-    def flow(self, handler_node):
-        flow_result = self._execute_flow(handler_node)
+    def finish_flow(self,flow_result):
         finish = self.get_finish()
         if finish:
-            finish_service = self.get_node_service(finish, self.get_params_result())
+            import copy
+            p = copy.copy(self.get_params_result())
+            # 设置消息
+            p[self.get_flow_msg_name()] = self.get_msg(flow_result)
+            # 设置流程状态
+            p[self.get_flow_sucess_name()] = self.is_success(flow_result)
+            finish_service = self.get_node_service(finish, p)
             if not self.is_success(finish_service):
                 return finish_service
+
             finish_service = self.get_data(finish_service)
-            # 设置消息
+
             finish_service[self.get_flow_msg_name()] = self.get_msg(flow_result)
             # 设置流程状态
             finish_service[self.get_flow_sucess_name()] = self.is_success(flow_result)
-            finish_service = self.get_service_result(finish_service)
+            finish_service = self.get_service_result(finish_service,self.template)
             if not self.is_success(finish_service):
                 return finish_service
+        return self.success("执行成功")
+    def flow(self, handler_node):
+        flow_result = self._execute_flow(handler_node)
+        finish_result = self.finish_flow(flow_result)
+        if not self.is_success(finish_result):
+            return finish_result
+        # finish = self.get_finish()
+        # if finish:
+        #     finish_service = self.get_node_service(finish, self.get_params_result())
+        #     if not self.is_success(finish_service):
+        #         return finish_service
+        #     finish_service = self.get_data(finish_service)
+        #     # 设置消息
+        #     finish_service[self.get_flow_msg_name()] = self.get_msg(flow_result)
+        #     # 设置流程状态
+        #     finish_service[self.get_flow_sucess_name()] = self.is_success(flow_result)
+        #     finish_service = self.get_service_result(finish_service)
+        #     if not self.is_success(finish_service):
+        #         return finish_service
         return flow_result
 
     def _execute_flow(self, handler_node):
