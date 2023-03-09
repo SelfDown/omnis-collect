@@ -1,4 +1,11 @@
 service:
+  - key: schedule_test
+    http: true
+    module: empty
+    schedule:
+      parameter:
+        trigger: "interval"
+        seconds: 15
   - key: ssh_test
     http: true
     must_login: false

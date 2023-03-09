@@ -50,6 +50,47 @@ class TemplateService(CollectService):
 
     # def get_session(self,template=None):
     #     return self.session
+    def get_schedule_services(self):
+        router = self.get_items_router()
+        service_list = []
+        index = 0
+        for project in router:
+            for service in router[project]:
+                serviceData = router[project][service]
+                if "schedule" in serviceData:
+                    schedule = get_safe_data("schedule", serviceData)
+                    if not schedule:
+                        continue
+                    enable = get_safe_data("enable", serviceData, "")
+                    enableVar = self.render_data(enable, {})
+
+                    def schedule_func(data):
+                        def f():
+                            try:
+
+                                result = self.result(data)
+                                if not get_safe_data("success", result):
+                                    self.log(data)
+                                    self.log(result)
+                            except Exception as e:
+                                pass
+
+                        return f
+
+                    parameter = get_safe_data("parameter", schedule)
+                    if not parameter:
+                        continue
+                    if enable is "" or enableVar == self.get_true_value():
+                        index += 1
+                        s = project + "." + service
+                        self.log("添加定时服务:" + str(index))
+                        self.log(s)
+                        self.log(parameter)
+                        parameter["func"] = schedule_func(data={
+                            "service": s,
+                        })
+                        service_list.append(parameter)
+        return service_list
 
     def result(self, data, is_http=False):
         service = get_safe_data("service", data)

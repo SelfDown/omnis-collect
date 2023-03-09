@@ -28,6 +28,9 @@ class GenFile(RequestHandler):
     def get_file_name_name(self):
         return self.gf_const["file_name_name"]
 
+    def get_handler_base64_case_name(self):
+        return "handler_base64_case"
+
     def handler(self, params, config, template):
 
         foreach_name = get_safe_data(self.get_foreach_name(), config)
@@ -36,6 +39,7 @@ class GenFile(RequestHandler):
 
         file_list = get_safe_data(foreach_name, params)
         item_name = get_safe_data(self.get_item_name(), config)
+        handler_base64_case = get_safe_data(self.get_handler_base64_case_name(), config)
 
         file_name_name = get_safe_data(self.get_file_name_name(), config)
         file_content_name = get_safe_data(self.get_file_content_name(), config)
@@ -60,12 +64,17 @@ class GenFile(RequestHandler):
                 os.makedirs(parent_dir)
             with open(file_path, "wb") as f:
                 file_content = self.get_render_data(file_content_name, params_result, tool)
+                if handler_base64_case:
+                    r = self.render_data(handler_base64_case, params_result)
+                    if r == self.get_true_value():
+                        import base64
+                        file_content = base64.b64decode(file_content)
                 f.write(file_content)
             data_list.append(file_path)
         # 处理压缩
         import shutil
         try:
-            dest = shutil.make_archive(file_dir, "tar", file_dir,base_dir="./")
+            dest = shutil.make_archive(file_dir, "tar", file_dir, base_dir="./")
         except Exception as e:
             return self.fail(str(e))
         save_field = get_safe_data(self.get_save_field_name(), config)

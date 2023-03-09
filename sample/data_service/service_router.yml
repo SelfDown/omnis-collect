@@ -174,10 +174,20 @@ after_plugin:
 # 请求处理器
 request_handler:
 
+  # 去重
+  - key: distinct
+    path: collect.service_imp.request_handlers.handlers.distinct
+    class_name: Distinct
+    method: handler
   # 字段转数组
   - key: arr2fieldobj
     path: collect.service_imp.request_handlers.handlers.arr2fieldobj
     class_name: Arr2FieldObj
+    method: handler
+  # 字段转数组
+  - key: reg2list
+    path: collect.service_imp.request_handlers.handlers.reg2list
+    class_name: Reg2List
     method: handler
   # 字段转数组
   - key: field2array
@@ -254,6 +264,11 @@ request_handler:
     path: collect.service_imp.request_handlers.handlers.get_array_obj
     class_name: GetArrayObj
     method: handler
+  # 提取数组对象里面的属性，作为数组
+  - key: obj_in_arr
+    path: collect.service_imp.request_handlers.handlers.obj_in_array
+    class_name: ObjInArray
+    method: handler
   # excel 解析
   - key: excel_data
     path: collect.service_imp.request_handlers.handlers.excelData
@@ -292,6 +307,10 @@ request_handler:
   - key: render_template
     path: collect.service_imp.request_handlers.handlers.render_template
     class_name: RenderTemplate
+    method: handler
+  - key: clear_cache
+    path: collect.service_imp.request_handlers.handlers.clear_cache
+    class_name: ClearCache
     method: handler
 
 # 结果处理器
@@ -332,6 +351,11 @@ result_handler:
   - key: new_col
     path: collect.service_imp.result_handlers.handlers.new_col
     class_name: NewCol
+    method: handler
+  # 添加参数
+  - key: add_all_param
+    path: collect.service_imp.result_handlers.handlers.add_all_param
+    class_name: AddAllParam
     method: handler
   # 对象列表转数组
   - key: value_arr
@@ -505,6 +529,16 @@ filter_handler:
     path: collect.service_imp.common.filters.template_filters.reg
     class_name: RegFilter
     method: filter
+  # 正则表达式求和
+  - key: reg_sum
+    path: collect.service_imp.common.filters.template_filters.reg_sum
+    class_name: RegSumFilter
+    method: filter
+  # 拼音
+  - key: pinyin
+    path: collect.service_imp.common.filters.template_filters.pin_yin
+    class_name: PinYinFilter
+    method: filter
   # uuid
   - key: uuid
     path: collect.service_imp.common.filters.template_filters.uuid
@@ -514,6 +548,21 @@ filter_handler:
   - key: md5
     path: collect.service_imp.common.filters.template_filters.md5
     class_name: Md5Filter
+    method: filter
+  # b64
+  - key: base64_encode
+    path: collect.service_imp.common.filters.template_filters.base64_encode
+    class_name: Base64EncodeFilter
+    method: filter
+  # b64
+  - key: base64_decode
+    path: collect.service_imp.common.filters.template_filters.base64_decode
+    class_name: Base64DecodeFilter
+    method: filter
+  # array_name
+  - key: array_name
+    path: collect.service_imp.common.filters.template_filters.array_name
+    class_name: ArrayNameFilter
     method: filter
   # des
   - key: des
@@ -639,6 +688,10 @@ third_application:
     - key: download
       path: "collect.service_imp.flow.common.scp_download"
       class_name: "SCPDownload"
+      method: "handler"
+    - key: mkdirs
+      path: "collect.service_imp.flow.common.scp_mkdirs"
+      class_name: "SCPMkdirs"
       method: "handler"
   config:
     - key: config_data

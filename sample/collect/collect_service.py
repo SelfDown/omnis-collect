@@ -357,6 +357,8 @@ class CollectService:
             field_dict[field_name] = field_type
         has = False
         for key in param_result:
+            if key is None:
+                continue
             if not can_save_field(key):
                 continue
 
@@ -400,7 +402,8 @@ class CollectService:
             value = param_result[key]
             if key in field_dict:
                 model_field = field_dict[key]
-                from django.db.models import DateTimeField, DateField, IntegerField, BigIntegerField, FloatField,AutoField
+                from django.db.models import DateTimeField, DateField, IntegerField, BigIntegerField, FloatField, \
+                    AutoField
                 if (model_field in (DateField, DateTimeField)) and not value:
                     continue
 
