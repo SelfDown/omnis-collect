@@ -25,6 +25,9 @@ class GenFile(RequestHandler):
     def get_dir_path_name(self):
         return self.gf_const["dir_path_name"]
 
+    def get_tar_name(self):
+        return "tar"
+
     def get_file_name_name(self):
         return self.gf_const["file_name_name"]
 
@@ -55,6 +58,11 @@ class GenFile(RequestHandler):
             os.makedirs(file_dir)
         data_list = []
         # 生成文件
+        tar = get_safe_data(self.get_tar_name(), config)
+        is_tar = True
+        if tar:
+            is_tar = self.render_data(tar, params) == self.get_true_value()
+        dest = ""
         for item in file_list:
             params_result[item_name] = item
             file_name = self.get_render_data(file_name_name, params_result, tool)
@@ -71,12 +79,17 @@ class GenFile(RequestHandler):
                         file_content = base64.b64decode(file_content)
                 f.write(file_content)
             data_list.append(file_path)
+            # 如果不要压缩则取第一个文件
+            if not is_tar:
+                dest = file_path
+                break
         # 处理压缩
-        import shutil
-        try:
-            dest = shutil.make_archive(file_dir, "tar", file_dir, base_dir="./")
-        except Exception as e:
-            return self.fail(str(e))
+        if is_tar:
+            import shutil
+            try:
+                dest = shutil.make_archive(file_dir, "tar", file_dir, base_dir="./")
+            except Exception as e:
+                return self.fail(str(e))
         save_field = get_safe_data(self.get_save_field_name(), config)
         if save_field:
             params_result[save_field] = dest

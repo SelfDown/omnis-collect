@@ -153,7 +153,7 @@ class UpdateDataFromArray(RequestHandler):
                 params_copy[item_name] = item
                 for fromItem in fromList:  # 匹配列表
 
-
+                    params_copy[from_item_name] = fromItem
                     ifValue = self.get_render_data(ifTemplate, params_copy, template_tool)
                     if ifValue != self.get_true_value():
                         continue

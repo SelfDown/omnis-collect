@@ -26,8 +26,8 @@ class FileResponse(ResultHandler):
         if not path_name:
             return self.fail("文件处理器" + self.get_path_name() + " 节点")
         filename = get_safe_data(self.get_filename_name(), params)
-        if not filename:
-            return self.fail("文件处理器" + self.get_filename_name() + " 节点")
+        # if not filename:
+        #     return self.fail("文件处理器" + self.get_filename_name() + " 节点")
         params_result = self.get_params_result(template)
         path = get_safe_data(path_name, params_result)
 
@@ -46,6 +46,9 @@ class FileResponse(ResultHandler):
                 return tool.render(name, params_result)
 
         path = get_render_data(path)
-        filename = get_render_data(filename)
+        if not filename:
+            filename = os.path.basename(path)
+        else:
+            filename = get_render_data(filename)
         file = Result.file_response(path, filename=filename)
         return self.success(file)

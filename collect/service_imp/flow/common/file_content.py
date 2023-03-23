@@ -17,6 +17,8 @@ class FileContent(CollectSSHService):
 
     def get_file_name(self):
         return self.fc_const["file_name"]
+    def not_exists_ignore_name(self):
+        return "not_exists_ignore"
 
     def handler(self, params, config, template):
         file_name = get_safe_data(self.get_file_name(), config)
@@ -29,6 +31,9 @@ class FileContent(CollectSSHService):
 
         file = self.get_render_data(file_name, params_result, tool)
         if not os.path.exists(file):
+            not_exists_ignore = get_safe_data(self.not_exists_ignore_name(),config,False)
+            if not_exists_ignore:
+                return self.success("")
             return self.fail(file + "配置的文件路径不存在")
 
         with open(file) as f:

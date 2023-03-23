@@ -154,7 +154,12 @@ class BaseModifyRule:
         return get_safe_data(self.get_field(), self.get_obj_left())
 
     def get_right_value(self):
-        return get_safe_data(self.get_field(), self.get_obj_right())
+        val = get_safe_data(self.get_field(), self.get_obj_right())
+        import datetime
+        if isinstance(val, datetime.datetime):
+            val = unicode(val)
+        return val
+
 
     def get_transfer_name(self):
         return "transfer"

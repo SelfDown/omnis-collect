@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="collect",
-    version="0.0.83",
+    version="0.0.86",
     author="zzhang",
     author_email="zzhang@cenboomh.com",
     description="一个web 接口配置工具",

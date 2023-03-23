@@ -24,6 +24,8 @@ class MulArr(RequestHandler):
 
     def get_obj_name(self):
         return self.ma_const["obj_name"]
+    def get_from_self_name(self):
+        return "from_self"
 
     def handler(self, params, config, template):
 
@@ -45,7 +47,9 @@ class MulArr(RequestHandler):
         if not from_arr:
             return self.fail("参数没有找到 {field} 节点".format(field=from_arr_name))
         mul_arr = get_safe_data(mul_arr_name, params)
-        if not mul_arr:
+        # 处理相乘的数据是来源自己
+        from_self = get_safe_data(self.get_from_self_name(),config)
+        if not mul_arr and not from_self:
             params[save_field] = []
             return self.success(params)
         result_list = []
@@ -56,6 +60,8 @@ class MulArr(RequestHandler):
         for from_item in from_arr:
             t = copy.deepcopy(params)
             t["from_item"] = from_item
+            if from_self:
+                mul_arr = self.render_data(mul_arr_name,from_item,tool)
             for mul_item in mul_arr:
                 t["item"] = mul_item
                 result = copy.deepcopy(mul_item)

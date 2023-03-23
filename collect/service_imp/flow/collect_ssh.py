@@ -281,7 +281,7 @@ class CollectSSHService(ServiceCollectFlowService):
             ssh = self.get_ssh_data()
         env = 'source /etc/profile;source .bash_profile;export LANG=en_US.UTF-8;'
         try:
-            stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell),timeout=15*60)
+            stdin, stdout, stderr = ssh.exec_command('%s%s' % (env, shell),timeout=60*60)
             stdin.write("n")
             result = ''.join(str(stdout.read()) + str(stderr.read()))
             result = str(result).strip()

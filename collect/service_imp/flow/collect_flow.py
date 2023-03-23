@@ -24,7 +24,7 @@ class ServiceCollectFlowService(CollectService):
     }
 
     # 最大服务运行次数
-    max = 20
+    max = 100
 
     def __init__(self, op_user):
         CollectService.__init__(self, op_user=op_user)
