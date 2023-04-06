@@ -33,7 +33,7 @@ class FilterArr(ResultHandler):
         for item in result:
             if not field:
 
-                value = tool.render(templ, item)
+                value = self.render_data(templ, item)
                 if value == self.get_true_value():
                     data_list.append(item)
             else:

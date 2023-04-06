@@ -10,6 +10,8 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 
 class SubStr(BaseFilter):
     def filter(self, value, start=None, end=None):
+        if not isinstance(value,str):
+            return value
         if not value:
             return ""
         if not start and end:

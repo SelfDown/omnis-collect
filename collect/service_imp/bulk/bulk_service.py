@@ -147,8 +147,8 @@ class ServiceBulkService(CollectService):
 
         result_list = []
         btl = BulkThreadList(func=self.get_node_result, max_once=max_once)
-        if len(foreach) > 100:
-            return self.fail("服务不能超过100个")
+        if len(foreach) > 1000:
+            return self.fail("服务不能超过1000个")
         if self.can_log():
             self.log("总共运行" + str(len(foreach)) + "服务")
         reqList = []

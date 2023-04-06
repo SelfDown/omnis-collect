@@ -72,6 +72,8 @@ class TemplateService(CollectService):
                                 if not get_safe_data("success", result):
                                     self.log(data)
                                     self.log(result)
+                                    del result
+
                             except Exception as e:
                                 pass
 

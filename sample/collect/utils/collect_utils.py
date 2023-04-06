@@ -20,6 +20,10 @@ if not os.path.exists(fact_item_config):
     raise Exception("根目下没有找到" + fact_item_config + "文件", )
 props = Properties(fact_item_config)  # 读取文件
 
+def transferDateTime(str,from_fmt="%Y-%m-%d %H:%M:%S",to_fmt="%Y-%m-%d %H:%M:%S"):
+    import datetime
+    return datetime.datetime.strptime(str,from_fmt).strftime(to_fmt)
+
 
 def getDateTime(fmt="%Y-%m-%d %H:%M:%S", *args, **kwargs):
     # 判断字符串为空的情况

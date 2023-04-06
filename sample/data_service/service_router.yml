@@ -574,6 +574,11 @@ filter_handler:
     path: collect.service_imp.common.filters.template_filters.date_time
     class_name: CurrentDateTime
     method: filter
+  # 日期格式调整
+  - key: date_format
+    path: collect.service_imp.common.filters.template_filters.date_format
+    class_name: DateFormat
+    method: filter
   # 判断记录是否存在
   - key: exist
     path: collect.service_imp.common.filters.template_filters.exist

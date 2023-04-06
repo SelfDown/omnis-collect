@@ -160,7 +160,6 @@ class BaseModifyRule:
             val = unicode(val)
         return val
 
-
     def get_transfer_name(self):
         return "transfer"
 
@@ -184,11 +183,11 @@ class BaseModifyRule:
     def _get_obj(self, left, right, rule, operation=None, transfer_dict=None):
         if not operation:
             operation = self.get_operation(rule)
-        if operation != self.get_remove_operation(): # 如果是删除，则左边的值取空
+        if operation != self.get_remove_operation():  # 如果是删除，则左边的值取空
             left_value = self.get_field_value(left, rule)
         else:
             left_value = ""
-        if operation !=self.get_add_operation():# 如果是新增则右边的值取空
+        if operation != self.get_add_operation():  # 如果是新增则右边的值取空
             right_value = self.get_field_value(right, rule)
         else:
             right_value = ""
@@ -551,17 +550,28 @@ class ArrayFieldModifyRule(ArrayAddDeleteModifyRule):
             key = self.render(key_templ, p)
             if key in right_dict:
                 left_common_list.append(item)
+        right_common_dict = {}
+        for item in right_common_list:
+            p = {item_field: item}
+            key = self.render(key_templ, p)
+            right_common_dict[key] = item
 
         right_common_list.sort(key=lambda item: self.render(key_templ, {item_field: item}))
         left_common_list.sort(key=lambda item: self.render(key_templ, {item_field: item}))
         result_list = []
-        common_list = zip(left_common_list, right_common_list)
+        # common_list = zip(left_common_list, right_common_list)
         for field in fields:
             field_change_list = []
             if not self.is_enable_rule(field):
                 continue
             # 先获取要改变的值列表
-            for left_item, right_item in common_list:
+            for left_item in left_common_list:
+                # 生成key
+                p = {item_field: left_item}
+                key = self.render(key_templ, p)
+                # 获取右边的数据
+                right_item = right_common_dict[key]
+
                 templ = get_safe_data(self.get_template_name(), field)
                 field_name = get_safe_data(self.get_field_name(), field)
                 value_templ = get_safe_data(self.get_value_name(), field)
