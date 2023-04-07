@@ -333,7 +333,12 @@ class CollectService:
                 value = templ
             else:
                 value = ""
-        return value
+        try:
+            return value
+        except Exception as e:
+            pass
+        finally:
+            del value
 
     def get_update_fields(self, model_obj,
                           param_result=None,

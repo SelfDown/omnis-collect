@@ -34,6 +34,7 @@ class TemplateTool(CollectService):
             method = getattr(rule_obj, rule[self.get_method_name()])
             env.filters[key] = method
 
+
     def render(self, templ, params, config_params=None, template=None):
         templ = str(templ)
         # if not isinstance(templ, str):
@@ -52,7 +53,13 @@ class TemplateTool(CollectService):
         self.load_filter(env, templ, params, config_params, template)
 
         try:
-            t = env.from_string(templ)
+            if templ not in _cache:
+                env = Environment()
+                self.load_filter(env, templ, params, config_params, template)
+                t = env.from_string(templ)
+                _cache[templ] = t
+            else:
+                t = _cache[templ]
             if params and isinstance(params, dict) and 'self' in params:
                 del params['self']
             if None in params:
@@ -63,6 +70,7 @@ class TemplateTool(CollectService):
             return ""
 
         data = result_content.strip()
+        del result_content
         if data == "None":
             data = ""
         return data
