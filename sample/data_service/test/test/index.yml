@@ -6,6 +6,28 @@ service:
       parameter:
         trigger: "interval"
         seconds: 15
+    params:
+      user_id:
+        template: "{{uuid()}}"
+
+      date_time:
+        template: "{{current_date_time()}}"
+      day:
+        template: "{{current_day()}}"
+    result_handler:
+      - key: add_param
+        params:
+          from_field: user_id
+          to_field: user_id
+
+      - key: add_param
+        params:
+          from_field: date_time
+          to_field: date_time
+      - key: add_param
+        params:
+          from_field: day
+          to_field: day
   - key: ssh_test
     http: true
     must_login: false

@@ -12,5 +12,5 @@ from collect.utils.collect_utils import get_uuid
 class UUIDFilter(BaseFilter):
 
     @staticmethod
-    def filter(value):
+    def filter():
         return get_uuid()

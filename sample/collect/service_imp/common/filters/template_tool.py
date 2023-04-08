@@ -11,6 +11,8 @@ from jinja2 import Environment
 from collect.collect_service import CollectService
 
 # 全局变量缓存模板信息
+from collect.utils.collect_utils import get_safe_data
+
 _cache = {}
 
 
@@ -32,8 +34,11 @@ class TemplateTool(CollectService):
                                                            current_key=key,
                                                            op_user=self.op_user)
             method = getattr(rule_obj, rule[self.get_method_name()])
-            env.filters[key] = method
-
+            ft = get_safe_data("type", rule)
+            if ft == "func":
+                env.globals[key] = method
+            else:
+                env.filters[key] = method
 
     def render(self, templ, params, config_params=None, template=None):
         templ = str(templ)
@@ -49,8 +54,6 @@ class TemplateTool(CollectService):
                 params = params.dict()
             except Exception as  e:
                 pass
-        env = Environment()
-        self.load_filter(env, templ, params, config_params, template)
 
         try:
             if templ not in _cache:

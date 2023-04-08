@@ -11,6 +11,6 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 class CurrentDay(BaseFilter):
 
     # @staticmethod
-    def filter(self, value):
+    def filter(self):
         import time
         return time.strftime("%Y-%m-%d", time.localtime())

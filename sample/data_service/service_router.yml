@@ -543,6 +543,7 @@ filter_handler:
   - key: uuid
     path: collect.service_imp.common.filters.template_filters.uuid
     class_name: UUIDFilter
+    type: func
     method: filter
   # md5
   - key: md5
@@ -573,6 +574,7 @@ filter_handler:
   - key: current_date_time
     path: collect.service_imp.common.filters.template_filters.date_time
     class_name: CurrentDateTime
+    type: func
     method: filter
   # 日期格式调整
   - key: date_format
@@ -609,6 +611,7 @@ filter_handler:
   - key: current_day
     path: collect.service_imp.common.filters.template_filters.current_day
     class_name: CurrentDay
+    type: func
     method: filter
 
   # 获取配置文件get_key
