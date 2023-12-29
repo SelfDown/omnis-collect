@@ -198,6 +198,8 @@ class BaseModifyRule:
 
             # service_node = get_safe_data(self.get_service_name(), transfer)
             def transferValue(value):
+                if value is None or value == "":
+                    return value, True
                 if transfer_dict is not None:
                     transfer_value = get_safe_data(value, transfer_dict, "")
                     return transfer_value, True

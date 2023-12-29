@@ -409,7 +409,7 @@ service:
           template: "{{server_id_list|must_list}}"
           err_msg: 服务器列表不能为空
       folder:
-        template: "{{'collect_tmp'|get_key}}/zabbix_target/{{''|current_day}}/{{''|uuid|substr(end=4)}}"
+        template: "{{'collect_tmp'|get_key}}/zabbix_target/{{''|current_day}}/{{uuid()|substr(end=4)}}"
     flow:
       services:
         - key: start

@@ -5,7 +5,7 @@ service:
     must_login: false
     params:
       agent_id:
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       operate_user:
         template: "{{session_user_id}}"
       operate_time:

@@ -50,7 +50,7 @@ class TemplateService(CollectService):
 
     # def get_session(self,template=None):
     #     return self.session
-    def get_schedule_services(self):
+    def get_schedule_services(self, always=False):
         router = self.get_items_router()
         service_list = []
         index = 0
@@ -61,8 +61,14 @@ class TemplateService(CollectService):
                     schedule = get_safe_data("schedule", serviceData)
                     if not schedule:
                         continue
-                    enable = get_safe_data("enable", serviceData, "")
-                    enableVar = self.render_data(enable, {})
+                    if always == True and "always" not in schedule:
+                        continue
+                    enable = get_safe_data("enable", schedule, "")
+                    if enable:
+
+                        enableVar = self.render_data(enable, {})
+                        if enableVar != self.get_true_value():
+                            continue
 
                     def schedule_func(data):
                         def f():

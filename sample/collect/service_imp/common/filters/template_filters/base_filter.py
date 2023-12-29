@@ -9,9 +9,12 @@ from collect.collect_service import CollectService
 
 
 class BaseFilter(CollectService):
-    def __init__(self, op_user, params, config_params, template,current_key):
-        self.params = params
-        self.config_params = config_params
-        self.op_user = op_user
-        self.template = template
-        self.current_key = current_key
+    # def __init__(self):
+        """
+        公共方法初始化
+        """
+        # self.params = params
+        # self.config_params = config_params
+        # self.op_user = op_user
+        # self.template = template
+        # self.current_key = current_key

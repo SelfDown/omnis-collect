@@ -16,6 +16,7 @@ class BulkThread(threading.Thread):
         self.func = func
         self.args = args
         self.result = {}
+        self.setName(get_safe_data("service", args))
 
     def run(self):
         self.result = self.func(*self.args)
@@ -117,7 +118,7 @@ class ServiceBulkService(CollectService):
             append_param = True
             item = get_safe_data(self.get_item_name(), params)
             if not isinstance(item, dict):
-                item = {self.get_item_name():item}
+                item = {self.get_item_name(): item}
             params = dict(params.items() + item.items())
         service_data = self.get_node_service(node=node, params=params, template=template,
                                              append_param=append_param)
@@ -147,8 +148,8 @@ class ServiceBulkService(CollectService):
 
         result_list = []
         btl = BulkThreadList(func=self.get_node_result, max_once=max_once)
-        if len(foreach) > 1000:
-            return self.fail("服务不能超过1000个")
+        if len(foreach) > 100000:
+            return self.fail("服务不能超过100000个")
         if self.can_log():
             self.log("总共运行" + str(len(foreach)) + "服务")
         reqList = []
@@ -168,6 +169,14 @@ class ServiceBulkService(CollectService):
         for service_result, req in zip(results, reqList):
             service_result[self.get_item_name()] = req
             result_list.append(service_result)
+        # try:
+        #     import threading
+        #     self.log("线程数")
+        #     self.log(threading.enumerate())
+        #     self.log("存活线程数")
+        #     self.log(threading.enumerate())
+        # except Exception as e:
+        #     pass
         save_field = get_safe_data(self.get_save_field_name(), batch)
         if save_field:
             params_result[save_field] = result_list

@@ -10,7 +10,7 @@ from collect.service_imp.common.filters.template_filters.base_filter import Base
 
 class SubStr(BaseFilter):
     def filter(self, value, start=None, end=None):
-        if not isinstance(value,str):
+        if not (isinstance(value,str) or isinstance(value,unicode)):
             return value
         if not value:
             return ""

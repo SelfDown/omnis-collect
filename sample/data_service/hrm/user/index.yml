@@ -34,7 +34,7 @@ service:
     extend_param: hrm.get_user_by_password
     params:
       new_user_id:
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       to_obj:
         default: true
       with_password:
@@ -162,7 +162,7 @@ service:
       create_ldap:
         defalut: true
       user_id:
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       role_id_list:
         name: 角色ID 列表
         default: [ ]
@@ -199,7 +199,7 @@ service:
       create_ldap:
         defalut: true
       user_id:
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       role_id_list:
         name: 角色ID 列表
         default: [ ]

@@ -39,9 +39,12 @@ class SqlService(CollectService):
         def get_template_vars(templ):
             if not templ:
                 return []
-
-            env = Environment()
-            parsed_content = env.parse(templ)
+            # 缓存编译模板
+            # env = Environment()
+            # parsed_content = env.parse(templ)
+            from collect.service_imp.common.filters.template_tool import TemplateTool
+            tool = TemplateTool()
+            parsed_content = tool.parse_node(templ)
             content = parsed_content.body
             result = []
 

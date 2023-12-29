@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @Time: 2021/7/15 15:24
-@Author: zzhang zzhang@cenboomh.com
+@Author: zzhang
 @File: uuid.py
 @desc:
 """

@@ -35,7 +35,9 @@ service:
         item: item
         fields:
           - field: template_event_log_id
-            template: "{{''|uuid}}"
+            template: "{{uuid()}}"
+          - field: msg
+            template: "{{item.msg|substr(0,3000)}}"
     model_field: template_event_log_list
     model: TemplateEventLog
   - key: router

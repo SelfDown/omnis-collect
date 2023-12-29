@@ -61,6 +61,12 @@
 
             <div>
 
+                <a href="javascript:void (0)" @click="change('result34_search')">
+                    清理redis缓存
+                </a>
+            </div>
+            <div>
+
                 <a href="javascript:void (0)" @click="change('result32_search')">
                     工作流查状态
                 </a>
@@ -377,6 +383,7 @@
                     result31_search: '{"service":"test.make_files"}',
                     result32_search: '{"service":"flow.publish","req_statu":"100"}',
                     result33_search: '{"service":"flow.publish","req_statu":"100"}',
+                    result34_search: '{"service":"redis.clear_redis_cache","master_name":"mymaster","password":"wg2021","db":2,"key":"test","field":"","slave_list":[["172.26.0.165",26379],["172.26.0.201",26379],["172.26.0.203",26379]]}',
                 }
             }
         },

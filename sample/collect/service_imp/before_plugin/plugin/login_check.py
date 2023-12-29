@@ -40,13 +40,14 @@ class LoginCheck(BeforePlugin):
         must_token = get_safe_data(self.get_must_token_name(), template, False)
 
         # must_token 的权限大于must_login,如果有token ,就不必登录了
+        no_auth_service = get_key("no_auth_service","")
         header = self.get_header(template)
         if must_token:
             token = header.get("HTTP_" + self.get_token_name().upper())
             config_token = get_key(self.get_token_name())
             if token != config_token:
                 return self.fail("接入的token 不正确")
-        elif must_login == True and self.op_user == '-1':
+        elif must_login == True and self.op_user == '-1' and self.get_current_service(template) not in no_auth_service:
             return self.fail("请重新登录")
 
         def get_ip():

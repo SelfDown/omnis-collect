@@ -1,0 +1,3 @@
+service:
+  - name: "redis"
+    path: "redis/index.yml"

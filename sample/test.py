@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from collect.service.template_service import TemplateService
-import collect.service_imp.common.filters.template_filters.date_time
-template = TemplateService(op_user="sys")
-pl = template.get_schedule_services()
-for f in pl:
-    f["func"]()
+
+from ldap3 import HASHED_SALTED_SHA
+from ldap3.utils.hashed import hashed
+hashed_password = hashed(HASHED_SALTED_SHA, str("123456"))
+print hashed_password

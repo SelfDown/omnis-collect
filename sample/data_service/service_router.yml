@@ -29,6 +29,11 @@ services:
     path: 'flow/service.yml'
 
 
+  - key: 'redis'
+    name: 'redis 缓存清理'
+    path: 'redis/service.yml'
+
+
 
 # 返回结果转换规则
 #rules:
@@ -520,6 +525,12 @@ module_handler:
   - key: jenkins
     path: collect.service_imp.jenkins.jenkins_service
     class_name: JenkinsService
+    method: handler
+
+  # jenkins
+  - key: redis_sentinel
+    path: collect.service_imp.redis.redis_sentinel_service
+    class_name: RedisSentinelService
     method: handler
 
 

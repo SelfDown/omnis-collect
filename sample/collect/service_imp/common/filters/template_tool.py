@@ -11,34 +11,54 @@ from jinja2 import Environment
 from collect.collect_service import CollectService
 
 # 全局变量缓存模板信息
-from collect.utils.collect_utils import get_safe_data
-
-_cache = {}
+from collect.utils.collect_utils import get_safe_data, Singleton
 
 
+@Singleton
 class TemplateTool(CollectService):
-    def load_filter(self, env, templ, params, config_params, template):
+    def __init__(self, op_user=None):
+        CollectService.__init__(self, op_user)
+        self._cache = {}
+        self._node_code = {}
+
+    def load_filter(self, env, templ):
         filter_config = self.get_filter_handler()
         for key in filter_config:
 
             if isinstance(templ, str) and key not in templ:
                 continue
             rule = filter_config[key]
+
             path = rule[self.get_path_name()]
             class_name = rule[self.get_class_name()]
             import importlib
             filter_factory = importlib.import_module(path)
-            rule_obj = getattr(filter_factory, class_name)(params=params,
-                                                           config_params=config_params,
-                                                           template=template,
-                                                           current_key=key,
-                                                           op_user=self.op_user)
+            rule_obj = getattr(filter_factory, class_name)()
             method = getattr(rule_obj, rule[self.get_method_name()])
             ft = get_safe_data("type", rule)
             if ft == "func":
                 env.globals[key] = method
             else:
                 env.filters[key] = method
+
+    def parse_node(self, templ):
+        if not self._node_code.has_key(templ):
+            env = Environment()
+            t = env.parse(templ)
+            self._node_code[templ] = t
+        else:
+            t = self._node_code.get(templ)
+        return t
+
+    def gen_template(self, templ):
+        if not self._cache.has_key(templ):
+            env = Environment()
+            self.load_filter(env, templ)
+            t = env.from_string(templ)
+            self._cache[templ] = t
+        else:
+            t = self._cache.get(templ)
+        return t
 
     def render(self, templ, params, config_params=None, template=None):
         templ = str(templ)
@@ -56,13 +76,7 @@ class TemplateTool(CollectService):
                 pass
 
         try:
-            if templ not in _cache:
-                env = Environment()
-                self.load_filter(env, templ, params, config_params, template)
-                t = env.from_string(templ)
-                _cache[templ] = t
-            else:
-                t = _cache[templ]
+            t = self.gen_template(templ)
             if params and isinstance(params, dict) and 'self' in params:
                 del params['self']
             if None in params:

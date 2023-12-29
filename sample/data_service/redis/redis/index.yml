@@ -1,0 +1,24 @@
+service:
+  - key: clear_redis_cache
+    module: redis_sentinel
+    http: true
+    params:
+      key:
+        check:
+          template: "{{key|must}}"
+          err_msg: key 不能为空
+      field:
+        default:
+      master_name:
+        check:
+          template: "{{master_name|must}}"
+          err_msg: master 名称不能为空
+      db:
+        check:
+          template: "{{db|must}}"
+          err_msg: 数据库实例不能为空
+      password:
+        default: ""
+      slave_list:
+        default: []
+    data_json: clear_redis_cache.json

@@ -18,7 +18,7 @@
     {
       "enable": "{{ create_ldap =='1'}}",
       "service": {
-        "id": "{{''|uuid}}",
+        "id": "{{uuid()}}",
         "service": "hrm.ldap_add_user"
       },
       "save_field": "ldap_result"
@@ -28,7 +28,7 @@
 
       "enable": "{{ create_ldap =='1'}}",
       "service": {
-        "id": "{{''|uuid}}",
+        "id": "{{uuid()}}",
         "service": "server.svn_authorize"
       },
       "save_field": "svn_result"

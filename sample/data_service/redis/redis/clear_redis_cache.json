@@ -1,0 +1,32 @@
+{
+  "connection": {
+    "sentinel": {
+      "sentinels": {{slave_list|json_str}},
+      "socket_timeout":2000
+    },
+    "master_for": {
+        "service_name":"{{master_name}}",
+        "password": {{password|json_str}},
+        "db":{{db}},
+         "socket_timeout":2000
+
+    },
+    "slave_for": {
+      "service_name":"{{master_name}}",
+       "password": {{password|json_str}},
+       "db":{{db}},
+       "socket_timeout":2000
+    }
+  },
+  "target":"MASTER",
+  "method": "hgetall",
+  "params_list":[{
+            "params":["BCS_CODE_TABLE:BCS0010"]
+            "method":"del"},
+          {
+                "params":"BCS_CODE_TABLE:BCS0011"
+                "method":"del"
+          }
+        ]
+
+}

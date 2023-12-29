@@ -33,6 +33,7 @@ class TemplateEventLog:
         try:
             result = t.result(service, is_http=False)
             if not t.is_success(result):
+                self.log(t.get_msg(service), "error")
                 self.log(t.get_msg(result), "error")
         except Exception as e:
             self.log("系统运行错误:" + str(e))

@@ -110,7 +110,7 @@ service:
         check:
           tempalte: "{{project_code|must}}"
           err_msg: "项目编码不能为空"
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       project_code:
         check:
           service:

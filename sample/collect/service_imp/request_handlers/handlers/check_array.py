@@ -36,7 +36,7 @@ class CheckArray(RequestHandler):
         item_name = get_safe_data(self.get_item_name(), config)
         if not item_name:
             return self.fail(self.get_item_name() + "字段配置没有找到")
-        foreach = get_safe_data(foreach_name, params)
+        foreach = self.render_data(foreach_name, params)
         if not foreach:
             return self.fail(foreach_name + "字段参数没有找到")
         fields = get_safe_data(self.get_fields_name(), config)
@@ -46,7 +46,7 @@ class CheckArray(RequestHandler):
         params_copy = copy.deepcopy(params)
         for item_order_index, item in enumerate(foreach):
             params_copy[item_name] = item
-            params_copy[self.get_item_order_index_name()] = item_order_index+1
+            params_copy[self.get_item_order_index_name()] = item_order_index + 1
             for field_index, field in enumerate(fields):
                 temp = get_safe_data(self.get_template_name(), field)
                 if not temp:

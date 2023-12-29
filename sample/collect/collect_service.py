@@ -1581,9 +1581,10 @@ class CollectService:
 
     def login_check(self):
         must_login = True
+        no_auth_service = get_key("no_auth_service", "")
         if self.get_must_login_name() in self.template:
             must_login = self.template[self.get_must_login_name()]
-        if must_login and self.op_user == '-1':
+        if must_login and self.op_user == '-1' and self.get_current_service() not in no_auth_service:
             self.log(self.get_template_service_name())
             return self.fail(msg="请重新登录")
         else:

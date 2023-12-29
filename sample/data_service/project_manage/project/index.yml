@@ -22,7 +22,7 @@ service:
     module: 'model_save'
     params:
       project_id:
-        template: "{{''|uuid}}"
+        template: "{{uuid()}}"
       code:
         check:
           template: "{{code|must}}"

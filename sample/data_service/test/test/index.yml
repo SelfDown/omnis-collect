@@ -108,7 +108,7 @@ service:
         item: item
         fields:
           - field: file_id
-            template: "{{''|uuid}}"
+            template: "{{uuid()}}"
           - field: file_type
             template: "{{file_service_type}}"
     model_field: file_list
